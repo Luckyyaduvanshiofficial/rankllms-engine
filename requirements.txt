@@ -1,0 +1,10 @@
+Django>=6.0
+django-ninja>=1.6.2
+psycopg2-binary>=2.9.9
+dj-database-url>=3.1.0
+django-cors-headers>=4.9.0
+requests>=2.31.0
+APScheduler>=3.10.4
+python-dotenv>=1.0.0
+gunicorn>=21.2.0
+pydantic>=2.7.0
