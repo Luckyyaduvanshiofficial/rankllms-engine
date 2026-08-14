@@ -352,7 +352,66 @@ def get_main_leaderboard(request, sort_by: str = "rankllms_index", limit: int = 
     }
 
 
+@api.get("/benchmarks", response=dict, tags=["Benchmarks API"])
+def get_benchmarks_catalog(request, sort_by: str = "rankllms_index", limit: int = Field(50, ge=1, le=1000), offset: int = 0):
+    """
+    Dedicated Benchmarks API endpoint.
+    Returns model benchmark evaluation matrix sorted by rankllms_index (default), coding_index, agentic_index, or speed.
+    """
+    qs = LLMModel.objects.select_related('provider', 'spec', 'pricing', 'benchmark').filter(is_active=True)
+
+    order_map = {
+        'rankllms_index': F('benchmark__intelligence_index').desc(nulls_last=True),
+        '-rankllms_index': F('benchmark__intelligence_index').desc(nulls_last=True),
+        'coding_index': F('benchmark__coding_index').desc(nulls_last=True),
+        '-coding_index': F('benchmark__coding_index').desc(nulls_last=True),
+        'agentic_index': F('benchmark__agentic_index').desc(nulls_last=True),
+        '-agentic_index': F('benchmark__agentic_index').desc(nulls_last=True),
+        'speed': F('benchmark__tokens_per_second').desc(nulls_last=True),
+    }
+
+    sort_field = order_map.get(sort_by, F('benchmark__intelligence_index').desc(nulls_last=True))
+    qs = qs.order_by(sort_field, F('benchmark__coding_index').desc(nulls_last=True))
+
+    total = qs.count()
+    models = list(qs[offset:offset + limit])
+
+    items = []
+    for idx, m in enumerate(models, start=offset + 1):
+        spec = getattr(m, 'spec', None)
+        benchmark = getattr(m, 'benchmark', None)
+
+        items.append({
+            "rank": idx,
+            "id": m.id,
+            "openrouter_id": m.openrouter_id,
+            "slug": m.slug,
+            "name": m.name,
+            "provider": m.provider.name,
+            "category": m.category,
+            "is_open_weight": m.is_open_weight,
+            "benchmarks": {
+                "rankllms_index": benchmark.intelligence_index if benchmark else 0.0,
+                "coding_index": benchmark.coding_index if benchmark else 0.0,
+                "agentic_index": benchmark.agentic_index if benchmark else 0.0,
+                "swe_bench_score": benchmark.swe_bench_score if benchmark else 0.0,
+                "arena_elo": benchmark.arena_elo if benchmark else 0.0,
+                "tokens_per_second": benchmark.tokens_per_second if benchmark else 0.0,
+                "time_to_first_token": benchmark.time_to_first_token if benchmark else 0.0,
+            }
+        })
+
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "sort_by": sort_by,
+        "items": items
+    }
+
+
 @api.get("/leaderboard/open-weights", response=dict, tags=["Page 2: Open-LLM Leaderboard"])
+
 def get_open_llm_leaderboard(request, sort_by: str = "intelligence", limit: int = 50):
     """
     Open LLM Leaderboard API (Ranks ONLY Open-Source / Open-Weight models like DeepSeek, Llama, Qwen, Mistral).
