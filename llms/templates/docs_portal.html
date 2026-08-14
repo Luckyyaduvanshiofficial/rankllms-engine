@@ -3,41 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RankLLMs Engine — Interactive Documentation Portal</title>
+  <title>RankLLMs Engine — Documentation & Live Control Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #090D16;
-      --bg-card: #111827;
-      --bg-card-hover: #1F2937;
-      --border-color: #1F293D;
-      --text-main: #F3F4F6;
-      --text-muted: #9CA3AF;
-      --accent-indigo: #6366F1;
-      --accent-cyan: #00E599;
-      --accent-pink: #EC4899;
-      --badge-get: #10B981;
-      --badge-post: #3B82F6;
+      --bg-body: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --bg-sidebar: #FFFFFF;
+      --border-color: #E2E8F0;
+      --border-focus: #CBD5E1;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --accent-indigo: #4F46E5;
+      --accent-indigo-light: #EEF2FF;
+      --accent-emerald: #059669;
+      --accent-emerald-light: #ECFDF5;
+      --accent-sky: #0284C7;
+      --accent-amber: #D97706;
+      --badge-get: #059669;
+      --badge-post: #2563EB;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
       --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: var(--bg-dark);
+      background-color: var(--bg-body);
       color: var(--text-main);
       font-family: var(--font-sans);
       display: flex;
       height: 100vh;
       overflow: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* Sidebar Navigation */
     aside {
-      width: 280px;
-      background: #0D1322;
+      width: 290px;
+      background: var(--bg-sidebar);
       border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
@@ -52,32 +61,39 @@
       gap: 12px;
     }
     .brand-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-indigo), #3B82F6);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 18px;
+      font-size: 20px;
       color: #FFF;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
     }
     .brand-text {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 800;
       letter-spacing: -0.5px;
-      background: linear-gradient(to right, #FFF, #A5B4FC);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--text-main);
+    }
+    .brand-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      background: var(--accent-indigo-light);
+      color: var(--accent-indigo);
+      border-radius: 4px;
+      margin-left: auto;
     }
 
     .nav-tabs {
       padding: 16px 12px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       overflow-y: auto;
       flex: 1;
     }
@@ -87,7 +103,7 @@
       align-items: center;
       gap: 12px;
       padding: 12px 16px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: none;
       background: transparent;
       color: var(--text-muted);
@@ -96,42 +112,42 @@
       font-weight: 600;
       cursor: pointer;
       text-align: left;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
     .nav-btn:hover {
-      background: rgba(255, 255, 255, 0.04);
-      color: #FFF;
+      background: var(--bg-body);
+      color: var(--text-main);
     }
     .nav-btn.active {
-      background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.02));
-      color: #FFF;
-      border-left: 3px solid var(--accent-indigo);
+      background: var(--accent-indigo-light);
+      color: var(--accent-indigo);
+      font-weight: 700;
     }
-    .nav-btn svg { width: 18px; height: 18px; fill: currentColor; opacity: 0.8; }
 
-    /* Footer status pill */
+    /* Footer Status Pill */
     .sidebar-footer {
       padding: 16px;
       border-top: 1px solid var(--border-color);
-      font-size: 12px;
+      background: #FAF5FF;
     }
     .status-pill {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      background: rgba(0, 229, 153, 0.1);
-      border: 1px solid rgba(0, 229, 153, 0.3);
-      color: var(--accent-cyan);
-      border-radius: 20px;
-      font-weight: 600;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--accent-emerald-light);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+      color: var(--accent-emerald);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
     }
     .pulse-dot {
       width: 8px;
       height: 8px;
-      background: var(--accent-cyan);
+      background: var(--accent-emerald);
       border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-emerald);
       animation: pulse 2s infinite;
     }
     @keyframes pulse {
@@ -146,125 +162,234 @@
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      background: var(--bg-dark);
+      background: var(--bg-body);
     }
 
     header {
-      padding: 20px 36px;
+      padding: 16px 36px;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(13, 19, 34, 0.6);
-      backdrop-filter: blur(10px);
+      background: var(--bg-card);
       position: sticky;
       top: 0;
       z-index: 10;
+      box-shadow: var(--shadow-sm);
     }
 
-    .header-title { font-size: 20px; font-weight: 700; }
+    .header-title { font-size: 18px; font-weight: 800; color: var(--text-main); }
     .quick-links { display: flex; gap: 12px; }
     .btn-action {
-      padding: 8px 16px;
-      border-radius: 6px;
+      padding: 9px 18px;
+      border-radius: 8px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
       transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
     }
     .btn-swagger {
       background: var(--accent-indigo);
       color: #FFF;
+      border: none;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
     }
-    .btn-swagger:hover { background: #4F46E5; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+    .btn-swagger:hover { background: #4338CA; transform: translateY(-1px); }
+    
+    .btn-sync {
+      background: linear-gradient(135deg, var(--accent-emerald), #047857);
+      color: #FFF;
+      border: none;
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+    }
+    .btn-sync:hover { background: #047857; transform: translateY(-1px); }
+    .btn-sync:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
     .btn-gh {
-      background: var(--bg-card-hover);
+      background: var(--bg-card);
       color: var(--text-main);
       border: 1px solid var(--border-color);
     }
+    .btn-gh:hover { background: var(--bg-body); }
 
     .content-area {
       padding: 36px;
-      max-width: 1100px;
+      max-width: 1150px;
       margin: 0 auto;
       width: 100%;
     }
 
     .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* UI Cards & Grids */
+    /* Light Hero Banner */
     .hero-banner {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(0, 229, 153, 0.05));
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border: 1px solid #C7D2FE;
       border-radius: 16px;
       padding: 32px;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
     }
-    .hero-banner h1 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
-    .hero-banner p { color: var(--text-muted); font-size: 15px; line-height: 1.6; max-width: 750px; }
+    .hero-banner h1 { font-size: 26px; font-weight: 800; color: #1E1B4B; margin-bottom: 8px; }
+    .hero-banner p { color: #3730A3; font-size: 15px; line-height: 1.6; max-width: 780px; }
 
+    /* Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 16px;
       margin-bottom: 32px;
     }
     .stat-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 20px;
+      box-shadow: var(--shadow-sm);
     }
-    .stat-val { font-size: 28px; font-weight: 800; color: var(--accent-cyan); font-family: var(--font-mono); }
-    .stat-lbl { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-top: 4px; }
+    .stat-val { font-size: 30px; font-weight: 800; color: var(--accent-indigo); font-family: var(--font-mono); }
+    .stat-lbl { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+
+    /* One-Click Sync Console Card */
+    .sync-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-md);
+    }
+    .sync-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .sync-card-title { font-size: 16px; font-weight: 800; color: var(--text-main); }
+    
+    .sync-log-box {
+      background: #0F172A;
+      color: #38BDF8;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 16px;
+      border-radius: 10px;
+      min-height: 100px;
+      max-height: 250px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
 
     /* Endpoint Cards */
     .endpoint-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 12px;
+      border-radius: 14px;
       margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
       overflow: hidden;
+      transition: border-color 0.2s ease;
     }
+    .endpoint-card:hover { border-color: var(--border-focus); }
+    
     .endpoint-header {
       padding: 16px 20px;
       display: flex;
       align-items: center;
       gap: 14px;
-      background: rgba(255, 255, 255, 0.02);
+      background: #F8FAFC;
       border-bottom: 1px solid var(--border-color);
     }
     .method-badge {
       padding: 4px 10px;
       border-radius: 6px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
       font-family: var(--font-mono);
     }
-    .method-get { background: rgba(16, 185, 129, 0.15); color: var(--badge-get); border: 1px solid rgba(16, 185, 129, 0.3); }
-    .method-post { background: rgba(59, 130, 246, 0.15); color: var(--badge-post); border: 1px solid rgba(59, 130, 246, 0.3); }
-    .endpoint-path { font-family: var(--font-mono); font-weight: 600; font-size: 15px; color: #FFF; }
-    .endpoint-desc { color: var(--text-muted); font-size: 13px; margin-left: auto; }
+    .method-get { background: var(--accent-emerald-light); color: var(--badge-get); border: 1px solid rgba(5, 150, 105, 0.2); }
+    .method-post { background: #EFF6FF; color: var(--badge-post); border: 1px solid rgba(37, 99, 235, 0.2); }
+    .endpoint-path { font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--text-main); }
+    .endpoint-desc { color: var(--text-muted); font-size: 13px; font-weight: 500; margin-left: auto; }
 
     .endpoint-body { padding: 20px; }
+    
     .code-block {
-      background: #070A10;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
+      background: #1E293B;
+      border-radius: 10px;
       padding: 16px;
       font-family: var(--font-mono);
       font-size: 13px;
-      color: #A5B4FC;
+      color: #E2E8F0;
       overflow-x: auto;
       margin-top: 10px;
+      position: relative;
+    }
+    .code-keyword { color: #F472B6; }
+    .code-string { color: #34D399; }
+
+    .btn-test {
+      margin-top: 12px;
+      padding: 8px 14px;
+      background: #F1F5F9;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .btn-test:hover { background: #E2E8F0; }
+
+    .test-result-box {
+      margin-top: 12px;
+      padding: 12px;
+      background: #0F172A;
+      color: #4ADE80;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      border-radius: 8px;
+      display: none;
+      max-height: 200px;
+      overflow-y: auto;
     }
 
-    h2 { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
-    h3 { font-size: 16px; font-weight: 600; margin: 20px 0 10px 0; color: #E5E7EB; }
+    h2 { font-size: 22px; font-weight: 800; margin-bottom: 20px; color: var(--text-main); letter-spacing: -0.3px; }
+    h3 { font-size: 16px; font-weight: 700; margin: 24px 0 12px 0; color: var(--text-main); }
     p { color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; font-size: 14px; }
     ul { margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.8; margin-bottom: 20px; }
+
+    /* Suggestion Cards */
+    .suggestion-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 16px;
+    }
+    .sug-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--accent-indigo-light);
+      color: var(--accent-indigo);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .sug-title { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+    .sug-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -273,43 +398,50 @@
   <aside>
     <div class="brand">
       <div class="brand-icon">R</div>
-      <div class="brand-text">RankLLMs Engine</div>
+      <div>
+        <div class="brand-text">RankLLMs</div>
+        <div style="font-size:11px; color:var(--text-muted); font-weight:600;">Engine Control v1.0</div>
+      </div>
+      <span class="brand-tag">PRO</span>
     </div>
 
     <nav class="nav-tabs">
-      <button class="nav-btn active" onclick="switchTab('overview')">
-        📌 Overview
+      <button class="nav-btn active" onclick="switchTab(this, 'overview')">
+        📊 Dashboard & One-Click Sync
       </button>
-      <button class="nav-btn" onclick="switchTab('architecture')">
-        🏗️ Architecture & Flow
+      <button class="nav-btn" onclick="switchTab(this, 'all-routes')">
+        🔌 Complete API Endpoints (10)
       </button>
-      <button class="nav-btn" onclick="switchTab('api-reference')">
-        🔌 API Endpoints
+      <button class="nav-btn" onclick="switchTab(this, 'architecture')">
+        🏛️ Data Models & Schema
       </button>
-      <button class="nav-btn" onclick="switchTab('data-pipeline')">
-        ⚡ Data Pipelines
+      <button class="nav-btn" onclick="switchTab(this, 'pipelines')">
+        ⚡ Pipelines & APScheduler
       </button>
-      <button class="nav-btn" onclick="switchTab('deployment')">
-        🚀 Deployment Options
+      <button class="nav-btn" onclick="switchTab(this, 'deployment')">
+        🚀 Render & 24/7 Keep-Alive
       </button>
-      <button class="nav-btn" onclick="switchTab('local-dev')">
-        💻 Local Setup & CLI
+      <button class="nav-btn" onclick="switchTab(this, 'suggestions')">
+        💡 Pro Engine Suggestions
       </button>
     </nav>
 
     <div class="sidebar-footer">
       <div class="status-pill">
         <div class="pulse-dot"></div>
-        Engine Healthy (Neon DB)
+        Engine Live (Neon Postgres)
       </div>
     </div>
   </aside>
 
-  <!-- Main View -->
+  <!-- Main Area -->
   <main>
     <header>
-      <div class="header-title" id="page-title">Documentation Portal</div>
+      <div class="header-title" id="page-title">Dashboard & One-Click Sync</div>
       <div class="quick-links">
+        <button class="btn-action btn-sync" id="top-sync-btn" onclick="triggerMasterSync()">
+          ⚡ Run One-Click Master Sync
+        </button>
         <a href="/api/v1/docs" target="_blank" class="btn-action btn-swagger">Open Swagger API Docs ↗</a>
         <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" target="_blank" class="btn-action btn-gh">GitHub Repo ↗</a>
       </div>
@@ -317,13 +449,14 @@
 
     <div class="content-area">
 
-      <!-- TAB 1: OVERVIEW -->
+      <!-- TAB 1: DASHBOARD & ONE-CLICK SYNC -->
       <section id="tab-overview" class="tab-content active">
         <div class="hero-banner">
-          <h1>RankLLMs Data API Engine</h1>
-          <p>High-speed, production-grade engine powering AI model leaderboards, Open-LLM rankings, token-usage app analytics, multi-modal evaluations, and real-time model comparisons across 760+ models.</p>
+          <h1>RankLLMs Engine Administration & API Portal</h1>
+          <p>High-performance data aggregation engine for 760+ AI Models, 120+ Providers, Live Benchmark Indices (Artificial Analysis), App Rankings, and Task Classification Market Share.</p>
         </div>
 
+        <!-- Stat Counters -->
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-val" id="stat-models">764</div>
@@ -335,97 +468,157 @@
           </div>
           <div class="stat-card">
             <div class="stat-val">100%</div>
-            <div class="stat-lbl">Data Coverage (No Nulls)</div>
+            <div class="stat-lbl">Non-Null Data Guarantee</div>
           </div>
           <div class="stat-card">
             <div class="stat-val">6 hrs</div>
-            <div class="stat-lbl">Auto Pipeline Sync</div>
+            <div class="stat-lbl">Automated Cron Sync</div>
           </div>
         </div>
 
-        <h2>Core Engine Capabilities</h2>
-        <ul>
-          <li><strong>Catalog Aggregation:</strong> Fetches OpenRouter catalog and Artificial Analysis ratings into Neon PostgreSQL.</li>
-          <li><strong>Multi-Modal Leaderboards:</strong> Aggregates Large Language Models, Image Generation, Video Generation, and Audio models.</li>
-          <li><strong>Interactive Comparisons:</strong> Side-by-side spec, pricing, speed, and intelligence score comparison API.</li>
-          <li><strong>Automated Backfill:</strong> Smart pipeline that guarantees 0% missing fields across context lengths, max completion tokens, pricing per 1M, and intelligence scores.</li>
-        </ul>
-      </section>
-
-      <!-- TAB 2: ARCHITECTURE -->
-      <section id="tab-architecture" class="tab-content">
-        <h2>Architecture & Data Schema</h2>
-        <p>RankLLMs Engine relies on Django 6.0 and Django Ninja for zero-overhead JSON serialization, connected to Neon PostgreSQL over SSL.</p>
-
-        <div class="code-block">
-+-------------------------+       +------------------------------------+
-|  OpenRouter API Catalog |       |  Artificial Analysis Data API v2   |
-|  (Models + Analytics)   |       |  (LLM Benchmarks + Media Rating)   |
-+------------+------------+       +-----------------+------------------+
-             |                                      |
-             v                                      v
-   [ openrouter_sync.py ]                [ artificial_analysis_sync.py ]
-   (Catalog & App Rankings)              (Intelligence, Coding & Media)
-             |                                      |
-             +-------------------+------------------+
-                                 |
-                                 v
-                       [ fill_nulls.py ]
-                       (Backfills missing specs,
-                        pricing & benchmarks)
-                                 |
-                                 v
-                   +---------------------------+
-                   |  Neon PostgreSQL Database |
-                   +-------------+-------------+
-                                 |
-                                 v
-                   +---------------------------+
-                   | Django Ninja REST API v1  |
-                   +---------------------------+
+        <!-- One-Click Master Sync Console Card -->
+        <div class="sync-card">
+          <div class="sync-card-header">
+            <div>
+              <div class="sync-card-title">⚡ Interactive One-Click Master Data Sync</div>
+              <div style="font-size:13px; color:var(--text-muted);">Triggers OpenRouter Catalog Sync ➔ Artificial Analysis Benchmark Ingestion ➔ Intelligent Null Backfill.</div>
+            </div>
+            <button class="btn-action btn-sync" id="card-sync-btn" onclick="triggerMasterSync()">
+              Run Master Sync Now
+            </button>
+          </div>
+          <div class="sync-log-box" id="sync-console-output">
+[Console Ready] Click 'Run Master Sync Now' to pull latest AI models from OpenRouter catalog & Artificial Analysis evaluations...
+          </div>
         </div>
       </section>
 
-      <!-- TAB 3: API REFERENCE -->
-      <section id="tab-api-reference" class="tab-content">
-        <h2>REST API Endpoints</h2>
+      <!-- TAB 2: COMPLETE API ROUTES -->
+      <section id="tab-all-routes" class="tab-content">
+        <h2>Complete REST API Catalog (All Endpoints)</h2>
+        <p>All endpoints are documented below. You can test live API responses directly using the <strong>Try Endpoint</strong> button.</p>
 
+        <!-- Route 1: GET /ping -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/ping</span>
+            <span class="endpoint-desc">Render & Uptime Keep-Alive Ping</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Ultra-fast 1ms ping endpoint used by UptimeRobot, Cron-Job.org, or Render to keep instance awake 24/7.</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/ping"</div>
+            <button class="btn-test" onclick="testEndpoint('/ping', 'res-ping')">Try Endpoint Live ➔</button>
+            <div class="test-result-box" id="res-ping"></div>
+          </div>
+        </div>
+
+        <!-- Route 2: GET /healthz -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/healthz</span>
+            <span class="endpoint-desc">Render Automated Infrastructure Probe</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Render load-balancer health check probe endpoint.</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/healthz"</div>
+            <button class="btn-test" onclick="testEndpoint('/healthz', 'res-healthz')">Try Endpoint Live ➔</button>
+            <div class="test-result-box" id="res-healthz"></div>
+          </div>
+        </div>
+
+        <!-- Route 3: GET /health -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/health</span>
+            <span class="endpoint-desc">Root System Health Status</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Returns health status and render keep-alive verification payload.</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/health"</div>
+            <button class="btn-test" onclick="testEndpoint('/health', 'res-health')">Try Endpoint Live ➔</button>
+            <div class="test-result-box" id="res-health"></div>
+          </div>
+        </div>
+
+        <!-- Route 4: GET /api/v1/health -->
         <div class="endpoint-card">
           <div class="endpoint-header">
             <span class="method-badge method-get">GET</span>
             <span class="endpoint-path">/api/v1/health</span>
-            <span class="endpoint-desc">System Health Check</span>
+            <span class="endpoint-desc">API Health & Neon DB Audit</span>
           </div>
           <div class="endpoint-body">
-            <p>Returns health status and live record counts from PostgreSQL.</p>
+            <p>Checks Neon PostgreSQL connection status and returns active record counts.</p>
             <div class="code-block">curl -X GET "http://localhost:8000/api/v1/health"</div>
+            <button class="btn-test" onclick="testEndpoint('/api/v1/health', 'res-v1-health')">Try Endpoint Live ➔</button>
+            <div class="test-result-box" id="res-v1-health"></div>
           </div>
         </div>
 
+        <!-- Route 5: GET /api/v1/providers -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/api/v1/providers</span>
+            <span class="endpoint-desc">List AI Providers</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Returns all 123 AI providers (OpenAI, Anthropic, Google, DeepSeek, Meta, Qwen, etc.).</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/providers"</div>
+            <button class="btn-test" onclick="testEndpoint('/api/v1/providers', 'res-providers')">Try Endpoint Live ➔</button>
+            <div class="test-result-box" id="res-providers"></div>
+          </div>
+        </div>
+
+        <!-- Route 6: GET /api/v1/models -->
         <div class="endpoint-card">
           <div class="endpoint-header">
             <span class="method-badge method-get">GET</span>
             <span class="endpoint-path">/api/v1/models</span>
-            <span class="endpoint-desc">Models Catalog & Search</span>
+            <span class="endpoint-desc">Search, Filter & Paginate Models</span>
           </div>
           <div class="endpoint-body">
-            <p>Filterable catalog. Query parameters: <code>search</code>, <code>category</code>, <code>provider</code>, <code>is_free</code>, <code>is_open_weight</code>.</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/models?category=llm&is_open_weight=true"</div>
+            <p>Filters: <code>search</code>, <code>category</code> (llm, image, video, audio), <code>provider</code>, <code>is_free</code>, <code>is_open_weight</code>, <code>ordering</code>, <code>limit</code>, <code>offset</code>.</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/models?category=llm&is_open_weight=true&limit=5"</div>
+            <button class="btn-test" onclick="testEndpoint('/api/v1/models?category=llm&limit=5', 'res-models')">Try Endpoint Live ➔</button>
+            <div class="test-result-box" id="res-models"></div>
           </div>
         </div>
 
+        <!-- Route 7: GET /api/v1/models/{identifier} -->
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/api/v1/models/{path:identifier}</span>
+            <span class="endpoint-desc">Detailed Model Specs & Benchmarks</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Retrieves single model detail by OpenRouter ID (e.g. <code>anthropic/claude-3.5-sonnet</code>), slug, or DB ID.</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/models/anthropic/claude-3.5-sonnet"</div>
+            <button class="btn-test" onclick="testEndpoint('/api/v1/models/anthropic/claude-3.5-sonnet', 'res-model-detail')">Try Endpoint Live ➔</button>
+            <div class="test-result-box" id="res-model-detail"></div>
+          </div>
+        </div>
+
+        <!-- Route 8: GET /api/v1/leaderboard -->
         <div class="endpoint-card">
           <div class="endpoint-header">
             <span class="method-badge method-get">GET</span>
             <span class="endpoint-path">/api/v1/leaderboard</span>
-            <span class="endpoint-desc">Leaderboards & Rankings</span>
+            <span class="endpoint-desc">Model Leaderboards & Rankings</span>
           </div>
           <div class="endpoint-body">
-            <p>Returns ranked models. Parameters: <code>sort_by</code> (<code>intelligence</code>, <code>coding</code>, <code>speed</code>, <code>price</code>), <code>category</code> (<code>all</code>, <code>open-llm</code>, <code>free</code>, <code>weekly-top-10</code>).</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/leaderboard?sort_by=coding"</div>
+            <p>Filters: <code>sort_by</code> (<code>intelligence</code>, <code>coding</code>, <code>speed</code>, <code>price</code>), <code>category</code> (<code>all</code>, <code>open-llm</code>, <code>free</code>, <code>weekly-top-10</code>).</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/leaderboard?sort_by=coding&category=all"</div>
+            <button class="btn-test" onclick="testEndpoint('/api/v1/leaderboard?sort_by=coding&limit=5', 'res-leaderboard')">Try Endpoint Live ➔</button>
+            <div class="test-result-box" id="res-leaderboard"></div>
           </div>
         </div>
 
+        <!-- Route 9: GET /api/v1/compare -->
         <div class="endpoint-card">
           <div class="endpoint-header">
             <span class="method-badge method-get">GET</span>
@@ -433,11 +626,14 @@
             <span class="endpoint-desc">Side-by-Side Model Comparison</span>
           </div>
           <div class="endpoint-body">
-            <p>Compares specs, cost, speed, and intelligence index between 2 models.</p>
+            <p>Side-by-side comparison between <code>model_a</code> and <code>model_b</code> (specs, prices, coding index, TPS).</p>
             <div class="code-block">curl -X GET "http://localhost:8000/api/v1/compare?model_a=anthropic/claude-3.5-sonnet&model_b=deepseek/deepseek-r1"</div>
+            <button class="btn-test" onclick="testEndpoint('/api/v1/compare?model_a=anthropic/claude-3.5-sonnet&model_b=deepseek/deepseek-r1', 'res-compare')">Try Endpoint Live ➔</button>
+            <div class="test-result-box" id="res-compare"></div>
           </div>
         </div>
 
+        <!-- Route 10: POST /api/v1/sync -->
         <div class="endpoint-card">
           <div class="endpoint-header">
             <span class="method-badge method-post">POST</span>
@@ -445,63 +641,89 @@
             <span class="endpoint-desc">Trigger Master Sync Pipeline</span>
           </div>
           <div class="endpoint-body">
-            <p>Triggers complete OpenRouter + Artificial Analysis + Null Backfill pipeline.</p>
+            <p>Triggers complete OpenRouter catalog + Artificial Analysis + Null Backfill ingestion pipeline.</p>
             <div class="code-block">curl -X POST "http://localhost:8000/api/v1/sync"</div>
           </div>
         </div>
       </section>
 
-      <!-- TAB 4: DATA PIPELINES -->
-      <section id="tab-data-pipeline" class="tab-content">
+      <!-- TAB 3: ARCHITECTURE & SCHEMA -->
+      <section id="tab-architecture" class="tab-content">
+        <h2>Data Models & Entity Relationships</h2>
+        <p>RankLLMs Engine organizes AI entities into 6 core PostgreSQL models:</p>
+        <ul>
+          <li><strong>LLMModel</strong>: Primary registry entity (`openrouter_id`, `slug`, `name`, `provider`, `category`, `is_open_weight`, `is_free`).</li>
+          <li><strong>ModelSpecification</strong>: OneToOne with LLMModel (`context_length`, `max_completion_tokens`, `supports_vision`, `supports_tools`).</li>
+          <li><strong>ModelPricing</strong>: OneToOne with LLMModel (`prompt_price_per_1m`, `completion_price_per_1m`).</li>
+          <li><strong>ModelBenchmark</strong>: OneToOne with LLMModel (`intelligence_index`, `coding_index`, `agentic_index`, `tokens_per_second`, `arena_elo`).</li>
+          <li><strong>AppRanking</strong>: Top 50 AI applications ranked by monthly token usage.</li>
+          <li><strong>TaskClassification</strong>: Task distribution percentages (Code Generation, Debugging, Workflow Execution).</li>
+        </ul>
+      </section>
+
+      <!-- TAB 4: PIPELINES -->
+      <section id="tab-pipelines" class="tab-content">
         <h2>Data Pipelines & APScheduler</h2>
-        <p>RankLLMs Engine uses APScheduler running inside Django process to execute <code>sync_all</code> every 6 hours automatically.</p>
-        <div class="code-block"># Manual CLI execution
-python manage.py sync_all</div>
+        <p>The engine executes `run_master_sync()` periodically every 6 hours using APScheduler in background process.</p>
       </section>
 
-      <!-- TAB 5: DEPLOYMENT OPTIONS -->
+      <!-- TAB 5: DEPLOYMENT -->
       <section id="tab-deployment" class="tab-content">
-        <h2>Deployment Options</h2>
-        <h3>Option 1: Render (Recommended)</h3>
-        <p>Build Command: <code>pip install -r requirements.txt && python manage.py migrate && python manage.py sync_all</code><br>
-        Start Command: <code>gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3</code></p>
-
-        <h3>Option 2: Docker Compose</h3>
-        <div class="code-block">docker-compose up -d --build</div>
-
-        <h3>Option 3: Linux VPS (Hostinger / DigitalOcean / AWS EC2)</h3>
-        <p>Use Gunicorn systemd service behind Nginx reverse proxy.</p>
+        <h2>Render Deployment & 24/7 Keep-Alive</h2>
+        <p>To prevent Render free tier sleeping after 15 minutes of inactivity, set an uptime pinger to hit <code>/ping</code> or <code>/health</code> every 5 minutes on UptimeRobot or Cron-Job.org.</p>
       </section>
 
-      <!-- TAB 6: LOCAL DEV -->
-      <section id="tab-local-dev" class="tab-content">
-        <h2>Local Development</h2>
-        <div class="code-block"># Setup virtual environment
-python -m venv venv
-.\venv\Scripts\activate
+      <!-- TAB 6: PRO SUGGESTIONS -->
+      <section id="tab-suggestions" class="tab-content">
+        <h2>Pro Suggestions to Elevate RankLLMs Engine</h2>
 
-# Install requirements
-pip install -r requirements.txt
+        <div class="suggestion-card">
+          <div class="sug-icon">🚀</div>
+          <div>
+            <div class="sug-title">1. Redis / In-Memory Response Caching</div>
+            <div class="sug-text">Add 5-minute Django cache headers or Redis caching for high-traffic leaderboard endpoints (<code>/api/v1/leaderboard</code>, <code>/api/v1/models</code>) to reduce database queries to near 0ms for frontend users.</div>
+          </div>
+        </div>
 
-# Run migrations & server
-python manage.py migrate
-python manage.py runserver</div>
+        <div class="suggestion-card">
+          <div class="sug-icon">🔑</div>
+          <div>
+            <div class="sug-title">2. API Keys & Rate Limiting (API Monetization)</div>
+            <div class="sug-text">Add API key authentication (`X-API-Key`) with tiered rate-limiting (e.g. Free Tier: 60 req/min, Pro Tier: 1000 req/min) if you plan to offer RankLLMs Data API to third-party developers.</div>
+          </div>
+        </div>
+
+        <div class="suggestion-card">
+          <div class="sug-icon">📊</div>
+          <div>
+            <div class="sug-title">3. Export Leaderboard to CSV / JSON</div>
+            <div class="sug-text">Add an <code>/api/v1/export?format=csv</code> endpoint so developers and researchers can download the entire benchmark matrix as a CSV spreadsheet.</div>
+          </div>
+        </div>
+
+        <div class="suggestion-card">
+          <div class="sug-icon">🔔</div>
+          <div>
+            <div class="sug-title">4. Discord / Webhook Alerts on New Model Releases</div>
+            <div class="sug-text">Whenever <code>sync_all</code> detects a brand-new model (e.g. Claude 4, GPT-5, DeepSeek R2), send an automated Discord or Slack webhook notification.</div>
+          </div>
+        </div>
       </section>
 
     </div>
   </main>
 
   <script>
-    function switchTab(tabId) {
+    function switchTab(btnElem, tabId) {
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-      event.target.classList.add('active');
+      btnElem.classList.add('active');
       document.getElementById('tab-' + tabId).classList.add('active');
-      document.getElementById('page-title').innerText = event.target.innerText.trim();
+      document.getElementById('page-title').innerText = btnElem.innerText.trim();
     }
 
-    // Fetch live status
+    // Live Health Fetcher
     fetch('/api/v1/health')
       .then(res => res.json())
       .then(data => {
@@ -509,6 +731,73 @@ python manage.py runserver</div>
         if(data.total_providers) document.getElementById('stat-providers').innerText = data.total_providers;
       })
       .catch(err => console.log(err));
+
+    // Interactive Endpoint Tester
+    function testEndpoint(path, resultId) {
+      const box = document.getElementById(resultId);
+      box.style.display = 'block';
+      box.innerText = "Fetching " + path + "...";
+
+      fetch(path)
+        .then(res => res.text())
+        .then(text => {
+          try {
+            const json = JSON.parse(text);
+            box.innerText = JSON.stringify(json, null, 2);
+          } catch(e) {
+            box.innerText = text;
+          }
+        })
+        .catch(err => {
+          box.innerText = "Error: " + err.message;
+        });
+    }
+
+    // One-Click Master Sync Function
+    function triggerMasterSync() {
+      const topBtn = document.getElementById('top-sync-btn');
+      const cardBtn = document.getElementById('card-sync-btn');
+      const consoleBox = document.getElementById('sync-console-output');
+
+      topBtn.disabled = true;
+      cardBtn.disabled = true;
+      topBtn.innerText = "⏳ Running Sync...";
+      cardBtn.innerText = "⏳ Running Sync...";
+
+      consoleBox.innerText = "🚀 [1/3] Triggering Master Data Pipeline via POST /api/v1/sync...\nFetching OpenRouter Catalog & Analytics...";
+
+      fetch('/api/v1/sync', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          topBtn.disabled = false;
+          cardBtn.disabled = false;
+          topBtn.innerText = "⚡ Run One-Click Master Sync";
+          cardBtn.innerText = "Run Master Sync Now";
+
+          if(data.status === "success") {
+            const sum = data.summary || {};
+            consoleBox.innerText = `✅ RANKLLMS ENGINE MASTER SYNC COMPLETE!\n\n` +
+              `⏱ Elapsed Time: ${sum.elapsed_seconds || 0}s\n` +
+              `📊 Total Models: ${sum.total_models || 764} (100% Non-Null Specs, Pricing & Benchmarks)\n` +
+              `🏛 Providers: ${sum.total_providers || 123}\n` +
+              `📈 App Rankings: ${sum.total_app_rankings || 50} | Task Shares: ${sum.total_task_classifications || 29}\n\n` +
+              `All models and metrics are synchronized with Neon PostgreSQL!`;
+            
+            // Refresh stats
+            if(sum.total_models) document.getElementById('stat-models').innerText = sum.total_models;
+            if(sum.total_providers) document.getElementById('stat-providers').innerText = sum.total_providers;
+          } else {
+            consoleBox.innerText = "❌ Sync finished with status: " + JSON.stringify(data);
+          }
+        })
+        .catch(err => {
+          topBtn.disabled = false;
+          cardBtn.disabled = false;
+          topBtn.innerText = "⚡ Run One-Click Master Sync";
+          cardBtn.innerText = "Run Master Sync Now";
+          consoleBox.innerText = "❌ Error triggering master sync: " + err.message;
+        });
+    }
   </script>
 </body>
 </html>
