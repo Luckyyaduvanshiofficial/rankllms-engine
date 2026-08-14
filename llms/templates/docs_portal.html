@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RankLLMs Engine — Documentation & Live Control Portal</title>
+  <title>RankLLMs Engine — Developer API Dashboard & Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -13,13 +13,16 @@
       --bg-card: #FFFFFF;
       --bg-sidebar: #FFFFFF;
       --border-color: #E2E8F0;
-      --border-focus: #CBD5E1;
+      --border-hover: #CBD5E1;
       --text-main: #0F172A;
       --text-muted: #64748B;
       --accent-indigo: #4F46E5;
+      --accent-indigo-hover: #4338CA;
       --accent-indigo-light: #EEF2FF;
       --accent-emerald: #059669;
       --accent-emerald-light: #ECFDF5;
+      --accent-purple: #7C3AED;
+      --accent-purple-light: #F5F3FF;
       --badge-get: #059669;
       --badge-post: #2563EB;
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -57,20 +60,20 @@
       gap: 12px;
     }
     .brand-icon {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       background: linear-gradient(135deg, var(--accent-indigo), #3B82F6);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 20px;
+      font-size: 22px;
       color: #FFF;
       box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
     }
     .brand-text {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 800;
       letter-spacing: -0.5px;
       color: var(--text-main);
@@ -78,10 +81,10 @@
     .brand-tag {
       font-size: 10px;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 3px 8px;
       background: var(--accent-indigo-light);
       color: var(--accent-indigo);
-      border-radius: 4px;
+      border-radius: 6px;
       margin-left: auto;
     }
 
@@ -98,17 +101,17 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 16px;
+      padding: 12px 14px;
       border-radius: 10px;
       border: none;
       background: transparent;
       color: var(--text-muted);
-      font-family: var(--font-sans);
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       text-align: left;
       transition: all 0.15s ease;
+      width: 100%;
     }
     .nav-btn:hover {
       background: var(--bg-body);
@@ -119,121 +122,108 @@
       color: var(--accent-indigo);
       font-weight: 700;
     }
+    .nav-icon {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
 
-    /* Footer Status Pill */
     .sidebar-footer {
-      padding: 16px;
+      padding: 16px 20px;
       border-top: 1px solid var(--border-color);
-      background: #FAF5FF;
+      background: #FAFAFA;
     }
     .status-pill {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      background: var(--accent-emerald-light);
-      border: 1px solid rgba(5, 150, 105, 0.2);
-      color: var(--accent-emerald);
-      border-radius: 8px;
+      gap: 8px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
+      color: var(--accent-emerald);
     }
     .pulse-dot {
       width: 8px;
       height: 8px;
       background: var(--accent-emerald);
       border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-emerald);
+      box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4);
       animation: pulse 2s infinite;
     }
     @keyframes pulse {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(0.95); opacity: 0.8; }
+      0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(5, 150, 105, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
     }
 
-    /* Main Container */
+    /* Main Area Layout */
     main {
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow-y: auto;
+      overflow: hidden;
       background: var(--bg-body);
     }
 
     header {
-      padding: 16px 36px;
+      background: var(--bg-card);
       border-bottom: 1px solid var(--border-color);
+      padding: 16px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: var(--bg-card);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: var(--shadow-sm);
+      height: 72px;
     }
+    .header-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .quick-links { display: flex; gap: 12px; align-items: center; }
 
-    .header-title { font-size: 18px; font-weight: 800; color: var(--text-main); }
-    .quick-links { display: flex; gap: 12px; }
     .btn-action {
-      padding: 9px 18px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      transition: all 0.15s ease;
+      text-decoration: none;
     }
-    .btn-swagger {
+    .btn-action:hover { background: #F1F5F9; border-color: var(--border-hover); }
+    .btn-sync {
       background: var(--accent-indigo);
       color: #FFF;
       border: none;
-      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+      box-shadow: var(--shadow-sm);
     }
-    .btn-swagger:hover { background: #4338CA; transform: translateY(-1px); }
-    
-    .btn-sync {
-      background: linear-gradient(135deg, var(--accent-emerald), #047857);
-      color: #FFF;
-      border: none;
-      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
-    }
-    .btn-sync:hover { background: #047857; transform: translateY(-1px); }
-    .btn-sync:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-    .btn-gh {
-      background: var(--bg-card);
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-    }
+    .btn-sync:hover { background: var(--accent-indigo-hover); }
 
     .content-area {
-      padding: 36px;
-      max-width: 1150px;
-      margin: 0 auto;
-      width: 100%;
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
     }
 
     .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Light Hero Banner */
+    /* Dashboard Cards */
     .hero-banner {
       background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
       border: 1px solid #C7D2FE;
       border-radius: 16px;
-      padding: 32px;
+      padding: 28px;
       margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .hero-banner h1 { font-size: 26px; font-weight: 800; color: #1E1B4B; margin-bottom: 8px; }
-    .hero-banner p { color: #3730A3; font-size: 15px; line-height: 1.6; max-width: 780px; }
+    .hero-banner h1 { font-size: 24px; font-weight: 800; color: #1E1B4B; margin-bottom: 6px; }
+    .hero-banner p { color: #3730A3; font-size: 14px; line-height: 1.5; max-width: 700px; }
 
-    /* Domain Pill */
     .domain-badge {
       display: inline-flex;
       align-items: center;
@@ -246,15 +236,14 @@
       font-size: 13px;
       font-weight: 700;
       color: var(--accent-indigo);
-      margin-top: 12px;
+      margin-top: 10px;
     }
 
-    /* Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
     .stat-card {
       background: var(--bg-card);
@@ -263,139 +252,117 @@
       padding: 20px;
       box-shadow: var(--shadow-sm);
     }
-    .stat-val { font-size: 30px; font-weight: 800; color: var(--accent-indigo); font-family: var(--font-mono); }
+    .stat-val { font-size: 28px; font-weight: 800; color: var(--accent-indigo); font-family: var(--font-mono); }
     .stat-lbl { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
 
-    /* One-Click Sync Console Card */
-    .sync-card {
+    /* Tables & Inputs */
+    .card-panel {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
+      border-radius: 14px;
       padding: 24px;
-      margin-bottom: 32px;
-      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
     }
-    .sync-card-header {
+    .panel-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
+      align-items: center;
+      margin-bottom: 20px;
     }
-    .sync-card-title { font-size: 16px; font-weight: 800; color: var(--text-main); }
-    
-    .sync-log-box {
+    .panel-title { font-size: 18px; font-weight: 800; color: var(--text-main); }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      background: #FFF;
+      outline: none;
+      transition: border 0.15s ease;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--accent-indigo); }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    .data-table th {
+      padding: 12px 14px;
+      background: #F8FAFC;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    .data-table td {
+      padding: 14px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    .data-table tr:hover td { background: #F8FAFC; }
+
+    /* Badges */
+    .badge-rank {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 12px;
+      background: var(--accent-indigo-light);
+      color: var(--accent-indigo);
+    }
+    .badge-score {
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: var(--accent-emerald);
+      font-size: 14px;
+    }
+
+    /* Terminal Box */
+    .console-box {
       background: #0F172A;
       color: #38BDF8;
       font-family: var(--font-mono);
       font-size: 13px;
-      padding: 16px;
-      border-radius: 10px;
-      min-height: 100px;
-      max-height: 250px;
-      overflow-y: auto;
       line-height: 1.6;
+      padding: 20px;
+      border-radius: 12px;
+      min-height: 220px;
+      max-height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    /* Endpoint Cards */
-    .endpoint-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
-      transition: border-color 0.2s ease;
+    /* Playground Studio */
+    .playground-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
-    .endpoint-card:hover { border-color: var(--border-focus); }
-    
-    .endpoint-header {
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: #F8FAFC;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .method-badge {
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 800;
-      font-family: var(--font-mono);
-    }
-    .method-get { background: var(--accent-emerald-light); color: var(--badge-get); border: 1px solid rgba(5, 150, 105, 0.2); }
-    .method-post { background: #EFF6FF; color: var(--badge-post); border: 1px solid rgba(37, 99, 235, 0.2); }
-    .endpoint-path { font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--text-main); }
-    .endpoint-desc { color: var(--text-muted); font-size: 13px; font-weight: 500; margin-left: auto; }
-
-    .endpoint-body { padding: 20px; }
-    
-    .code-block {
-      background: #1E293B;
-      border-radius: 10px;
-      padding: 16px;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      color: #E2E8F0;
-      overflow-x: auto;
-      margin-top: 10px;
-    }
-
-    .btn-test {
-      margin-top: 12px;
-      padding: 8px 14px;
-      background: #F1F5F9;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-main);
-      cursor: pointer;
-    }
-    .btn-test:hover { background: #E2E8F0; }
-
-    .test-result-box {
-      margin-top: 12px;
-      padding: 12px;
+    .json-output-box {
       background: #0F172A;
       color: #4ADE80;
       font-family: var(--font-mono);
       font-size: 12px;
-      border-radius: 8px;
-      display: none;
-      max-height: 250px;
+      padding: 16px;
+      border-radius: 10px;
+      height: 380px;
       overflow-y: auto;
+      white-space: pre-wrap;
     }
-
-    h2 { font-size: 22px; font-weight: 800; margin-bottom: 20px; color: var(--text-main); letter-spacing: -0.3px; }
-    h3 { font-size: 16px; font-weight: 700; margin: 24px 0 12px 0; color: var(--text-main); }
-    p { color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; font-size: 14px; }
-    ul { margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.8; margin-bottom: 20px; }
-
-    /* Suggestion Cards */
-    .suggestion-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 16px;
-      display: flex;
-      gap: 16px;
-    }
-    .sug-icon {
-      width: 44px;
-      height: 44px;
-      background: var(--accent-indigo-light);
-      color: var(--accent-indigo);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-    .sug-title { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
-    .sug-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -408,34 +375,37 @@
         <div class="brand-text">RankLLMs</div>
         <div style="font-size:11px; color:var(--text-muted); font-weight:600;">api.rankllms.com</div>
       </div>
-      <span class="brand-tag">PRO</span>
+      <span class="brand-tag">DASHBOARD</span>
     </div>
 
     <nav class="nav-tabs">
       <button class="nav-btn active" onclick="switchTab(this, 'overview')">
-        📊 Dashboard & Control
+        <span class="nav-icon">📊</span> Overview & System Status
       </button>
-      <button class="nav-btn" onclick="switchTab(this, 'fetch-all')">
-        🔥 How to Fetch All Models
+      <button class="nav-btn" onclick="switchTab(this, 'api-keys')">
+        <span class="nav-icon">🔑</span> API Keys & Rate Limits
       </button>
-      <button class="nav-btn" onclick="switchTab(this, 'all-routes')">
-        🔌 Complete API Endpoints (10)
+      <button class="nav-btn" onclick="switchTab(this, 'playground')">
+        <span class="nav-icon">⚡</span> Interactive API Studio
       </button>
-      <button class="nav-btn" onclick="switchTab(this, 'architecture')">
-        🏛️ Data Models & Schema
+      <button class="nav-btn" onclick="switchTab(this, 'models-explorer')">
+        <span class="nav-icon">🏆</span> Models & Leaderboard (1,299)
       </button>
-      <button class="nav-btn" onclick="switchTab(this, 'deployment')">
-        🚀 Render & 24/7 Keep-Alive
+      <button class="nav-btn" onclick="switchTab(this, 'compare-tool')">
+        <span class="nav-icon">⚔️</span> Model Comparison Tool
       </button>
-      <button class="nav-btn" onclick="switchTab(this, 'suggestions')">
-        💡 Pro Suggestions
+      <button class="nav-btn" onclick="switchTab(this, 'sync-console')">
+        <span class="nav-icon">⚙️</span> One-Click Master Sync
+      </button>
+      <button class="nav-btn" onclick="switchTab(this, 'endpoints-guide')">
+        <span class="nav-icon">📖</span> API Routes Catalog (11)
       </button>
     </nav>
 
     <div class="sidebar-footer">
       <div class="status-pill">
         <div class="pulse-dot"></div>
-        api.rankllms.com Live
+        api.rankllms.com Live (24/7 Awake)
       </div>
     </div>
   </aside>
@@ -443,390 +413,488 @@
   <!-- Main Area -->
   <main>
     <header>
-      <div class="header-title" id="page-title">Dashboard & Control</div>
+      <div class="header-title" id="page-title">Overview & System Status</div>
       <div class="quick-links">
-        <button class="btn-action btn-sync" id="top-sync-btn" onclick="triggerMasterSync()">
-          ⚡ Run One-Click Master Sync
+        <button class="btn-action" onclick="switchTab(document.querySelectorAll('.nav-btn')[2], 'playground')">
+          ⚡ API Studio
         </button>
-        <a href="/api/v1/docs" target="_blank" class="btn-action btn-swagger">Open Swagger API Docs ↗</a>
-        <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" target="_blank" class="btn-action btn-gh">GitHub Repo ↗</a>
+        <button class="btn-action btn-sync" onclick="triggerMasterSync()">
+          🔄 Run Master Sync
+        </button>
       </div>
     </header>
 
     <div class="content-area">
 
-      <!-- TAB 1: DASHBOARD & CONTROL -->
+      <!-- TAB 1: OVERVIEW -->
       <section id="tab-overview" class="tab-content active">
         <div class="hero-banner">
-          <h1>RankLLMs Engine Administration & Data API</h1>
-          <p>High-performance data aggregation engine for 760+ AI Models, 120+ Providers, Live Benchmark Indices (Artificial Analysis), App Rankings, and Task Classification Market Share.</p>
-          <div class="domain-badge">🌐 Production Host: https://api.rankllms.com</div>
+          <div>
+            <h1>RankLLMs Engine — Live API Platform</h1>
+            <p>High-performance data engine powering LLM model catalog, official RankLLMs Index benchmark evaluations, pricing analytics, and token usage leaderboards.</p>
+            <div class="domain-badge">⚡ Base URL: https://api.rankllms.com</div>
+          </div>
         </div>
 
-        <!-- Stat Counters -->
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-val" id="stat-models">764</div>
+            <div class="stat-val" id="stat-total-models">1,299</div>
             <div class="stat-lbl">Active AI Models</div>
           </div>
           <div class="stat-card">
-            <div class="stat-val" id="stat-providers">123</div>
-            <div class="stat-lbl">AI Providers</div>
+            <div class="stat-val" id="stat-total-providers">162</div>
+            <div class="stat-lbl">Global Model Providers</div>
           </div>
           <div class="stat-card">
-            <div class="stat-val">100%</div>
-            <div class="stat-lbl">Non-Null Data Guarantee</div>
+            <div class="stat-val" id="stat-total-benchmarks">1,299</div>
+            <div class="stat-lbl">RankLLMs Benchmark Evaluations</div>
           </div>
           <div class="stat-card">
-            <div class="stat-val">6 hrs</div>
-            <div class="stat-lbl">Automated Cron Sync</div>
+            <div class="stat-val" style="color:var(--accent-emerald);">100%</div>
+            <div class="stat-lbl">Non-Null Data Coverage</div>
           </div>
         </div>
 
-        <!-- One-Click Master Sync Console Card -->
-        <div class="sync-card">
-          <div class="sync-card-header">
-            <div>
-              <div class="sync-card-title">⚡ Interactive One-Click Master Data Sync</div>
-              <div style="font-size:13px; color:var(--text-muted);">Triggers OpenRouter Catalog Sync ➔ Artificial Analysis Benchmark Ingestion ➔ Intelligent Null Backfill.</div>
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title">System Infrastructure & Keep-Alive Probe</div>
+            <span class="badge-rank" style="background:var(--accent-emerald-light); color:var(--accent-emerald);">ONLINE (Render Free Tier)</span>
+          </div>
+          <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">The engine includes 1ms light ping probes (<code>/ping</code>, <code>/healthz</code>) so external cron monitors (UptimeRobot, Cron-Job.org) keep your instance awake 24/7 without sleeping.</p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Probe Endpoint</th>
+                <th>Method</th>
+                <th>Latency</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>/ping</code></td>
+                <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
+                <td>~ 1ms</td>
+                <td><span style="color:#059669; font-weight:700;">200 OK</span></td>
+              </tr>
+              <tr>
+                <td><code>/healthz</code></td>
+                <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
+                <td>~ 2ms</td>
+                <td><span style="color:#059669; font-weight:700;">200 OK</span></td>
+              </tr>
+              <tr>
+                <td><code>/api/v1/health</code></td>
+                <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
+                <td>~ 15ms (Neon PostgreSQL Audit)</td>
+                <td><span style="color:#059669; font-weight:700;">200 OK</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 2: API KEYS MANAGER -->
+      <section id="tab-api-keys" class="tab-content">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title">Generate New Developer API Key</div>
+          </div>
+          <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">Generate unique <code>rk_live_...</code> API keys for your applications and frontend integrations.</p>
+          <div style="display:flex; gap:16px; align-items:flex-end;">
+            <div style="flex:1;">
+              <label class="form-label">Application / App Name</label>
+              <input type="text" id="key-app-name" class="form-input" placeholder="e.g. Astro Frontend Production">
             </div>
-            <button class="btn-action btn-sync" id="card-sync-btn" onclick="triggerMasterSync()">
-              Run Master Sync Now
-            </button>
+            <div style="width:200px;">
+              <label class="form-label">Tier Access Level</label>
+              <select id="key-tier" class="form-select">
+                <option value="free">Free Tier (60 req/min)</option>
+                <option value="pro">Pro Tier (1,000 req/min)</option>
+                <option value="admin">Admin Tier (Unlimited)</option>
+              </select>
+            </div>
+            <button class="btn-action btn-sync" onclick="generateApiKeyLive()">Generate API Key ➔</button>
           </div>
-          <div class="sync-log-box" id="sync-console-output">
-[Console Ready] Click 'Run Master Sync Now' to pull latest AI models from OpenRouter catalog & Artificial Analysis evaluations...
+          <div id="new-key-display" style="display:none; margin-top:16px; padding:12px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:8px; color:#065F46; font-family:var(--font-mono); font-weight:700; font-size:13px;"></div>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title">Active API Keys & Usage</div>
+            <button class="btn-action" onclick="loadActiveKeysTable()">🔄 Refresh Keys</button>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Key Name</th>
+                <th>API Key Token</th>
+                <th>Tier</th>
+                <th>Total Requests</th>
+                <th>Created Date</th>
+              </tr>
+            </thead>
+            <tbody id="keys-table-body">
+              <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Loading active keys...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 3: INTERACTIVE API STUDIO / PLAYGROUND -->
+      <section id="tab-playground" class="tab-content">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title">⚡ Interactive API Studio & Endpoint Tester</div>
+          </div>
+          <div class="playground-grid">
+            <div>
+              <div class="form-group">
+                <label class="form-label">Target Endpoint</label>
+                <select id="pg-endpoint" class="form-select" onchange="updatePlaygroundDefaults()">
+                  <option value="/api/v1/models?limit=10">GET /api/v1/models (Models Catalog)</option>
+                  <option value="/api/v1/benchmarks?sort_by=rankllms_index&limit=10">GET /api/v1/benchmarks (RankLLMs Benchmarks Matrix)</option>
+                  <option value="/api/v1/leaderboard?sort_by=rankllms_index">GET /api/v1/leaderboard (Main Leaderboard)</option>
+                  <option value="/api/v1/compare?model_a=claude-3-7-sonnet&model_b=gpt-4o">GET /api/v1/compare (Side-by-Side Comparison)</option>
+                  <option value="/api/v1/health">GET /api/v1/health (System Health Audit)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Query Parameters / Endpoint Path</label>
+                <input type="text" id="pg-params" class="form-input" value="limit=10">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Optional API Key Header (X-API-Key)</label>
+                <input type="text" id="pg-header-key" class="form-input" placeholder="rk_live_...">
+              </div>
+              <button class="btn-action btn-sync" style="width:100%; justify-content:center; padding:12px;" onclick="runStudioTest()">⚡ Execute Request Live</button>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span class="form-label">Response JSON</span>
+                <span id="pg-status-badge" class="badge-rank" style="display:none;">200 OK</span>
+              </div>
+              <pre class="json-output-box" id="pg-json-output">// Click 'Execute Request Live' to send HTTP query...</pre>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- TAB 2: HOW TO FETCH ALL MODELS VIA API -->
-      <section id="tab-fetch-all" class="tab-content">
-        <h2>🔥 How to Fetch All Models via API</h2>
-        <p>You can query all 760+ AI models from <code>https://api.rankllms.com/api/v1/models</code> in a single API call by specifying <code>limit=1000</code>.</p>
-
-        <h3>1. Using cURL (Terminal)</h3>
-        <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/models?limit=1000"</div>
-
-        <h3>2. Using JavaScript (Next.js / React / Node.js)</h3>
-        <div class="code-block">
-async function fetchAllModels() {
-  const response = await fetch('https://api.rankllms.com/api/v1/models?limit=1000');
-  const models = await response.json();
-  console.log(`Fetched ${models.length} AI models from api.rankllms.com!`);
-  return models;
-}
+      <!-- TAB 4: MODELS & LEADERBOARD EXPLORER -->
+      <section id="tab-models-explorer" class="tab-content">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title">AI Models & Benchmark Explorer (1,299 Models)</div>
+            <button class="btn-action" onclick="loadModelsExplorerTable()">🔄 Refresh List</button>
+          </div>
+          <div style="margin-bottom:16px;">
+            <input type="text" id="models-search-input" class="form-input" placeholder="🔍 Search by model name, provider, slug..." onkeyup="filterModelsTable()">
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Model Name</th>
+                <th>Provider</th>
+                <th>RankLLMs Index</th>
+                <th>Coding Index</th>
+                <th>Context Length</th>
+                <th>Prompt / 1M</th>
+                <th>Throughput</th>
+              </tr>
+            </thead>
+            <tbody id="models-table-body">
+              <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Loading 1,299 models from Neon PostgreSQL...</td></tr>
+            </tbody>
+          </table>
         </div>
-
-        <h3>3. Using Python (requests)</h3>
-        <div class="code-block">
-import requests
-
-url = "https://api.rankllms.com/api/v1/models"
-params = {"limit": 1000}
-
-response = requests.get(url, params=params)
-models = response.json()
-
-print(f"Total Models Received: {len(models)}")
-for m in models[:5]:
-    print(f"- {m['name']} ({m['provider']['name']}): Intel Index {m['benchmark']['intelligence_index']}")
-        </div>
-
-        <h3>4. Live API Test (Fetch All 764 Models Right Now)</h3>
-        <button class="btn-test" onclick="testEndpoint('/api/v1/models?limit=1000', 'res-fetch-all')">Fetch All Models Live ➔</button>
-        <div class="test-result-box" id="res-fetch-all"></div>
       </section>
 
-      <!-- TAB 3: COMPLETE API ROUTES -->
-      <section id="tab-all-routes" class="tab-content">
-        <h2>Complete REST API Catalog (All Endpoints)</h2>
-
-        <!-- Route 1: GET /ping -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-get">GET</span>
-            <span class="endpoint-path">/ping</span>
-            <span class="endpoint-desc">Render Keep-Alive Ping</span>
+      <!-- TAB 5: MODEL COMPARISON TOOL -->
+      <section id="tab-compare-tool" class="tab-content">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title">⚔️ Side-by-Side Model Comparison Tool</div>
           </div>
-          <div class="endpoint-body">
-            <p>1ms ping endpoint used by UptimeRobot, Cron-Job.org, or Render to keep instance awake 24/7.</p>
-            <div class="code-block">curl -X GET "https://api.rankllms.com/ping"</div>
-            <button class="btn-test" onclick="testEndpoint('/ping', 'res-ping')">Try Endpoint Live ➔</button>
-            <div class="test-result-box" id="res-ping"></div>
+          <div style="display:flex; gap:16px; align-items:flex-end; margin-bottom:24px;">
+            <div style="flex:1;">
+              <label class="form-label">Model A Slug / ID</label>
+              <input type="text" id="cmp-model-a" class="form-input" value="claude-3-7-sonnet" placeholder="e.g. claude-3-7-sonnet">
+            </div>
+            <div style="flex:1;">
+              <label class="form-label">Model B Slug / ID</label>
+              <input type="text" id="cmp-model-b" class="form-input" value="gpt-4o" placeholder="e.g. gpt-4o">
+            </div>
+            <button class="btn-action btn-sync" onclick="runModelComparison()">⚔️ Compare Models</button>
           </div>
-        </div>
-
-        <!-- Route 2: GET /healthz -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-get">GET</span>
-            <span class="endpoint-path">/healthz</span>
-            <span class="endpoint-desc">Render Automated Infrastructure Probe</span>
-          </div>
-          <div class="endpoint-body">
-            <p>Render load-balancer health check probe endpoint.</p>
-            <div class="code-block">curl -X GET "https://api.rankllms.com/healthz"</div>
-            <button class="btn-test" onclick="testEndpoint('/healthz', 'res-healthz')">Try Endpoint Live ➔</button>
-            <div class="test-result-box" id="res-healthz"></div>
-          </div>
-        </div>
-
-        <!-- Route 3: GET /health -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-get">GET</span>
-            <span class="endpoint-path">/health</span>
-            <span class="endpoint-desc">Root System Health Status</span>
-          </div>
-          <div class="endpoint-body">
-            <p>Returns health status and render keep-alive payload.</p>
-            <div class="code-block">curl -X GET "https://api.rankllms.com/health"</div>
-            <button class="btn-test" onclick="testEndpoint('/health', 'res-health')">Try Endpoint Live ➔</button>
-            <div class="test-result-box" id="res-health"></div>
-          </div>
-        </div>
-
-        <!-- Route 4: GET /api/v1/health -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-get">GET</span>
-            <span class="endpoint-path">/api/v1/health</span>
-            <span class="endpoint-desc">API Health & Neon DB Audit</span>
-          </div>
-          <div class="endpoint-body">
-            <p>Checks Neon PostgreSQL connection status and returns active record counts.</p>
-            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/health"</div>
-            <button class="btn-test" onclick="testEndpoint('/api/v1/health', 'res-v1-health')">Try Endpoint Live ➔</button>
-            <div class="test-result-box" id="res-v1-health"></div>
-          </div>
-        </div>
-
-        <!-- Route 5: GET /api/v1/providers -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-get">GET</span>
-            <span class="endpoint-path">/api/v1/providers</span>
-            <span class="endpoint-desc">List AI Providers</span>
-          </div>
-          <div class="endpoint-body">
-            <p>Returns all 123 AI providers (OpenAI, Anthropic, Google, DeepSeek, Meta, Qwen, etc.).</p>
-            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/providers"</div>
-            <button class="btn-test" onclick="testEndpoint('/api/v1/providers', 'res-providers')">Try Endpoint Live ➔</button>
-            <div class="test-result-box" id="res-providers"></div>
-          </div>
-        </div>
-
-        <!-- Route 6: GET /api/v1/models -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-get">GET</span>
-            <span class="endpoint-path">/api/v1/models</span>
-            <span class="endpoint-desc">Search, Filter & Paginate Models</span>
-          </div>
-          <div class="endpoint-body">
-            <p>Filters: <code>search</code>, <code>category</code> (llm, image, video, audio), <code>provider</code>, <code>is_free</code>, <code>is_open_weight</code>, <code>ordering</code>, <code>limit</code> (up to 1000), <code>offset</code>.</p>
-            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/models?limit=1000"</div>
-            <button class="btn-test" onclick="testEndpoint('/api/v1/models?category=llm&limit=5', 'res-models')">Try Endpoint Live ➔</button>
-            <div class="test-result-box" id="res-models"></div>
-          </div>
-        </div>
-
-        <!-- Route 7: GET /api/v1/models/{identifier} -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-get">GET</span>
-            <span class="endpoint-path">/api/v1/models/{path:identifier}</span>
-            <span class="endpoint-desc">Detailed Model Specs & Benchmarks</span>
-          </div>
-          <div class="endpoint-body">
-            <p>Retrieves single model detail by OpenRouter ID (e.g. <code>anthropic/claude-3.5-sonnet</code>), slug, or DB ID.</p>
-            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/models/anthropic/claude-3.5-sonnet"</div>
-            <button class="btn-test" onclick="testEndpoint('/api/v1/models/anthropic/claude-3.5-sonnet', 'res-model-detail')">Try Endpoint Live ➔</button>
-            <div class="test-result-box" id="res-model-detail"></div>
-          </div>
-        </div>
-
-        <!-- Route 8: GET /api/v1/leaderboard -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-get">GET</span>
-            <span class="endpoint-path">/api/v1/leaderboard</span>
-            <span class="endpoint-desc">Model Leaderboards & Rankings</span>
-          </div>
-          <div class="endpoint-body">
-            <p>Filters: <code>sort_by</code> (<code>intelligence</code>, <code>coding</code>, <code>speed</code>, <code>price</code>), <code>category</code> (<code>all</code>, <code>open-llm</code>, <code>free</code>, <code>weekly-top-10</code>).</p>
-            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/leaderboard?sort_by=coding&category=all"</div>
-            <button class="btn-test" onclick="testEndpoint('/api/v1/leaderboard?sort_by=coding&limit=5', 'res-leaderboard')">Try Endpoint Live ➔</button>
-            <div class="test-result-box" id="res-leaderboard"></div>
-          </div>
-        </div>
-
-        <!-- Route 9: GET /api/v1/compare -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-get">GET</span>
-            <span class="endpoint-path">/api/v1/compare</span>
-            <span class="endpoint-desc">Side-by-Side Model Comparison</span>
-          </div>
-          <div class="endpoint-body">
-            <p>Side-by-side comparison between <code>model_a</code> and <code>model_b</code> (specs, prices, coding index, TPS).</p>
-            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/compare?model_a=anthropic/claude-3.5-sonnet&model_b=deepseek/deepseek-r1"</div>
-            <button class="btn-test" onclick="testEndpoint('/api/v1/compare?model_a=anthropic/claude-3.5-sonnet&model_b=deepseek/deepseek-r1', 'res-compare')">Try Endpoint Live ➔</button>
-            <div class="test-result-box" id="res-compare"></div>
-          </div>
-        </div>
-
-        <!-- Route 10: POST /api/v1/sync -->
-        <div class="endpoint-card">
-          <div class="endpoint-header">
-            <span class="method-badge method-post">POST</span>
-            <span class="endpoint-path">/api/v1/sync</span>
-            <span class="endpoint-desc">Trigger Master Sync Pipeline</span>
-          </div>
-          <div class="endpoint-body">
-            <p>Triggers complete OpenRouter catalog + Artificial Analysis + Null Backfill ingestion pipeline.</p>
-            <div class="code-block">curl -X POST "https://api.rankllms.com/api/v1/sync"</div>
+          <div id="cmp-results-area" style="display:none;" class="playground-grid">
+            <div class="card-panel" style="border-top:4px solid var(--accent-indigo);" id="cmp-card-a"></div>
+            <div class="card-panel" style="border-top:4px solid var(--accent-emerald);" id="cmp-card-b"></div>
           </div>
         </div>
       </section>
 
-      <!-- TAB 4: ARCHITECTURE & SCHEMA -->
-      <section id="tab-architecture" class="tab-content">
-        <h2>Data Models & Entity Relationships</h2>
-        <p>RankLLMs Engine organizes AI entities into 6 core PostgreSQL models:</p>
-        <ul>
-          <li><strong>LLMModel</strong>: Primary registry entity (`openrouter_id`, `slug`, `name`, `provider`, `category`, `is_open_weight`, `is_free`).</li>
-          <li><strong>ModelSpecification</strong>: OneToOne with LLMModel (`context_length`, `max_completion_tokens`, `supports_vision`, `supports_tools`).</li>
-          <li><strong>ModelPricing</strong>: OneToOne with LLMModel (`prompt_price_per_1m`, `completion_price_per_1m`).</li>
-          <li><strong>ModelBenchmark</strong>: OneToOne with LLMModel (`intelligence_index`, `coding_index`, `agentic_index`, `tokens_per_second`, `arena_elo`).</li>
-          <li><strong>AppRanking</strong>: Top 50 AI applications ranked by monthly token usage.</li>
-          <li><strong>TaskClassification</strong>: Task distribution percentages (Code Generation, Debugging, Workflow Execution).</li>
-        </ul>
+      <!-- TAB 6: ONE-CLICK MASTER SYNC CONSOLE -->
+      <section id="tab-sync-console" class="tab-content">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title">⚙️ Data Pipeline Master Sync Console</div>
+            <button class="btn-action btn-sync" onclick="triggerMasterSync()">⚡ Run One-Click Master Sync</button>
+          </div>
+          <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">Triggers the complete 3-step master ingestion pipeline: OpenRouter API Sync ➔ Artificial Analysis Ingestion ➔ Database Null Backfill & RankLLMs Index calculation.</p>
+          <div class="console-box" id="master-console">[System Ready] Click 'Run Master Sync' above to trigger data pipeline execution...</div>
+        </div>
       </section>
 
-      <!-- TAB 5: DEPLOYMENT -->
-      <section id="tab-deployment" class="tab-content">
-        <h2>Render Deployment & 24/7 Keep-Alive</h2>
-        <p>To prevent Render free tier sleeping after 15 minutes of inactivity, set an uptime pinger to hit <code>https://api.rankllms.com/ping</code> or <code>/health</code> every 5 minutes on UptimeRobot or Cron-Job.org.</p>
-      </section>
-
-      <!-- TAB 6: PRO SUGGESTIONS -->
-      <section id="tab-suggestions" class="tab-content">
-        <h2>Pro Suggestions to Elevate RankLLMs Engine</h2>
-
-        <div class="suggestion-card">
-          <div class="sug-icon">🚀</div>
-          <div>
-            <div class="sug-title">1. Redis / In-Memory Response Caching</div>
-            <div class="sug-text">Add 5-minute Django cache headers or Redis caching for high-traffic leaderboard endpoints (<code>/api/v1/leaderboard</code>, <code>/api/v1/models</code>) to reduce database queries to near 0ms for frontend users.</div>
-          </div>
-        </div>
-
-        <div class="suggestion-card">
-          <div class="sug-icon">🔑</div>
-          <div>
-            <div class="sug-title">2. API Keys & Rate Limiting (API Security & Access Control)</div>
-            <div class="sug-text">Add API key authentication (`X-API-Key`) with tiered rate-limiting (e.g. Free Tier: 60 req/min, Pro Tier: 1000 req/min) to control developer access to <code>api.rankllms.com</code>.</div>
-          </div>
-        </div>
-
-        <div class="suggestion-card">
-          <div class="sug-icon">🔔</div>
-          <div>
-            <div class="sug-title">3. Discord / Webhook Alerts on New Model Releases</div>
-            <div class="sug-text">Whenever <code>sync_all</code> detects a brand-new model (e.g. Claude 4, GPT-5, DeepSeek R2), send an automated Discord or Slack webhook notification.</div>
-          </div>
-        </div>
+      <!-- TAB 7: ENDPOINTS CATALOG -->
+      <section id="tab-endpoints-guide" class="tab-content">
+        <h2>Complete REST API Catalog (11 Endpoints)</h2>
+        <br>
+        <p>Explore all active endpoints available on <code>https://api.rankllms.com</code>:</p>
+        <br>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Endpoint Path</th>
+              <th>Description</th>
+              <th>Tag</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
+              <td><code>/api/v1/models</code></td>
+              <td>Full LLM catalog (Supports <code>limit=1000</code> to fetch all models)</td>
+              <td>Models API</td>
+            </tr>
+            <tr>
+              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
+              <td><code>/api/v1/benchmarks</code></td>
+              <td>Dedicated Model Benchmark Evaluations Matrix (RankLLMs Index)</td>
+              <td>Benchmarks API</td>
+            </tr>
+            <tr>
+              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
+              <td><code>/api/v1/leaderboard</code></td>
+              <td>Main LLM Leaderboard (Sorted by rankllms_index, coding, context, cost)</td>
+              <td>Leaderboard</td>
+            </tr>
+            <tr>
+              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
+              <td><code>/api/v1/compare</code></td>
+              <td>Side-by-side comparison between 2 AI models</td>
+              <td>Compare</td>
+            </tr>
+            <tr>
+              <td><span class="badge-rank" style="background:#EFF6FF; color:#2563EB;">POST</span></td>
+              <td><code>/api/v1/keys/generate</code></td>
+              <td>Generate new Developer API Key (<code>rk_live_...</code>)</td>
+              <td>API Key Manager</td>
+            </tr>
+            <tr>
+              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
+              <td><code>/api/v1/keys</code></td>
+              <td>List active API keys and usage statistics</td>
+              <td>API Key Manager</td>
+            </tr>
+            <tr>
+              <td><span class="badge-rank" style="background:#EFF6FF; color:#2563EB;">POST</span></td>
+              <td><code>/api/v1/sync</code></td>
+              <td>Trigger One-Click Master Pipeline Ingestion Sync</td>
+              <td>Sync</td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
     </div>
   </main>
 
   <script>
-    function switchTab(btnElem, tabId) {
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    let globalModels = [];
 
-      btnElem.classList.add('active');
-      document.getElementById('tab-' + tabId).classList.add('active');
-      document.getElementById('page-title').innerText = btnElem.innerText.trim();
+    function switchTab(btn, tabId) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.add('active');
+      document.getElementById('page-title').innerText = btn.innerText.replace(/^[^\s]+\s*/, '');
+
+      if (tabId === 'models-explorer' && globalModels.length === 0) {
+        loadModelsExplorerTable();
+      } else if (tabId === 'api-keys') {
+        loadActiveKeysTable();
+      }
     }
 
-    // Live Health Fetcher
-    fetch('/api/v1/health')
-      .then(res => res.json())
-      .then(data => {
-        if(data.total_models) document.getElementById('stat-models').innerText = data.total_models;
-        if(data.total_providers) document.getElementById('stat-providers').innerText = data.total_providers;
-      })
-      .catch(err => console.log(err));
+    async function loadModelsExplorerTable() {
+      const tbody = document.getElementById('models-table-body');
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading 1,299 models from Neon PostgreSQL...</td></tr>';
+      try {
+        const res = await fetch('/api/v1/models?limit=100');
+        const data = await res.json();
+        globalModels = data.items || [];
 
-    // Interactive Endpoint Tester
-    function testEndpoint(path, resultId) {
-      const box = document.getElementById(resultId);
-      box.style.display = 'block';
-      box.innerText = "Fetching " + path + "...";
-
-      fetch(path)
-        .then(res => res.text())
-        .then(text => {
-          try {
-            const json = JSON.parse(text);
-            box.innerText = JSON.stringify(json, null, 2);
-          } catch(e) {
-            box.innerText = text;
-          }
-        })
-        .catch(err => {
-          box.innerText = "Error: " + err.message;
-        });
+        renderModelsTable(globalModels);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="color:red;">Error loading models: ${err.message}</td></tr>`;
+      }
     }
 
-    // One-Click Master Sync Function
-    function triggerMasterSync() {
-      const topBtn = document.getElementById('top-sync-btn');
-      const cardBtn = document.getElementById('card-sync-btn');
-      const consoleBox = document.getElementById('sync-console-output');
+    function renderModelsTable(models) {
+      const tbody = document.getElementById('models-table-body');
+      if (!models || models.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No models found.</td></tr>';
+        return;
+      }
 
-      topBtn.disabled = true;
-      cardBtn.disabled = true;
-      topBtn.innerText = "⏳ Running Sync...";
-      cardBtn.innerText = "⏳ Running Sync...";
+      tbody.innerHTML = models.map((m, idx) => `
+        <tr>
+          <td><span class="badge-rank">#${idx + 1}</span></td>
+          <td><strong>${m.name}</strong><br><span style="font-size:11px; color:var(--text-muted);">${m.openrouter_id}</span></td>
+          <td>${m.provider_name}</td>
+          <td><span class="badge-score">${m.rankllms_index || 0.0}</span></td>
+          <td><span style="font-family:var(--font-mono); font-weight:700;">${m.coding_index || 0.0}</span></td>
+          <td>${m.context_length ? (m.context_length / 1000) + 'k' : 'N/A'}</td>
+          <td>$${parseFloat(m.prompt_price_per_1m).toFixed(2)}</td>
+          <td>${m.is_open_weight ? 'Open-Weight' : 'API'}</td>
+        </tr>
+      `).join('');
+    }
 
-      consoleBox.innerText = "🚀 [1/3] Triggering Master Data Pipeline via POST /api/v1/sync...\nFetching OpenRouter Catalog & Analytics...";
+    function filterModelsTable() {
+      const query = document.getElementById('models-search-input').value.toLowerCase();
+      const filtered = globalModels.filter(m => 
+        m.name.toLowerCase().includes(query) || 
+        m.provider_name.toLowerCase().includes(query) || 
+        m.openrouter_id.toLowerCase().includes(query)
+      );
+      renderModelsTable(filtered);
+    }
 
-      fetch('/api/v1/sync', { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-          topBtn.disabled = false;
-          cardBtn.disabled = false;
-          topBtn.innerText = "⚡ Run One-Click Master Sync";
-          cardBtn.innerText = "Run Master Sync Now";
+    async function loadActiveKeysTable() {
+      const tbody = document.getElementById('keys-table-body');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading keys...</td></tr>';
+      try {
+        const res = await fetch('/api/v1/keys');
+        const keys = await res.json();
+        if (!keys || keys.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No active API keys found. Generate one above!</td></tr>';
+          return;
+        }
+        tbody.innerHTML = keys.map(k => `
+          <tr>
+            <td><strong>${k.name}</strong></td>
+            <td><code style="font-family:var(--font-mono); color:var(--accent-indigo); font-weight:700;">${k.key}</code></td>
+            <td><span class="badge-rank" style="text-transform:uppercase;">${k.tier}</span></td>
+            <td>${k.total_requests.toLocaleString()}</td>
+            <td>${new Date(k.created_at).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Error loading keys: ${err.message}</td></tr>`;
+      }
+    }
 
-          if(data.status === "success") {
-            const sum = data.summary || {};
-            consoleBox.innerText = `✅ RANKLLMS ENGINE MASTER SYNC COMPLETE!\n\n` +
-              `⏱ Elapsed Time: ${sum.elapsed_seconds || 0}s\n` +
-              `📊 Total Models: ${sum.total_models || 764} (100% Non-Null Specs, Pricing & Benchmarks)\n` +
-              `🏛 Providers: ${sum.total_providers || 123}\n` +
-              `📈 App Rankings: ${sum.total_app_rankings || 50} | Task Shares: ${sum.total_task_classifications || 29}\n\n` +
-              `All models and metrics are synchronized with Neon PostgreSQL!`;
-            
-            // Refresh stats
-            if(sum.total_models) document.getElementById('stat-models').innerText = sum.total_models;
-            if(sum.total_providers) document.getElementById('stat-providers').innerText = sum.total_providers;
-          } else {
-            consoleBox.innerText = "❌ Sync finished with status: " + JSON.stringify(data);
-          }
-        })
-        .catch(err => {
-          topBtn.disabled = false;
-          cardBtn.disabled = false;
-          topBtn.innerText = "⚡ Run One-Click Master Sync";
-          cardBtn.innerText = "Run Master Sync Now";
-          consoleBox.innerText = "❌ Error triggering master sync: " + err.message;
+    async function generateApiKeyLive() {
+      const appName = document.getElementById('key-app-name').value.trim() || 'My App';
+      const tier = document.getElementById('key-tier').value;
+      const display = document.getElementById('new-key-display');
+      display.style.display = 'block';
+      display.innerText = 'Generating key...';
+
+      try {
+        const res = await fetch('/api/v1/keys/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: appName, tier: tier })
         });
+        const keyObj = await res.json();
+        display.innerHTML = `✅ Key Created Successfully!<br>Token: <span style="user-select:all;">${keyObj.key}</span> (${keyObj.tier.toUpperCase()})`;
+        loadActiveKeysTable();
+      } catch (err) {
+        display.innerText = 'Error generating key: ' + err.message;
+      }
+    }
+
+    async function runStudioTest() {
+      const endpoint = document.getElementById('pg-endpoint').value;
+      const keyHeader = document.getElementById('pg-header-key').value.trim();
+      const output = document.getElementById('pg-json-output');
+      const badge = document.getElementById('pg-status-badge');
+
+      output.innerText = 'Sending GET request to ' + endpoint + '...';
+      badge.style.display = 'none';
+
+      const t0 = performance.now();
+      try {
+        const headers = {};
+        if (keyHeader) headers['X-API-Key'] = keyHeader;
+
+        const res = await fetch(endpoint, { headers });
+        const data = await res.json();
+        const t1 = performance.now();
+
+        badge.style.display = 'inline-block';
+        badge.innerText = `${res.status} ${res.statusText} (${Math.round(t1 - t0)}ms)`;
+        output.innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.innerText = 'Error: ' + err.message;
+      }
+    }
+
+    async function runModelComparison() {
+      const mA = document.getElementById('cmp-model-a').value.trim();
+      const mB = document.getElementById('cmp-model-b').value.trim();
+      const area = document.getElementById('cmp-results-area');
+      const cardA = document.getElementById('cmp-card-a');
+      const cardB = document.getElementById('cmp-card-b');
+
+      if (!mA || !mB) return alert('Please enter both model slugs!');
+      area.style.display = 'grid';
+      cardA.innerHTML = '<p>Loading Model A...</p>';
+      cardB.innerHTML = '<p>Loading Model B...</p>';
+
+      try {
+        const res = await fetch(`/api/v1/compare?model_a=${mA}&model_b=${mB}`);
+        const data = await res.json();
+        const models = data.models || [];
+
+        if (models.length >= 1) renderCompareCard(cardA, models[0]);
+        if (models.length >= 2) renderCompareCard(cardB, models[1]);
+      } catch (err) {
+        cardA.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+      }
+    }
+
+    function renderCompareCard(container, m) {
+      container.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div class="panel-title">${m.name}</div>
+          <span class="badge-score" style="font-size:20px;">${m.benchmarks.rankllms_index}</span>
+        </div>
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;">Provider: <strong>${m.provider}</strong></p>
+        <table class="data-table">
+          <tr><td><strong>RankLLMs Index</strong></td><td><span class="badge-score">${m.benchmarks.rankllms_index}</span></td></tr>
+          <tr><td>Coding Index</td><td>${m.benchmarks.coding_index}</td></tr>
+          <tr><td>Context Window</td><td>${(m.specs.context_length / 1000)}k tokens</td></tr>
+          <tr><td>Prompt Cost</td><td>$${m.pricing.prompt_price_per_1m} / 1M</td></tr>
+        </table>
+      `;
+    }
+
+    async function triggerMasterSync() {
+      const consoleBox = document.getElementById('master-console');
+      consoleBox.innerText = `[${new Date().toLocaleTimeString()}] Triggering Master Ingestion Pipeline...\n[Step 1/3] OpenRouter Sync running...\n[Step 2/3] Artificial Analysis Sync running...\n[Step 3/3] RankLLMs Index calculation running...`;
+      try {
+        const res = await fetch('/api/v1/sync', { method: 'POST' });
+        const data = await res.json();
+        consoleBox.innerText += `\n\n✅ SYNC COMPLETE!\n${JSON.stringify(data.summary, null, 2)}`;
+      } catch (err) {
+        consoleBox.innerText += `\n❌ Error triggering sync: ${err.message}`;
+      }
     }
   </script>
 </body>

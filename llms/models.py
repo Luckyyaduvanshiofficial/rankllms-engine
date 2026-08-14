@@ -256,3 +256,36 @@ class PricingHistory(models.Model):
 
     def __str__(self):
         return f"{self.model.name} @ {self.recorded_at}: ${self.prompt_price_per_1m}/1M in, ${self.completion_price_per_1m}/1M out"
+
+
+import secrets
+
+class APIKey(models.Model):
+    """
+    Developer API Keys for RankLLMs Data API.
+    """
+    TIER_CHOICES = [
+        ('free', 'Free Tier (60 req/min)'),
+        ('pro', 'Pro Tier (1000 req/min)'),
+        ('admin', 'Admin Tier (Unlimited)'),
+    ]
+
+    key = models.CharField(max_length=64, unique=True, db_index=True)
+    name = models.CharField(max_length=255, help_text="Developer or Application name")
+    tier = models.CharField(max_length=20, choices=TIER_CHOICES, default='free')
+    is_active = models.BooleanField(default=True)
+    total_requests = models.BigIntegerField(default=0)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.tier.upper()}): {self.key[:12]}..."
+
+    @classmethod
+    def generate_key(cls, name: str, tier: str = 'free'):
+        raw_key = f"rk_live_{secrets.token_hex(20)}"
+        return cls.objects.create(key=raw_key, name=name, tier=tier)
+

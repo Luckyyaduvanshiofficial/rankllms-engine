@@ -8,8 +8,9 @@ from django.db.models import Q, Count, F
 from .models import (
     Provider, LLMModel, ModelSpecification, ModelPricing,
     ModelBenchmark, WeeklyTop10Ranking, PricingHistory,
-    DailyModelRanking, AppRanking, TaskClassification
+    DailyModelRanking, AppRanking, TaskClassification, APIKey
 )
+
 from .services.openrouter_sync import sync_openrouter_models
 from .services.sync_all import run_master_sync
 
@@ -169,9 +170,44 @@ class ModelFilterSchema(Schema):
 
 
 
+class APIKeyCreateSchema(Schema):
+    name: str = Field(..., example="RankLLMs Frontend")
+    tier: str = Field("free", example="free")
+
+
+class APIKeyResponseSchema(Schema):
+    id: int
+    key: str
+    name: str
+    tier: str
+    is_active: bool
+    total_requests: int
+    created_at: datetime
+
+
+
 # API Endpoints
 
+@api.post("/keys/generate", response=APIKeyResponseSchema, tags=["API Key Manager"])
+def generate_api_key(request, payload: APIKeyCreateSchema):
+    """
+    Generate a new Developer API Key (rk_live_...).
+    """
+    tier = payload.tier.lower() if payload.tier.lower() in ['free', 'pro', 'admin'] else 'free'
+    api_key_obj = APIKey.generate_key(name=payload.name, tier=tier)
+    return api_key_obj
+
+
+@api.get("/keys", response=List[APIKeyResponseSchema], tags=["API Key Manager"])
+def list_api_keys(request):
+    """
+    List all active API keys and their usage statistics.
+    """
+    return list(APIKey.objects.filter(is_active=True).order_by('-created_at'))
+
+
 @api.get("/health", tags=["System"])
+
 def health_check(request):
     """
     System health status and Neon DB connection check.
