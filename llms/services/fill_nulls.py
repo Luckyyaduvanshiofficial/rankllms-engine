@@ -133,25 +133,13 @@ def fill_all_nulls():
             existing_benchmarks[m.id] = bm
             is_new_bm = True
 
-        # Interpolate Intelligence Index if 0
-        if bm.intelligence_index == 0.0:
-            base_intel = 45.0
-            if any(k in openrouter_id_lower for k in ['gpt-4', 'claude-3', 'gemini-1.5-pro', 'deepseek-r1', 'o3']):
-                base_intel = 62.0
-            elif any(k in openrouter_id_lower for k in ['llama-3.3', 'qwen-2.5-72b', 'mistral-large']):
-                base_intel = 55.0
-            elif any(k in openrouter_id_lower for k in ['70b', '72b']):
-                base_intel = 52.0
-            elif any(k in openrouter_id_lower for k in ['8b', '7b', 'mini', 'flash', 'haiku', 'micro']):
-                base_intel = 38.0
-            bm.intelligence_index = base_intel
-
-        # Interpolate Coding Index if 0
-        if bm.coding_index == 0.0:
+        # Do not assign fake base_intel scores; keep intelligence_index strictly from Artificial Analysis API evaluations
+        if bm.intelligence_index > 0.0 and bm.coding_index == 0.0:
             if 'coder' in openrouter_id_lower or 'code' in name_lower or 'deepseek-coder' in openrouter_id_lower:
-                bm.coding_index = round(bm.intelligence_index * 1.12, 1)
+                bm.coding_index = round(bm.intelligence_index * 1.05, 1)
             else:
-                bm.coding_index = round(bm.intelligence_index * 0.94, 1)
+                bm.coding_index = round(bm.intelligence_index * 0.95, 1)
+
 
         # Interpolate Agentic Index if 0
         if bm.agentic_index == 0.0:

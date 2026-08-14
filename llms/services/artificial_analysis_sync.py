@@ -1,14 +1,15 @@
 import requests
 import time
+from decimal import Decimal
 from django.conf import settings
 from django.db import transaction
 from django.utils.text import slugify
-from llms.models import LLMModel, ModelBenchmark, Provider
+from llms.models import LLMModel, ModelBenchmark, ModelPricing, ModelSpecification, Provider
 
 def sync_artificial_analysis_data():
     """
-    Ultra-fast Artificial Analysis Ingestion Service for RankLLMs Engine.
-    Ingests LLMs, Text-to-Image, Image-Editing, Text-to-Video, and Text-to-Speech model benchmarks & Elo ratings.
+    Ultra-fast Bulk Ingestion Service for Artificial Analysis API v2.
+    Ingests official LLM benchmark evaluations, pricing, throughput, and media ratings.
     """
     api_key = getattr(settings, 'ARTIFICIAL_ANALYSIS_API_KEY', 'aa_DtsFXIHlTbHDWSJdfhNFKjlZfHKnAeBk')
     base_url = getattr(settings, 'ARTIFICIAL_ANALYSIS_API_URL', 'https://artificialanalysis.ai/api/v2')
@@ -21,7 +22,6 @@ def sync_artificial_analysis_data():
     t0 = time.time()
     print("[Artificial Analysis Sync] Fetching catalog from Artificial Analysis API...")
 
-    # 1. Fetch LLM Models Endpoint
     url = f"{base_url}/data/llms/models"
     models_list = []
     try:
@@ -32,12 +32,13 @@ def sync_artificial_analysis_data():
     except Exception as e:
         print(f"[Artificial Analysis Sync] Warning fetching LLM models endpoint: {e}")
 
-    print(f"[Artificial Analysis Sync] Received {len(models_list)} LLM models.")
+    print(f"[Artificial Analysis Sync] Received {len(models_list)} LLM models from Artificial Analysis API.")
 
+    provider_cache = {p.slug: p for p in Provider.objects.all()}
     db_models = list(LLMModel.objects.all())
-    existing_benchmarks = {b.model_id: b for b in ModelBenchmark.objects.all()}
+    existing_open_ids = {m.openrouter_id for m in db_models}
 
-    # Build smart lookup dictionaries
+    # Smart lookup table
     lookup = {}
     for m in db_models:
         lookup[m.openrouter_id.lower().strip()] = m
@@ -47,15 +48,25 @@ def sync_artificial_analysis_data():
         clean_s = m.slug.replace('-', '').replace('_', '').lower().strip()
         lookup[clean_s] = m
 
-    benchmarks_to_create = []
-    benchmarks_to_update = []
-    updated_count = 0
+    # 1. Pre-create any missing Providers & LLMModels in bulk
+    new_providers = {}
+    new_llms = []
 
     for aa_model in models_list:
         aa_id = aa_model.get('id', '')
         aa_name = aa_model.get('name', '')
-        aa_slug = aa_model.get('slug', '')
-        evals = aa_model.get('evaluations', {}) or {}
+        aa_slug = aa_model.get('slug', '') or slugify(aa_name)
+        creator_data = aa_model.get('model_creator', {}) or {}
+
+        creator_name = creator_data.get('name') or 'Other'
+        creator_slug = creator_data.get('slug') or slugify(creator_name)
+
+        if creator_slug not in provider_cache and creator_slug not in new_providers:
+            new_providers[creator_slug] = Provider(
+                slug=creator_slug,
+                name=creator_name,
+                description=f'{creator_name} AI Models'
+            )
 
         clean_aa_slug = aa_slug.lower().strip()
         clean_aa_id = aa_id.lower().strip()
@@ -67,41 +78,135 @@ def sync_artificial_analysis_data():
             lookup.get(clean_aa_name)
         )
 
-        if target_model:
-            bm = existing_benchmarks.get(target_model.id)
-            is_new = False
-            if not bm:
-                bm = ModelBenchmark(model=target_model)
-                is_new = True
+        if not target_model:
+            open_id = f"aa/{creator_slug}/{aa_slug}"
+            if open_id not in existing_open_ids:
+                existing_open_ids.add(open_id)
+                new_llms.append((open_id, aa_slug, aa_name, creator_slug, aa_model))
 
-            intel = evals.get('artificial_analysis_intelligence_index')
-            coding = evals.get('artificial_analysis_coding_index')
-            tps = aa_model.get('median_output_tokens_per_second')
-            ttft = aa_model.get('median_time_to_first_token_seconds')
+    with transaction.atomic():
+        if new_providers:
+            Provider.objects.bulk_create(list(new_providers.values()), ignore_conflicts=True)
+            provider_cache = {p.slug: p for p in Provider.objects.all()}
 
-            has_changes = False
+        if new_llms:
+            llms_to_create = []
+            for open_id, aa_slug, aa_name, creator_slug, aa_model in new_llms:
+                prov = provider_cache.get(creator_slug) or provider_cache.get('other')
+                llms_to_create.append(LLMModel(
+                    openrouter_id=open_id,
+                    slug=aa_slug,
+                    name=aa_name,
+                    provider=prov,
+                    category='llm',
+                    raw_json=aa_model,
+                ))
+            LLMModel.objects.bulk_create(llms_to_create, ignore_conflicts=True)
 
-            if intel is not None:
-                bm.intelligence_index = float(intel)
-                has_changes = True
-            if coding is not None:
-                bm.coding_index = float(coding)
-                has_changes = True
-            if tps is not None:
-                bm.tokens_per_second = float(tps)
-                has_changes = True
-            if ttft is not None:
-                bm.time_to_first_token = float(ttft)
-                has_changes = True
+    # Refresh DB model cache
+    db_models = list(LLMModel.objects.all())
+    existing_benchmarks = {b.model_id: b for b in ModelBenchmark.objects.all()}
+    existing_pricing = {p.model_id: p for p in ModelPricing.objects.all()}
+    existing_specs = {s.model_id: s for s in ModelSpecification.objects.all()}
 
-            if has_changes:
-                if is_new:
-                    benchmarks_to_create.append(bm)
-                else:
-                    benchmarks_to_update.append(bm)
-                updated_count += 1
+    lookup = {}
+    for m in db_models:
+        lookup[m.openrouter_id.lower().strip()] = m
+        lookup[m.slug.lower().strip()] = m
+        short_id = m.openrouter_id.split('/')[-1].lower().strip()
+        lookup[short_id] = m
+        clean_s = m.slug.replace('-', '').replace('_', '').lower().strip()
+        lookup[clean_s] = m
 
-    # 2. Fetch Media Endpoints
+    specs_to_create = []
+    pricing_to_create = []
+    pricing_to_update = []
+    benchmarks_to_create = []
+    benchmarks_to_update = []
+    updated_count = 0
+
+    for aa_model in models_list:
+        aa_id = aa_model.get('id', '')
+        aa_name = aa_model.get('name', '')
+        aa_slug = aa_model.get('slug', '') or slugify(aa_name)
+        evals = aa_model.get('evaluations', {}) or {}
+        pricing_data = aa_model.get('pricing', {}) or {}
+
+        clean_aa_slug = aa_slug.lower().strip()
+        clean_aa_id = aa_id.lower().strip()
+        clean_aa_name = aa_name.lower().replace('-', '').replace('_', '').replace(' ', '')
+
+        target_model = (
+            lookup.get(clean_aa_slug) or
+            lookup.get(clean_aa_id) or
+            lookup.get(clean_aa_name)
+        )
+
+        if not target_model:
+            continue
+
+        # Specs
+        if target_model.id not in existing_specs:
+            specs_to_create.append(ModelSpecification(
+                model=target_model,
+                context_length=128000,
+                max_completion_tokens=4096,
+                modality='text->text'
+            ))
+
+        # Benchmark
+        bm = existing_benchmarks.get(target_model.id)
+        is_new_bm = False
+        if not bm:
+            bm = ModelBenchmark(model=target_model)
+            existing_benchmarks[target_model.id] = bm
+            is_new_bm = True
+
+        intel = evals.get('artificial_analysis_intelligence_index')
+        coding = evals.get('artificial_analysis_coding_index')
+        tps = aa_model.get('median_output_tokens_per_second')
+        ttft = aa_model.get('median_time_to_first_token_seconds')
+
+        if intel is not None:
+            bm.intelligence_index = float(intel)
+        if coding is not None:
+            bm.coding_index = float(coding)
+        if tps is not None:
+            bm.tokens_per_second = float(tps)
+        if ttft is not None:
+            bm.time_to_first_token = float(ttft)
+
+        if is_new_bm:
+            benchmarks_to_create.append(bm)
+        else:
+            benchmarks_to_update.append(bm)
+
+        # Pricing
+        p_in = pricing_data.get('price_1m_input_tokens')
+        p_out = pricing_data.get('price_1m_output_tokens')
+        if p_in is not None or p_out is not None:
+            pr = existing_pricing.get(target_model.id)
+            is_new_pr = False
+            if not pr:
+                pr = ModelPricing(model=target_model)
+                existing_pricing[target_model.id] = pr
+                is_new_pr = True
+
+            if p_in is not None:
+                pr.prompt_price_per_1m = Decimal(str(p_in))
+                pr.prompt_price_per_token = Decimal(str(p_in)) / Decimal('1000000')
+            if p_out is not None:
+                pr.completion_price_per_1m = Decimal(str(p_out))
+                pr.completion_price_per_token = Decimal(str(p_out)) / Decimal('1000000')
+
+            if is_new_pr:
+                pricing_to_create.append(pr)
+            else:
+                pricing_to_update.append(pr)
+
+        updated_count += 1
+
+    # 2. Media Endpoints Ingestion
     media_endpoints = [
         ('/data/media/text-to-image', 'image'),
         ('/data/media/image-editing', 'image'),
@@ -111,11 +216,8 @@ def sync_artificial_analysis_data():
     ]
 
     media_synced = 0
-    provider_cache = {p.slug: p for p in Provider.objects.all()}
     existing_openrouter_ids = set(LLMModel.objects.values_list('openrouter_id', flat=True))
-
     media_models_to_create = []
-    media_benchmarks_to_create = []
 
     for endpoint_path, category_name in media_endpoints:
         try:
@@ -157,8 +259,11 @@ def sync_artificial_analysis_data():
         if media_models_to_create:
             LLMModel.objects.bulk_create(media_models_to_create, ignore_conflicts=True)
 
+        if specs_to_create:
+            ModelSpecification.objects.bulk_create(specs_to_create, ignore_conflicts=True, batch_size=100)
+
         if benchmarks_to_create:
-            ModelBenchmark.objects.bulk_create(benchmarks_to_create, ignore_conflicts=True)
+            ModelBenchmark.objects.bulk_create(benchmarks_to_create, ignore_conflicts=True, batch_size=100)
         if benchmarks_to_update:
             ModelBenchmark.objects.bulk_update(
                 benchmarks_to_update,
@@ -166,5 +271,14 @@ def sync_artificial_analysis_data():
                 batch_size=100
             )
 
-    print(f"[Artificial Analysis Sync] Completed sync in {time.time()-t0:.2f}s. LLM Matched: {updated_count}, Media Created: {media_synced}.")
+        if pricing_to_create:
+            ModelPricing.objects.bulk_create(pricing_to_create, ignore_conflicts=True, batch_size=100)
+        if pricing_to_update:
+            ModelPricing.objects.bulk_update(
+                pricing_to_update,
+                fields=['prompt_price_per_token', 'completion_price_per_token', 'prompt_price_per_1m', 'completion_price_per_1m'],
+                batch_size=100
+            )
+
+    print(f"[Artificial Analysis Sync] Completed sync in {time.time()-t0:.2f}s. LLM Synced: {updated_count} (New LLMs: {len(new_llms)}), Media Created: {media_synced}.")
     return True
