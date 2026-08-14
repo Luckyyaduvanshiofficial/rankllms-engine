@@ -157,8 +157,9 @@ class ModelFilterSchema(Schema):
     min_context: Optional[int] = None
     max_prompt_price_1m: Optional[float] = None
     ordering: Optional[str] = "-intelligence_index"
-    limit: int = Field(50, ge=1, le=200)
+    limit: int = Field(50, ge=1, le=1000)
     offset: int = Field(0, ge=0)
+
 
 
 # API Endpoints

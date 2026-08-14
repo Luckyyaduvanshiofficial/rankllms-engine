@@ -16,18 +16,14 @@
       --border-focus: #CBD5E1;
       --text-main: #0F172A;
       --text-muted: #64748B;
-      --text-light: #94A3B8;
       --accent-indigo: #4F46E5;
       --accent-indigo-light: #EEF2FF;
       --accent-emerald: #059669;
       --accent-emerald-light: #ECFDF5;
-      --accent-sky: #0284C7;
-      --accent-amber: #D97706;
       --badge-get: #059669;
       --badge-post: #2563EB;
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
       --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
@@ -214,7 +210,6 @@
       color: var(--text-main);
       border: 1px solid var(--border-color);
     }
-    .btn-gh:hover { background: var(--bg-body); }
 
     .content-area {
       padding: 36px;
@@ -234,11 +229,25 @@
       border-radius: 16px;
       padding: 32px;
       margin-bottom: 28px;
-      position: relative;
-      overflow: hidden;
     }
     .hero-banner h1 { font-size: 26px; font-weight: 800; color: #1E1B4B; margin-bottom: 8px; }
     .hero-banner p { color: #3730A3; font-size: 15px; line-height: 1.6; max-width: 780px; }
+
+    /* Domain Pill */
+    .domain-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: #FFF;
+      border: 1px solid #C7D2FE;
+      border-radius: 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-indigo);
+      margin-top: 12px;
+    }
 
     /* Stats Grid */
     .stats-grid {
@@ -330,10 +339,7 @@
       color: #E2E8F0;
       overflow-x: auto;
       margin-top: 10px;
-      position: relative;
     }
-    .code-keyword { color: #F472B6; }
-    .code-string { color: #34D399; }
 
     .btn-test {
       margin-top: 12px;
@@ -357,7 +363,7 @@
       font-size: 12px;
       border-radius: 8px;
       display: none;
-      max-height: 200px;
+      max-height: 250px;
       overflow-y: auto;
     }
 
@@ -400,14 +406,17 @@
       <div class="brand-icon">R</div>
       <div>
         <div class="brand-text">RankLLMs</div>
-        <div style="font-size:11px; color:var(--text-muted); font-weight:600;">Engine Control v1.0</div>
+        <div style="font-size:11px; color:var(--text-muted); font-weight:600;">api.rankllms.com</div>
       </div>
       <span class="brand-tag">PRO</span>
     </div>
 
     <nav class="nav-tabs">
       <button class="nav-btn active" onclick="switchTab(this, 'overview')">
-        📊 Dashboard & One-Click Sync
+        📊 Dashboard & Control
+      </button>
+      <button class="nav-btn" onclick="switchTab(this, 'fetch-all')">
+        🔥 How to Fetch All Models
       </button>
       <button class="nav-btn" onclick="switchTab(this, 'all-routes')">
         🔌 Complete API Endpoints (10)
@@ -415,21 +424,18 @@
       <button class="nav-btn" onclick="switchTab(this, 'architecture')">
         🏛️ Data Models & Schema
       </button>
-      <button class="nav-btn" onclick="switchTab(this, 'pipelines')">
-        ⚡ Pipelines & APScheduler
-      </button>
       <button class="nav-btn" onclick="switchTab(this, 'deployment')">
         🚀 Render & 24/7 Keep-Alive
       </button>
       <button class="nav-btn" onclick="switchTab(this, 'suggestions')">
-        💡 Pro Engine Suggestions
+        💡 Pro Suggestions
       </button>
     </nav>
 
     <div class="sidebar-footer">
       <div class="status-pill">
         <div class="pulse-dot"></div>
-        Engine Live (Neon Postgres)
+        api.rankllms.com Live
       </div>
     </div>
   </aside>
@@ -437,7 +443,7 @@
   <!-- Main Area -->
   <main>
     <header>
-      <div class="header-title" id="page-title">Dashboard & One-Click Sync</div>
+      <div class="header-title" id="page-title">Dashboard & Control</div>
       <div class="quick-links">
         <button class="btn-action btn-sync" id="top-sync-btn" onclick="triggerMasterSync()">
           ⚡ Run One-Click Master Sync
@@ -449,11 +455,12 @@
 
     <div class="content-area">
 
-      <!-- TAB 1: DASHBOARD & ONE-CLICK SYNC -->
+      <!-- TAB 1: DASHBOARD & CONTROL -->
       <section id="tab-overview" class="tab-content active">
         <div class="hero-banner">
-          <h1>RankLLMs Engine Administration & API Portal</h1>
+          <h1>RankLLMs Engine Administration & Data API</h1>
           <p>High-performance data aggregation engine for 760+ AI Models, 120+ Providers, Live Benchmark Indices (Artificial Analysis), App Rankings, and Task Classification Market Share.</p>
+          <div class="domain-badge">🌐 Production Host: https://api.rankllms.com</div>
         </div>
 
         <!-- Stat Counters -->
@@ -493,21 +500,58 @@
         </div>
       </section>
 
-      <!-- TAB 2: COMPLETE API ROUTES -->
+      <!-- TAB 2: HOW TO FETCH ALL MODELS VIA API -->
+      <section id="tab-fetch-all" class="tab-content">
+        <h2>🔥 How to Fetch All Models via API</h2>
+        <p>You can query all 760+ AI models from <code>https://api.rankllms.com/api/v1/models</code> in a single API call by specifying <code>limit=1000</code>.</p>
+
+        <h3>1. Using cURL (Terminal)</h3>
+        <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/models?limit=1000"</div>
+
+        <h3>2. Using JavaScript (Next.js / React / Node.js)</h3>
+        <div class="code-block">
+async function fetchAllModels() {
+  const response = await fetch('https://api.rankllms.com/api/v1/models?limit=1000');
+  const models = await response.json();
+  console.log(`Fetched ${models.length} AI models from api.rankllms.com!`);
+  return models;
+}
+        </div>
+
+        <h3>3. Using Python (requests)</h3>
+        <div class="code-block">
+import requests
+
+url = "https://api.rankllms.com/api/v1/models"
+params = {"limit": 1000}
+
+response = requests.get(url, params=params)
+models = response.json()
+
+print(f"Total Models Received: {len(models)}")
+for m in models[:5]:
+    print(f"- {m['name']} ({m['provider']['name']}): Intel Index {m['benchmark']['intelligence_index']}")
+        </div>
+
+        <h3>4. Live API Test (Fetch All 764 Models Right Now)</h3>
+        <button class="btn-test" onclick="testEndpoint('/api/v1/models?limit=1000', 'res-fetch-all')">Fetch All Models Live ➔</button>
+        <div class="test-result-box" id="res-fetch-all"></div>
+      </section>
+
+      <!-- TAB 3: COMPLETE API ROUTES -->
       <section id="tab-all-routes" class="tab-content">
         <h2>Complete REST API Catalog (All Endpoints)</h2>
-        <p>All endpoints are documented below. You can test live API responses directly using the <strong>Try Endpoint</strong> button.</p>
 
         <!-- Route 1: GET /ping -->
         <div class="endpoint-card">
           <div class="endpoint-header">
             <span class="method-badge method-get">GET</span>
             <span class="endpoint-path">/ping</span>
-            <span class="endpoint-desc">Render & Uptime Keep-Alive Ping</span>
+            <span class="endpoint-desc">Render Keep-Alive Ping</span>
           </div>
           <div class="endpoint-body">
-            <p>Ultra-fast 1ms ping endpoint used by UptimeRobot, Cron-Job.org, or Render to keep instance awake 24/7.</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/ping"</div>
+            <p>1ms ping endpoint used by UptimeRobot, Cron-Job.org, or Render to keep instance awake 24/7.</p>
+            <div class="code-block">curl -X GET "https://api.rankllms.com/ping"</div>
             <button class="btn-test" onclick="testEndpoint('/ping', 'res-ping')">Try Endpoint Live ➔</button>
             <div class="test-result-box" id="res-ping"></div>
           </div>
@@ -522,7 +566,7 @@
           </div>
           <div class="endpoint-body">
             <p>Render load-balancer health check probe endpoint.</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/healthz"</div>
+            <div class="code-block">curl -X GET "https://api.rankllms.com/healthz"</div>
             <button class="btn-test" onclick="testEndpoint('/healthz', 'res-healthz')">Try Endpoint Live ➔</button>
             <div class="test-result-box" id="res-healthz"></div>
           </div>
@@ -536,8 +580,8 @@
             <span class="endpoint-desc">Root System Health Status</span>
           </div>
           <div class="endpoint-body">
-            <p>Returns health status and render keep-alive verification payload.</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/health"</div>
+            <p>Returns health status and render keep-alive payload.</p>
+            <div class="code-block">curl -X GET "https://api.rankllms.com/health"</div>
             <button class="btn-test" onclick="testEndpoint('/health', 'res-health')">Try Endpoint Live ➔</button>
             <div class="test-result-box" id="res-health"></div>
           </div>
@@ -552,7 +596,7 @@
           </div>
           <div class="endpoint-body">
             <p>Checks Neon PostgreSQL connection status and returns active record counts.</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/health"</div>
+            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/health"</div>
             <button class="btn-test" onclick="testEndpoint('/api/v1/health', 'res-v1-health')">Try Endpoint Live ➔</button>
             <div class="test-result-box" id="res-v1-health"></div>
           </div>
@@ -567,7 +611,7 @@
           </div>
           <div class="endpoint-body">
             <p>Returns all 123 AI providers (OpenAI, Anthropic, Google, DeepSeek, Meta, Qwen, etc.).</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/providers"</div>
+            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/providers"</div>
             <button class="btn-test" onclick="testEndpoint('/api/v1/providers', 'res-providers')">Try Endpoint Live ➔</button>
             <div class="test-result-box" id="res-providers"></div>
           </div>
@@ -581,8 +625,8 @@
             <span class="endpoint-desc">Search, Filter & Paginate Models</span>
           </div>
           <div class="endpoint-body">
-            <p>Filters: <code>search</code>, <code>category</code> (llm, image, video, audio), <code>provider</code>, <code>is_free</code>, <code>is_open_weight</code>, <code>ordering</code>, <code>limit</code>, <code>offset</code>.</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/models?category=llm&is_open_weight=true&limit=5"</div>
+            <p>Filters: <code>search</code>, <code>category</code> (llm, image, video, audio), <code>provider</code>, <code>is_free</code>, <code>is_open_weight</code>, <code>ordering</code>, <code>limit</code> (up to 1000), <code>offset</code>.</p>
+            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/models?limit=1000"</div>
             <button class="btn-test" onclick="testEndpoint('/api/v1/models?category=llm&limit=5', 'res-models')">Try Endpoint Live ➔</button>
             <div class="test-result-box" id="res-models"></div>
           </div>
@@ -597,7 +641,7 @@
           </div>
           <div class="endpoint-body">
             <p>Retrieves single model detail by OpenRouter ID (e.g. <code>anthropic/claude-3.5-sonnet</code>), slug, or DB ID.</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/models/anthropic/claude-3.5-sonnet"</div>
+            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/models/anthropic/claude-3.5-sonnet"</div>
             <button class="btn-test" onclick="testEndpoint('/api/v1/models/anthropic/claude-3.5-sonnet', 'res-model-detail')">Try Endpoint Live ➔</button>
             <div class="test-result-box" id="res-model-detail"></div>
           </div>
@@ -612,7 +656,7 @@
           </div>
           <div class="endpoint-body">
             <p>Filters: <code>sort_by</code> (<code>intelligence</code>, <code>coding</code>, <code>speed</code>, <code>price</code>), <code>category</code> (<code>all</code>, <code>open-llm</code>, <code>free</code>, <code>weekly-top-10</code>).</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/leaderboard?sort_by=coding&category=all"</div>
+            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/leaderboard?sort_by=coding&category=all"</div>
             <button class="btn-test" onclick="testEndpoint('/api/v1/leaderboard?sort_by=coding&limit=5', 'res-leaderboard')">Try Endpoint Live ➔</button>
             <div class="test-result-box" id="res-leaderboard"></div>
           </div>
@@ -627,7 +671,7 @@
           </div>
           <div class="endpoint-body">
             <p>Side-by-side comparison between <code>model_a</code> and <code>model_b</code> (specs, prices, coding index, TPS).</p>
-            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/compare?model_a=anthropic/claude-3.5-sonnet&model_b=deepseek/deepseek-r1"</div>
+            <div class="code-block">curl -X GET "https://api.rankllms.com/api/v1/compare?model_a=anthropic/claude-3.5-sonnet&model_b=deepseek/deepseek-r1"</div>
             <button class="btn-test" onclick="testEndpoint('/api/v1/compare?model_a=anthropic/claude-3.5-sonnet&model_b=deepseek/deepseek-r1', 'res-compare')">Try Endpoint Live ➔</button>
             <div class="test-result-box" id="res-compare"></div>
           </div>
@@ -642,12 +686,12 @@
           </div>
           <div class="endpoint-body">
             <p>Triggers complete OpenRouter catalog + Artificial Analysis + Null Backfill ingestion pipeline.</p>
-            <div class="code-block">curl -X POST "http://localhost:8000/api/v1/sync"</div>
+            <div class="code-block">curl -X POST "https://api.rankllms.com/api/v1/sync"</div>
           </div>
         </div>
       </section>
 
-      <!-- TAB 3: ARCHITECTURE & SCHEMA -->
+      <!-- TAB 4: ARCHITECTURE & SCHEMA -->
       <section id="tab-architecture" class="tab-content">
         <h2>Data Models & Entity Relationships</h2>
         <p>RankLLMs Engine organizes AI entities into 6 core PostgreSQL models:</p>
@@ -661,16 +705,10 @@
         </ul>
       </section>
 
-      <!-- TAB 4: PIPELINES -->
-      <section id="tab-pipelines" class="tab-content">
-        <h2>Data Pipelines & APScheduler</h2>
-        <p>The engine executes `run_master_sync()` periodically every 6 hours using APScheduler in background process.</p>
-      </section>
-
       <!-- TAB 5: DEPLOYMENT -->
       <section id="tab-deployment" class="tab-content">
         <h2>Render Deployment & 24/7 Keep-Alive</h2>
-        <p>To prevent Render free tier sleeping after 15 minutes of inactivity, set an uptime pinger to hit <code>/ping</code> or <code>/health</code> every 5 minutes on UptimeRobot or Cron-Job.org.</p>
+        <p>To prevent Render free tier sleeping after 15 minutes of inactivity, set an uptime pinger to hit <code>https://api.rankllms.com/ping</code> or <code>/health</code> every 5 minutes on UptimeRobot or Cron-Job.org.</p>
       </section>
 
       <!-- TAB 6: PRO SUGGESTIONS -->
@@ -688,23 +726,15 @@
         <div class="suggestion-card">
           <div class="sug-icon">🔑</div>
           <div>
-            <div class="sug-title">2. API Keys & Rate Limiting (API Monetization)</div>
-            <div class="sug-text">Add API key authentication (`X-API-Key`) with tiered rate-limiting (e.g. Free Tier: 60 req/min, Pro Tier: 1000 req/min) if you plan to offer RankLLMs Data API to third-party developers.</div>
-          </div>
-        </div>
-
-        <div class="suggestion-card">
-          <div class="sug-icon">📊</div>
-          <div>
-            <div class="sug-title">3. Export Leaderboard to CSV / JSON</div>
-            <div class="sug-text">Add an <code>/api/v1/export?format=csv</code> endpoint so developers and researchers can download the entire benchmark matrix as a CSV spreadsheet.</div>
+            <div class="sug-title">2. API Keys & Rate Limiting (API Security & Access Control)</div>
+            <div class="sug-text">Add API key authentication (`X-API-Key`) with tiered rate-limiting (e.g. Free Tier: 60 req/min, Pro Tier: 1000 req/min) to control developer access to <code>api.rankllms.com</code>.</div>
           </div>
         </div>
 
         <div class="suggestion-card">
           <div class="sug-icon">🔔</div>
           <div>
-            <div class="sug-title">4. Discord / Webhook Alerts on New Model Releases</div>
+            <div class="sug-title">3. Discord / Webhook Alerts on New Model Releases</div>
             <div class="sug-text">Whenever <code>sync_all</code> detects a brand-new model (e.g. Claude 4, GPT-5, DeepSeek R2), send an automated Discord or Slack webhook notification.</div>
           </div>
         </div>
