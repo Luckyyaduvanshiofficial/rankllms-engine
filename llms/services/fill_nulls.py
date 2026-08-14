@@ -2,8 +2,10 @@ import re
 from decimal import Decimal
 from django.db import transaction
 from llms.models import LLMModel, ModelSpecification, ModelPricing, ModelBenchmark
+from llms.services.rankllms_calculator import calculate_rankllms_index
 
 def fill_all_nulls():
+
     """
     Intelligent Null & Missing Data Backfill Service for RankLLMs Engine.
     Ensures 100% of LLMModels have complete Specs, Pricing, and Benchmark metrics without missing values.
@@ -133,38 +135,23 @@ def fill_all_nulls():
             existing_benchmarks[m.id] = bm
             is_new_bm = True
 
-        # Do not assign fake base_intel scores; keep intelligence_index strictly from Artificial Analysis API evaluations
-        if bm.intelligence_index > 0.0 and bm.coding_index == 0.0:
-            if 'coder' in openrouter_id_lower or 'code' in name_lower or 'deepseek-coder' in openrouter_id_lower:
-                bm.coding_index = round(bm.intelligence_index * 1.05, 1)
-            else:
-                bm.coding_index = round(bm.intelligence_index * 0.95, 1)
-
-
-        # Interpolate Agentic Index if 0
-        if bm.agentic_index == 0.0:
-            if spec.supports_tools or 'agent' in openrouter_id_lower or 'r1' in openrouter_id_lower:
-                bm.agentic_index = round(bm.intelligence_index * 0.88, 1)
-            else:
-                bm.agentic_index = round(bm.intelligence_index * 0.72, 1)
-
-        # Interpolate Throughput & Latency if 0
-        if bm.tokens_per_second == 0.0:
-            if 'flash' in openrouter_id_lower or 'turbo' in openrouter_id_lower or '8b' in openrouter_id_lower:
-                bm.tokens_per_second = 115.0
-                bm.time_to_first_token = 0.35
-            elif '70b' in openrouter_id_lower or 'pro' in openrouter_id_lower:
-                bm.tokens_per_second = 45.0
-                bm.time_to_first_token = 0.65
-            else:
-                bm.tokens_per_second = 68.0
-                bm.time_to_first_token = 0.50
+        # Calculate official RankLLMs Index using our transparent formula
+        if bm.intelligence_index > 0.0 or bm.coding_index > 0.0:
+            bm.intelligence_index = calculate_rankllms_index(
+                coding_index=bm.coding_index,
+                agentic_index=bm.agentic_index,
+                swe_bench_score=bm.swe_bench_score,
+                raw_intelligence=bm.intelligence_index,
+                tokens_per_second=bm.tokens_per_second,
+                context_length=spec.context_length
+            )
 
         if is_new_bm:
             benchmarks_to_create.append(bm)
             filled_benchmarks += 1
         else:
             benchmarks_to_update.append(bm)
+
 
     with transaction.atomic():
         if specs_to_create:
