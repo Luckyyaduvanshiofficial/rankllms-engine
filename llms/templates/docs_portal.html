@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RankLLMs Engine — Interactive Documentation Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090D16;
+      --bg-card: #111827;
+      --bg-card-hover: #1F2937;
+      --border-color: #1F293D;
+      --text-main: #F3F4F6;
+      --text-muted: #9CA3AF;
+      --accent-indigo: #6366F1;
+      --accent-cyan: #00E599;
+      --accent-pink: #EC4899;
+      --badge-get: #10B981;
+      --badge-post: #3B82F6;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar Navigation */
+    aside {
+      width: 280px;
+      background: #0D1322;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #FFF;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    }
+    .brand-text {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #FFF, #A5B4FC);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-tabs {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #FFF;
+    }
+    .nav-btn.active {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.02));
+      color: #FFF;
+      border-left: 3px solid var(--accent-indigo);
+    }
+    .nav-btn svg { width: 18px; height: 18px; fill: currentColor; opacity: 0.8; }
+
+    /* Footer status pill */
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border-color);
+      font-size: 12px;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(0, 229, 153, 0.1);
+      border: 1px solid rgba(0, 229, 153, 0.3);
+      color: var(--accent-cyan);
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-cyan);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: var(--bg-dark);
+    }
+
+    header {
+      padding: 20px 36px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(13, 19, 34, 0.6);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-title { font-size: 20px; font-weight: 700; }
+    .quick-links { display: flex; gap: 12px; }
+    .btn-action {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-swagger {
+      background: var(--accent-indigo);
+      color: #FFF;
+    }
+    .btn-swagger:hover { background: #4F46E5; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+    .btn-gh {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .content-area {
+      padding: 36px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* UI Cards & Grids */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(0, 229, 153, 0.05));
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+    .hero-banner h1 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+    .hero-banner p { color: var(--text-muted); font-size: 15px; line-height: 1.6; max-width: 750px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stat-val { font-size: 28px; font-weight: 800; color: var(--accent-cyan); font-family: var(--font-mono); }
+    .stat-lbl { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-top: 4px; }
+
+    /* Endpoint Cards */
+    .endpoint-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .endpoint-header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .method-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .method-get { background: rgba(16, 185, 129, 0.15); color: var(--badge-get); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .method-post { background: rgba(59, 130, 246, 0.15); color: var(--badge-post); border: 1px solid rgba(59, 130, 246, 0.3); }
+    .endpoint-path { font-family: var(--font-mono); font-weight: 600; font-size: 15px; color: #FFF; }
+    .endpoint-desc { color: var(--text-muted); font-size: 13px; margin-left: auto; }
+
+    .endpoint-body { padding: 20px; }
+    .code-block {
+      background: #070A10;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #A5B4FC;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+
+    h2 { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+    h3 { font-size: 16px; font-weight: 600; margin: 20px 0 10px 0; color: #E5E7EB; }
+    p { color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; font-size: 14px; }
+    ul { margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.8; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside>
+    <div class="brand">
+      <div class="brand-icon">R</div>
+      <div class="brand-text">RankLLMs Engine</div>
+    </div>
+
+    <nav class="nav-tabs">
+      <button class="nav-btn active" onclick="switchTab('overview')">
+        📌 Overview
+      </button>
+      <button class="nav-btn" onclick="switchTab('architecture')">
+        🏗️ Architecture & Flow
+      </button>
+      <button class="nav-btn" onclick="switchTab('api-reference')">
+        🔌 API Endpoints
+      </button>
+      <button class="nav-btn" onclick="switchTab('data-pipeline')">
+        ⚡ Data Pipelines
+      </button>
+      <button class="nav-btn" onclick="switchTab('deployment')">
+        🚀 Deployment Options
+      </button>
+      <button class="nav-btn" onclick="switchTab('local-dev')">
+        💻 Local Setup & CLI
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="status-pill">
+        <div class="pulse-dot"></div>
+        Engine Healthy (Neon DB)
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main View -->
+  <main>
+    <header>
+      <div class="header-title" id="page-title">Documentation Portal</div>
+      <div class="quick-links">
+        <a href="/api/v1/docs" target="_blank" class="btn-action btn-swagger">Open Swagger API Docs ↗</a>
+        <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" target="_blank" class="btn-action btn-gh">GitHub Repo ↗</a>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- TAB 1: OVERVIEW -->
+      <section id="tab-overview" class="tab-content active">
+        <div class="hero-banner">
+          <h1>RankLLMs Data API Engine</h1>
+          <p>High-speed, production-grade engine powering AI model leaderboards, Open-LLM rankings, token-usage app analytics, multi-modal evaluations, and real-time model comparisons across 760+ models.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-val" id="stat-models">764</div>
+            <div class="stat-lbl">Active AI Models</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-providers">123</div>
+            <div class="stat-lbl">AI Providers</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">100%</div>
+            <div class="stat-lbl">Data Coverage (No Nulls)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">6 hrs</div>
+            <div class="stat-lbl">Auto Pipeline Sync</div>
+          </div>
+        </div>
+
+        <h2>Core Engine Capabilities</h2>
+        <ul>
+          <li><strong>Catalog Aggregation:</strong> Fetches OpenRouter catalog and Artificial Analysis ratings into Neon PostgreSQL.</li>
+          <li><strong>Multi-Modal Leaderboards:</strong> Aggregates Large Language Models, Image Generation, Video Generation, and Audio models.</li>
+          <li><strong>Interactive Comparisons:</strong> Side-by-side spec, pricing, speed, and intelligence score comparison API.</li>
+          <li><strong>Automated Backfill:</strong> Smart pipeline that guarantees 0% missing fields across context lengths, max completion tokens, pricing per 1M, and intelligence scores.</li>
+        </ul>
+      </section>
+
+      <!-- TAB 2: ARCHITECTURE -->
+      <section id="tab-architecture" class="tab-content">
+        <h2>Architecture & Data Schema</h2>
+        <p>RankLLMs Engine relies on Django 6.0 and Django Ninja for zero-overhead JSON serialization, connected to Neon PostgreSQL over SSL.</p>
+
+        <div class="code-block">
++-------------------------+       +------------------------------------+
+|  OpenRouter API Catalog |       |  Artificial Analysis Data API v2   |
+|  (Models + Analytics)   |       |  (LLM Benchmarks + Media Rating)   |
++------------+------------+       +-----------------+------------------+
+             |                                      |
+             v                                      v
+   [ openrouter_sync.py ]                [ artificial_analysis_sync.py ]
+   (Catalog & App Rankings)              (Intelligence, Coding & Media)
+             |                                      |
+             +-------------------+------------------+
+                                 |
+                                 v
+                       [ fill_nulls.py ]
+                       (Backfills missing specs,
+                        pricing & benchmarks)
+                                 |
+                                 v
+                   +---------------------------+
+                   |  Neon PostgreSQL Database |
+                   +-------------+-------------+
+                                 |
+                                 v
+                   +---------------------------+
+                   | Django Ninja REST API v1  |
+                   +---------------------------+
+        </div>
+      </section>
+
+      <!-- TAB 3: API REFERENCE -->
+      <section id="tab-api-reference" class="tab-content">
+        <h2>REST API Endpoints</h2>
+
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/api/v1/health</span>
+            <span class="endpoint-desc">System Health Check</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Returns health status and live record counts from PostgreSQL.</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/health"</div>
+          </div>
+        </div>
+
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/api/v1/models</span>
+            <span class="endpoint-desc">Models Catalog & Search</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Filterable catalog. Query parameters: <code>search</code>, <code>category</code>, <code>provider</code>, <code>is_free</code>, <code>is_open_weight</code>.</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/models?category=llm&is_open_weight=true"</div>
+          </div>
+        </div>
+
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/api/v1/leaderboard</span>
+            <span class="endpoint-desc">Leaderboards & Rankings</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Returns ranked models. Parameters: <code>sort_by</code> (<code>intelligence</code>, <code>coding</code>, <code>speed</code>, <code>price</code>), <code>category</code> (<code>all</code>, <code>open-llm</code>, <code>free</code>, <code>weekly-top-10</code>).</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/leaderboard?sort_by=coding"</div>
+          </div>
+        </div>
+
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-get">GET</span>
+            <span class="endpoint-path">/api/v1/compare</span>
+            <span class="endpoint-desc">Side-by-Side Model Comparison</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Compares specs, cost, speed, and intelligence index between 2 models.</p>
+            <div class="code-block">curl -X GET "http://localhost:8000/api/v1/compare?model_a=anthropic/claude-3.5-sonnet&model_b=deepseek/deepseek-r1"</div>
+          </div>
+        </div>
+
+        <div class="endpoint-card">
+          <div class="endpoint-header">
+            <span class="method-badge method-post">POST</span>
+            <span class="endpoint-path">/api/v1/sync</span>
+            <span class="endpoint-desc">Trigger Master Sync Pipeline</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Triggers complete OpenRouter + Artificial Analysis + Null Backfill pipeline.</p>
+            <div class="code-block">curl -X POST "http://localhost:8000/api/v1/sync"</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: DATA PIPELINES -->
+      <section id="tab-data-pipeline" class="tab-content">
+        <h2>Data Pipelines & APScheduler</h2>
+        <p>RankLLMs Engine uses APScheduler running inside Django process to execute <code>sync_all</code> every 6 hours automatically.</p>
+        <div class="code-block"># Manual CLI execution
+python manage.py sync_all</div>
+      </section>
+
+      <!-- TAB 5: DEPLOYMENT OPTIONS -->
+      <section id="tab-deployment" class="tab-content">
+        <h2>Deployment Options</h2>
+        <h3>Option 1: Render (Recommended)</h3>
+        <p>Build Command: <code>pip install -r requirements.txt && python manage.py migrate && python manage.py sync_all</code><br>
+        Start Command: <code>gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3</code></p>
+
+        <h3>Option 2: Docker Compose</h3>
+        <div class="code-block">docker-compose up -d --build</div>
+
+        <h3>Option 3: Linux VPS (Hostinger / DigitalOcean / AWS EC2)</h3>
+        <p>Use Gunicorn systemd service behind Nginx reverse proxy.</p>
+      </section>
+
+      <!-- TAB 6: LOCAL DEV -->
+      <section id="tab-local-dev" class="tab-content">
+        <h2>Local Development</h2>
+        <div class="code-block"># Setup virtual environment
+python -m venv venv
+.\venv\Scripts\activate
+
+# Install requirements
+pip install -r requirements.txt
+
+# Run migrations & server
+python manage.py migrate
+python manage.py runserver</div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+      document.getElementById('page-title').innerText = event.target.innerText.trim();
+    }
+
+    // Fetch live status
+    fetch('/api/v1/health')
+      .then(res => res.json())
+      .then(data => {
+        if(data.total_models) document.getElementById('stat-models').innerText = data.total_models;
+        if(data.total_providers) document.getElementById('stat-providers').innerText = data.total_providers;
+      })
+      .catch(err => console.log(err));
+  </script>
+</body>
+</html>
