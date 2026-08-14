@@ -22,6 +22,7 @@ It powers high-speed REST APIs for leaderboards, token-usage app analytics, task
 
 To keep documentation clean and easy to navigate, detailed guides are organized into separate files:
 
+- 🌟 **[About RankLLMs & Project Overview](docs/01_Aboutus.md)** — Complete project mission, architecture, scoring methodology, and API overview.
 - 🏗️ **[Architecture & Data Schema](docs/01_Architecture.md)** — Core models, data flow, OpenRouter & Artificial Analysis ingestion pipelines.
 - 🔌 **[API Reference Guide](docs/02_API_Reference.md)** — Complete list of REST API endpoints, query parameters, and JSON response examples.
 - 🚀 **[Deployment Options & Guide](docs/03_Deployment_Guide.md)** — Deploying to Render, Railway, Hostinger VPS (Nginx + Gunicorn), Docker, or Cloudflare.
