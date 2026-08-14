@@ -225,26 +225,27 @@ def list_models(request, filters: ModelFilterSchema = Query(...)):
     if filters.max_prompt_price_1m is not None:
         qs = qs.filter(pricing__prompt_price_per_1m__lte=filters.max_prompt_price_1m)
 
-    # Ordering mapping
+    # Ordering mapping defaulting to most intelligent models at top
     order_map = {
-        'intelligence_index': 'benchmark__intelligence_index',
-        '-intelligence_index': '-benchmark__intelligence_index',
-        'coding_index': 'benchmark__coding_index',
-        '-coding_index': '-benchmark__coding_index',
-        'agentic_index': 'benchmark__agentic_index',
-        '-agentic_index': '-benchmark__agentic_index',
-        'swe_bench': 'benchmark__swe_bench_score',
-        '-swe_bench': '-benchmark__swe_bench_score',
-        'prompt_price': 'pricing__prompt_price_per_1m',
-        '-prompt_price': '-pricing__prompt_price_per_1m',
-        'context_length': 'spec__context_length',
-        '-context_length': '-spec__context_length',
+        'intelligence_index': F('benchmark__intelligence_index').desc(nulls_last=True),
+        '-intelligence_index': F('benchmark__intelligence_index').desc(nulls_last=True),
+        'coding_index': F('benchmark__coding_index').desc(nulls_last=True),
+        '-coding_index': F('benchmark__coding_index').desc(nulls_last=True),
+        'agentic_index': F('benchmark__agentic_index').desc(nulls_last=True),
+        '-agentic_index': F('benchmark__agentic_index').desc(nulls_last=True),
+        'swe_bench': F('benchmark__swe_bench_score').desc(nulls_last=True),
+        '-swe_bench': F('benchmark__swe_bench_score').desc(nulls_last=True),
+        'prompt_price': F('pricing__prompt_price_per_1m').asc(nulls_last=True),
+        '-prompt_price': F('pricing__prompt_price_per_1m').desc(nulls_last=True),
+        'context_length': F('spec__context_length').desc(nulls_last=True),
+        '-context_length': F('spec__context_length').desc(nulls_last=True),
         'name': 'name',
         '-name': '-name',
     }
 
-    sort_field = order_map.get(filters.ordering, '-benchmark__intelligence_index')
-    qs = qs.order_by(sort_field)
+    sort_field = order_map.get(filters.ordering, F('benchmark__intelligence_index').desc(nulls_last=True))
+    qs = qs.order_by(sort_field, F('benchmark__coding_index').desc(nulls_last=True))
+
 
     total = qs.count()
     models = list(qs[filters.offset:filters.offset + filters.limit])
