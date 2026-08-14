@@ -341,7 +341,76 @@ def list_models(request, filters: ModelFilterSchema = Query(...)):
     }
 
 
+@api.get("/models/cards", response=List[dict], tags=["Static Cards API"])
+def get_model_cards_for_static_site(request, limit: int = 200, dedup: bool = True):
+    """
+    Dedicated Model Cards Export API endpoint.
+    Returns structured model cards array matching LLMModel TypeScript interface for Astro & Next.js static site generation (SSG).
+    """
+    qs = LLMModel.objects.select_related('provider', 'spec', 'pricing', 'benchmark').filter(is_active=True, category='llm')
+    qs = qs.order_by(F('benchmark__intelligence_index').desc(nulls_last=True), F('benchmark__coding_index').desc(nulls_last=True))
+
+    all_models = list(qs)
+    if dedup:
+        all_models = deduplicate_models(all_models)
+
+    models = all_models[:limit]
+    cards = []
+
+    for m in models:
+        spec = getattr(m, 'spec', None)
+        pricing = getattr(m, 'pricing', None)
+        bm = getattr(m, 'benchmark', None)
+
+        desc = m.description if m.description else f"{m.name} is a high-performance AI model developed by {m.provider.name}."
+
+        strengths = []
+        if bm and bm.coding_index >= 70:
+            strengths.append("Exceptional Code Generation")
+        if bm and bm.agentic_index >= 65:
+            strengths.append("Advanced Agentic Tool Use")
+        if spec and spec.context_length >= 128000:
+            strengths.append(f"Huge {spec.context_length // 1000}K Context Window")
+        if m.is_free:
+            strengths.append("100% Free API Access")
+        if m.is_open_weight:
+            strengths.append("Open-Weight / Self-Hostable")
+        if spec and spec.supports_vision:
+            strengths.append("Multimodal Vision")
+        if not strengths:
+            strengths = ["Fast Latency", "General Instruction Following"]
+
+        cards.append({
+            "id": m.slug or m.openrouter_id.replace('/', '-'),
+            "openrouter_id": m.openrouter_id,
+            "name": get_clean_model_name(m.name),
+            "provider": m.provider.name,
+            "category": m.category,
+            "isOpenWeight": m.is_open_weight,
+            "isFree": m.is_free,
+            "contextWindow": spec.context_length if spec else 128000,
+            "inputPricePerM": float(pricing.prompt_price_per_1m) if pricing else 0.0,
+            "outputPricePerM": float(pricing.completion_price_per_1m) if pricing else 0.0,
+            "rankllmsIndex": bm.intelligence_index if bm else 0.0,
+            "intelligenceIndex": bm.intelligence_index if bm else 0.0,
+            "codingIndex": bm.coding_index if bm else 0.0,
+            "agenticIndex": bm.agentic_index if bm else 0.0,
+            "sweBenchScore": bm.swe_bench_score if bm else 0.0,
+            "humanEvalScore": bm.human_eval_score if bm else 0.0,
+            "mmluScore": bm.mmlu_score if bm else 0.0,
+            "arenaElo": bm.arena_elo if bm else 0.0,
+            "speedTps": bm.tokens_per_second if bm else 0.0,
+            "timeToFirstToken": bm.time_to_first_token if bm else 0.0,
+            "releaseDate": m.created_at_openrouter.strftime("%Y-%m-%d") if m.created_at_openrouter else "2024-01-01",
+            "description": desc,
+            "strengths": strengths
+        })
+
+    return cards
+
+
 @api.get("/leaderboard", response=dict, tags=["Page 1: LLM Leaderboard"])
+
 def get_main_leaderboard(request, sort_by: str = "rankllms_index", dedup: bool = True, limit: int = 50):
     """
     Main LLM Leaderboard API (Supports sorting by RankLLMs Index, Coding Index, SWE-bench, Agentic Index, Context, Price).
