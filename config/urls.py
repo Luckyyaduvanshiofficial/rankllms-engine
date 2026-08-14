@@ -25,8 +25,10 @@ urlpatterns = [
     path('', root_home, name='root_home'),
     path('ping', ping_view, name='ping_view'),
     path('health', health_view, name='health_view'),
+    path('healthz', health_view, name='healthz_view'),
     path('admin/', admin.site.urls),
     path('api/v1/', api.urls),
 ]
+
 
 
