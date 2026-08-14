@@ -37,7 +37,32 @@ ARTIFICIAL_ANALYSIS_API_URL=https://artificialanalysis.ai/api/v2
 ARTIFICIAL_ANALYSIS_API_KEY=aa_DtsFXIHlTbHDWSJdfhNFKjlZfHKnAeBk
 ```
 
+### Step 3: Prevent Render Free Tier Sleeping (24/7 Keep-Alive Setup)
+Render's free web tier automatically spins down (sleeps) after 15 minutes of inactivity. To keep your API service awake **24/7 for free**, use an uptime pinger:
+
+1. **Lightweight Keep-Alive Routes**:
+   - `GET /health` (Returns `{"status": "healthy", "render_keep_alive": true}`)
+   - `GET /ping` (Returns `pong`)
+   - `GET /api/v1/health`
+
+2. **Setup Free Uptime Monitor (Choose any service)**:
+   - **Option A: UptimeRobot** (Free forever):
+     - Go to [UptimeRobot.com](https://uptimerobot.com) -> Add New Monitor.
+     - Monitor Type: **HTTP(s)**
+     - Friendly Name: `RankLLMs Render Ping`
+     - URL/IP: `https://your-render-app-name.onrender.com/health` (or `/ping`)
+     - Monitoring Interval: **Every 5 minutes** (or 8 minutes).
+   - **Option B: Cron-Job.org** (Free forever):
+     - Go to [cron-job.org](https://cron-job.org) -> Create Cronjob.
+     - Target URL: `https://your-render-app-name.onrender.com/ping`
+     - Execution schedule: `Every 5 minutes`.
+   - **Option C: Uptime Kuma** (Self-hosted):
+     - Add HTTP monitor targeting `https://your-render-app-name.onrender.com/health` with interval `300s`.
+
+Because Render receives an HTTP ping every 5 minutes, it **never hits the 15-minute inactivity limit** and stays online **24/7 without cost**!
+
 ---
+
 
 ## Option B: Railway Deployment
 
