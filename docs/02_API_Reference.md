@@ -80,7 +80,8 @@ Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
       "completion_price_per_1m": "15.000000"
     },
     "benchmark": {
-      "intelligence_index": 78.5,
+      "rankllms_index": 63.1,
+      "intelligence_index": 63.1,
       "coding_index": 76.5,
       "agentic_index": 71.0,
       "tokens_per_second": 65.2,
@@ -96,8 +97,9 @@ Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
 `GET /api/v1/leaderboard`
 
 **Query Parameters:**
-- `sort_by` *(string, default: `intelligence`)*:
-  - `intelligence`: Sorted by Artificial Analysis Intelligence Index.
+- `sort_by` *(string, default: `rankllms_index`)*:
+  - `rankllms_index`: Sorted by RankLLMs Index (highest overall intelligence at top).
+
   - `coding`: Sorted by Coding Index.
   - `speed`: Sorted by output throughput (`tokens_per_second`).
   - `price`: Sorted by lowest input prompt cost (`prompt_price_per_1m`).

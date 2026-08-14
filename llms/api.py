@@ -54,6 +54,7 @@ class ModelPricingSchema(Schema):
 
 
 class ModelBenchmarkSchema(Schema):
+    rankllms_index: float
     intelligence_index: float
     coding_index: float
     agentic_index: float
@@ -63,6 +64,11 @@ class ModelBenchmarkSchema(Schema):
     arena_elo: float
     tokens_per_second: float
     time_to_first_token: float
+
+    @staticmethod
+    def resolve_rankllms_index(obj):
+        return getattr(obj, 'intelligence_index', 0.0)
+
 
 
 class PricingHistorySchema(Schema):
@@ -156,8 +162,9 @@ class ModelFilterSchema(Schema):
     supports_tools: Optional[bool] = None
     min_context: Optional[int] = None
     max_prompt_price_1m: Optional[float] = None
-    ordering: Optional[str] = "-intelligence_index"
+    ordering: Optional[str] = "-rankllms_index"
     limit: int = Field(50, ge=1, le=1000)
+
     offset: int = Field(0, ge=0)
 
 
@@ -227,6 +234,8 @@ def list_models(request, filters: ModelFilterSchema = Query(...)):
 
     # Ordering mapping defaulting to most intelligent models at top
     order_map = {
+        'rankllms_index': F('benchmark__intelligence_index').desc(nulls_last=True),
+        '-rankllms_index': F('benchmark__intelligence_index').desc(nulls_last=True),
         'intelligence_index': F('benchmark__intelligence_index').desc(nulls_last=True),
         '-intelligence_index': F('benchmark__intelligence_index').desc(nulls_last=True),
         'coding_index': F('benchmark__coding_index').desc(nulls_last=True),
@@ -270,6 +279,7 @@ def list_models(request, filters: ModelFilterSchema = Query(...)):
             "context_length": spec.context_length if spec else 0,
             "prompt_price_per_1m": pricing.prompt_price_per_1m if pricing else Decimal('0'),
             "completion_price_per_1m": pricing.completion_price_per_1m if pricing else Decimal('0'),
+            "rankllms_index": benchmark.intelligence_index if benchmark else 0.0,
             "intelligence_index": benchmark.intelligence_index if benchmark else 0.0,
             "coding_index": benchmark.coding_index if benchmark else 0.0,
             "agentic_index": benchmark.agentic_index if benchmark else 0.0,
@@ -287,9 +297,9 @@ def list_models(request, filters: ModelFilterSchema = Query(...)):
 
 
 @api.get("/leaderboard", response=dict, tags=["Page 1: LLM Leaderboard"])
-def get_main_leaderboard(request, sort_by: str = "intelligence", limit: int = 50):
+def get_main_leaderboard(request, sort_by: str = "rankllms_index", limit: int = 50):
     """
-    Main LLM Leaderboard API (Supports sorting by Intelligence, Coding Index, SWE-bench, Agentic Index, Context, Price).
+    Main LLM Leaderboard API (Supports sorting by RankLLMs Index, Coding Index, SWE-bench, Agentic Index, Context, Price).
     """
     qs = LLMModel.objects.select_related('provider', 'spec', 'pricing', 'benchmark').filter(is_active=True, category='llm')
 
@@ -323,8 +333,10 @@ def get_main_leaderboard(request, sort_by: str = "intelligence", limit: int = 50
             "provider": m.provider.name,
             "is_open_weight": m.is_open_weight,
             "license": m.license,
+            "rankllms_index": benchmark.intelligence_index if benchmark else 0.0,
             "intelligence_index": benchmark.intelligence_index if benchmark else 0.0,
             "coding_index": benchmark.coding_index if benchmark else 0.0,
+
             "agentic_index": benchmark.agentic_index if benchmark else 0.0,
             "swe_bench_score": benchmark.swe_bench_score if benchmark else 0.0,
             "context_length": spec.context_length if spec else 0,
@@ -430,12 +442,14 @@ def compare_models(request, ids: str):
                 "is_free": m.is_free,
             },
             "benchmarks": {
+                "rankllms_index": benchmark.intelligence_index if benchmark else 0.0,
                 "intelligence_index": benchmark.intelligence_index if benchmark else 0.0,
                 "coding_index": benchmark.coding_index if benchmark else 0.0,
                 "agentic_index": benchmark.agentic_index if benchmark else 0.0,
                 "swe_bench_score": benchmark.swe_bench_score if benchmark else 0.0,
                 "arena_elo": benchmark.arena_elo if benchmark else 0.0,
             }
+
         })
 
     return {
