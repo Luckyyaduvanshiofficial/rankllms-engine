@@ -13,6 +13,9 @@ from .models import (
 
 from .services.openrouter_sync import sync_openrouter_models
 from .services.sync_all import run_master_sync
+from .services.deduplication import deduplicate_models, get_clean_model_name
+
+
 
 api = NinjaAPI(
     title="RankLLMs Engine API",
@@ -164,9 +167,11 @@ class ModelFilterSchema(Schema):
     min_context: Optional[int] = None
     max_prompt_price_1m: Optional[float] = None
     ordering: Optional[str] = "-rankllms_index"
+    dedup: bool = True
     limit: int = Field(50, ge=1, le=1000)
 
     offset: int = Field(0, ge=0)
+
 
 
 
@@ -291,9 +296,13 @@ def list_models(request, filters: ModelFilterSchema = Query(...)):
     sort_field = order_map.get(filters.ordering, F('benchmark__intelligence_index').desc(nulls_last=True))
     qs = qs.order_by(sort_field, F('benchmark__coding_index').desc(nulls_last=True))
 
+    all_models = list(qs)
+    if filters.dedup:
+        all_models = deduplicate_models(all_models)
 
-    total = qs.count()
-    models = list(qs[filters.offset:filters.offset + filters.limit])
+    total = len(all_models)
+    models = all_models[filters.offset:filters.offset + filters.limit]
+
 
     items = []
     for m in models:
@@ -333,7 +342,7 @@ def list_models(request, filters: ModelFilterSchema = Query(...)):
 
 
 @api.get("/leaderboard", response=dict, tags=["Page 1: LLM Leaderboard"])
-def get_main_leaderboard(request, sort_by: str = "rankllms_index", limit: int = 50):
+def get_main_leaderboard(request, sort_by: str = "rankllms_index", dedup: bool = True, limit: int = 50):
     """
     Main LLM Leaderboard API (Supports sorting by RankLLMs Index, Coding Index, SWE-bench, Agentic Index, Context, Price).
     """
@@ -353,7 +362,11 @@ def get_main_leaderboard(request, sort_by: str = "rankllms_index", limit: int = 
         qs = qs.order_by(F('benchmark__intelligence_index').desc(nulls_last=True), F('benchmark__coding_index').desc(nulls_last=True))
 
 
-    models = qs[:limit]
+    all_models = list(qs)
+    if dedup:
+        all_models = deduplicate_models(all_models)
+    models = all_models[:limit]
+
     rankings = []
     for idx, m in enumerate(models, start=1):
         spec = getattr(m, 'spec', None)
@@ -365,7 +378,7 @@ def get_main_leaderboard(request, sort_by: str = "rankllms_index", limit: int = 
             "id": m.id,
             "openrouter_id": m.openrouter_id,
             "slug": m.slug,
-            "name": m.name,
+            "name": get_clean_model_name(m.name) if dedup else m.name,
             "provider": m.provider.name,
             "is_open_weight": m.is_open_weight,
             "license": m.license,
@@ -383,13 +396,14 @@ def get_main_leaderboard(request, sort_by: str = "rankllms_index", limit: int = 
 
     return {
         "sort_by": sort_by,
+        "dedup": dedup,
         "count": len(rankings),
         "rankings": rankings
     }
 
 
 @api.get("/benchmarks", response=dict, tags=["Benchmarks API"])
-def get_benchmarks_catalog(request, sort_by: str = "rankllms_index", limit: int = Field(50, ge=1, le=1000), offset: int = 0):
+def get_benchmarks_catalog(request, sort_by: str = "rankllms_index", dedup: bool = True, limit: int = Field(50, ge=1, le=1000), offset: int = 0):
     """
     Dedicated Benchmarks API endpoint.
     Returns model benchmark evaluation matrix sorted by rankllms_index (default), coding_index, agentic_index, or speed.
@@ -409,8 +423,13 @@ def get_benchmarks_catalog(request, sort_by: str = "rankllms_index", limit: int 
     sort_field = order_map.get(sort_by, F('benchmark__intelligence_index').desc(nulls_last=True))
     qs = qs.order_by(sort_field, F('benchmark__coding_index').desc(nulls_last=True))
 
-    total = qs.count()
-    models = list(qs[offset:offset + limit])
+    all_models = list(qs)
+    if dedup:
+        all_models = deduplicate_models(all_models)
+
+    total = len(all_models)
+    models = all_models[offset:offset + limit]
+
 
     items = []
     for idx, m in enumerate(models, start=offset + 1):

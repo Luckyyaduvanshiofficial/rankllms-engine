@@ -584,11 +584,15 @@
       <section id="tab-models-explorer" class="tab-content">
         <div class="card-panel">
           <div class="panel-header">
-            <div class="panel-title">AI Models & Benchmark Explorer (1,299 Models)</div>
+            <div class="panel-title">AI Models & Benchmark Explorer</div>
             <button class="btn-action" onclick="loadModelsExplorerTable()">🔄 Refresh List</button>
           </div>
-          <div style="margin-bottom:16px;">
-            <input type="text" id="models-search-input" class="form-input" placeholder="🔍 Search by model name, provider, slug..." onkeyup="filterModelsTable()">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px;">
+            <input type="text" id="models-search-input" class="form-input" style="flex:1;" placeholder="🔍 Search by model name, provider, slug..." onkeyup="filterModelsTable()">
+            <div style="display:flex; gap:8px;">
+              <button class="btn-action" id="btn-dedup-curated" style="background:var(--accent-indigo-light); color:var(--accent-indigo); font-weight:700;" onclick="setDedupMode(true)">✨ Curated Unique (~200 Core Models)</button>
+              <button class="btn-action" id="btn-dedup-all" onclick="setDedupMode(false)">🌐 All Endpoints (1,299 Raw Records)</button>
+            </div>
           </div>
           <table class="data-table">
             <thead>
@@ -604,11 +608,12 @@
               </tr>
             </thead>
             <tbody id="models-table-body">
-              <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Loading 1,299 models from Neon PostgreSQL...</td></tr>
+              <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Loading curated models from Neon PostgreSQL...</td></tr>
             </tbody>
           </table>
         </div>
       </section>
+
 
       <!-- TAB 5: MODEL COMPARISON TOOL -->
       <section id="tab-compare-tool" class="tab-content">
@@ -729,11 +734,24 @@
       }
     }
 
+    async function setDedupMode(isDedup) {
+      currentDedupMode = isDedup;
+      document.getElementById('btn-dedup-curated').style.background = isDedup ? 'var(--accent-indigo-light)' : '#FFF';
+      document.getElementById('btn-dedup-curated').style.color = isDedup ? 'var(--accent-indigo)' : 'var(--text-main)';
+      document.getElementById('btn-dedup-curated').style.fontWeight = isDedup ? '700' : '500';
+
+      document.getElementById('btn-dedup-all').style.background = !isDedup ? 'var(--accent-indigo-light)' : '#FFF';
+      document.getElementById('btn-dedup-all').style.color = !isDedup ? 'var(--accent-indigo)' : 'var(--text-main)';
+      document.getElementById('btn-dedup-all').style.fontWeight = !isDedup ? '700' : '500';
+
+      await loadModelsExplorerTable();
+    }
+
     async function loadModelsExplorerTable() {
       const tbody = document.getElementById('models-table-body');
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading 1,299 models from Neon PostgreSQL...</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Loading ${currentDedupMode ? 'curated unique (~200 core)' : 'all 1,299 raw'} models from Neon PostgreSQL...</td></tr>`;
       try {
-        const res = await fetch('/api/v1/models?limit=100');
+        const res = await fetch(`/api/v1/models?limit=1000&dedup=${currentDedupMode}`);
         const data = await res.json();
         globalModels = data.items || [];
 
