@@ -51,9 +51,9 @@ Copy `.env.example` to `.env` and add your database credentials and API key:
 ```env
 DEBUG=True
 SECRET_KEY=your-secret-key-here
-DATABASE_URL=postgresql://user:password@ep-sample-123.neon.tech/neondb?sslmode=require
+DATABASE_URL=postgresql://user:password@your-host.neon.tech/neondb?sslmode=require
 ARTIFICIAL_ANALYSIS_API_URL=https://artificialanalysis.ai/api/v2
-ARTIFICIAL_ANALYSIS_API_KEY=aa_DtsFXIHlTbHDWSJdfhNFKjlZfHKnAeBk
+ARTIFICIAL_ANALYSIS_API_KEY=your-artificial-analysis-api-key-here
 ```
 
 ### 3. Run Migrations & Master Data Pipeline
@@ -97,7 +97,7 @@ curl -X POST "http://localhost:8000/api/v1/sync"
 | `SECRET_KEY` | **Yes** | Django secret key | `django-insecure-...` |
 | `DATABASE_URL` | **Yes** | Neon PostgreSQL connection URI | `postgresql://...neon.tech/neondb?sslmode=require` |
 | `ARTIFICIAL_ANALYSIS_API_URL` | Optional | Artificial Analysis base URL | `https://artificialanalysis.ai/api/v2` |
-| `ARTIFICIAL_ANALYSIS_API_KEY` | **Yes** | Artificial Analysis API Key | `aa_DtsFXIHl...` |
+| `ARTIFICIAL_ANALYSIS_API_KEY` | **Yes** | Artificial Analysis API Key | `your-artificial-analysis-api-key-here` |
 
 ---
 
