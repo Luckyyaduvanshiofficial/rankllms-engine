@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomous AI Agent & LLM Router Guide | RankLLMs</title>
+  <meta name="description" content="Integration guide for autonomous AI agents, multi-agent frameworks, and LLM routers to query RankLLMs benchmark matrices programmatically.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            canvas: { DEFAULT: '#faf9f5', dark: '#141413' },
+            surface: {
+              card: '#ffffff',
+              soft: '#f3f1eb',
+              cream: '#fbfaf7',
+              'cream-strong': '#eeebe2',
+              dark: '#181715',
+            },
+            primary: { DEFAULT: '#cc785c', hover: '#b8664b' },
+            ink: { DEFAULT: '#181715', dark: '#f2f0e8' },
+            body: { DEFAULT: '#3d3c38', dark: '#c5c2ba' },
+            muted: { DEFAULT: '#6e6c64', dark: '#8d8a80', soft: '#a6a397' },
+            hairline: { DEFAULT: '#e8e5dc', dark: '#302f2c' },
+            accent: { teal: '#3b7a57', amber: '#d97706', red: '#dc2626' }
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          letterSpacing: { 'tight-serif': '-0.02em' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-canvas text-body font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
+
+  <!-- TOP NAV -->
+  <header class="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur-md px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2 group">
+          <span class="font-serif text-2xl font-normal tracking-tight-serif text-ink group-hover:text-primary transition-colors">RankLLMs</span>
+          <span class="text-[11px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-surface-soft text-muted border border-hairline">Agent Guide</span>
+        </a>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
+        <a href="/leaderboard" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🏆 Leaderboard</a>
+        <a href="/benchmarks" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🔬 OpenRouter Benchmarks</a>
+        <a href="/cards" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🎴 Model Cards</a>
+        <a href="/compare" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">⚔️ Compare</a>
+        <a href="/agent-guide" class="px-3 py-1.5 rounded-md text-ink bg-surface-card border border-hairline shadow-sm font-semibold">🤖 Agent Guide</a>
+        <a href="/" class="px-3 py-1.5 rounded-md text-primary font-medium hover:bg-surface-soft transition-all">⚡ API Studio & Docs</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href="/llms.txt" target="_blank" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium text-ink bg-surface-card border border-hairline hover:bg-surface-soft transition-colors">
+          View llms.txt ➔
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="border-b border-hairline pb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-accent-teal/10 text-accent-teal border border-accent-teal/30 font-semibold">Native Agent Protocols</span>
+        <span class="text-xs font-mono text-muted">&bull; LangChain &bull; AutoGen &bull; CrewAI &bull; Claude Code &bull; OpenAI Swarm</span>
+      </div>
+      <h1 class="font-serif text-3xl sm:text-4xl font-normal tracking-tight-serif text-ink">Autonomous AI Agent & Router Guide</h1>
+      <p class="text-sm text-muted mt-2">Empower autonomous agents to select the optimal model dynamically based on intelligence, coding bench, context window, and price.</p>
+    </div>
+
+    <!-- Agent Decision Matrix -->
+    <div class="bg-surface-card border border-hairline rounded-xl p-6 space-y-4">
+      <h2 class="font-serif text-2xl text-ink font-normal">Deterministic Routing Recipes</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+        <div class="bg-canvas border border-hairline rounded-lg p-4 space-y-2">
+          <div class="text-primary font-bold">1. Best Autonomous Coder</div>
+          <p class="text-muted">High SWE-Bench & LiveCodeBench:</p>
+          <code class="block bg-surface-soft p-2 rounded text-ink">GET /api/v1/benchmarks?sort_by=coding_index&limit=5</code>
+        </div>
+        <div class="bg-canvas border border-hairline rounded-lg p-4 space-y-2">
+          <div class="text-accent-teal font-bold">2. Budget Open-Weights Router</div>
+          <p class="text-muted">Self-hosted & local open-weights:</p>
+          <code class="block bg-surface-soft p-2 rounded text-ink">GET /api/v1/leaderboard/open-weights?sort_by=intelligence</code>
+        </div>
+        <div class="bg-canvas border border-hairline rounded-lg p-4 space-y-2">
+          <div class="text-ink font-bold">3. Head-to-Head Arbiter</div>
+          <p class="text-muted">Side-by-side spec comparison:</p>
+          <code class="block bg-surface-soft p-2 rounded text-ink">GET /api/v1/compare?model_a=claude-3-7-sonnet&model_b=gpt-4o</code>
+        </div>
+        <div class="bg-canvas border border-hairline rounded-lg p-4 space-y-2">
+          <div class="text-muted font-bold">4. Top 200 Model Cards</div>
+          <p class="text-muted">Static card profiles for router cache:</p>
+          <code class="block bg-surface-soft p-2 rounded text-ink">GET /api/v1/models/cards</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- Python SDK Client Snippet -->
+    <div class="bg-surface-dark text-on-dark rounded-xl p-6 space-y-3 font-mono text-xs overflow-hidden border border-surface-soft-dark">
+      <div class="flex items-center justify-between text-muted text-[11px] pb-2 border-b border-hairline/20">
+        <span>Python Agent Tool Definition</span>
+        <span>RankLLMsClient.py</span>
+      </div>
+      <pre class="overflow-x-auto text-emerald-400"><code>import requests
+
+class RankLLMsClient:
+    def __init__(self, base_url="https://rankllms-engine.onrender.com"):
+        self.base_url = base_url
+
+    def get_best_coding_model(self, min_context=128000):
+        res = requests.get(f"{self.base_url}/api/v1/benchmarks?sort_by=coding_index&limit=20").json()
+        for m in res.get("items", []):
+            if m.get("context_length", 0) >= min_context:
+                return m["slug"] # e.g. "anthropic/claude-opus-5"
+        return "anthropic/claude-3.7-sonnet"
+
+    def compare(self, model_a, model_b):
+        return requests.get(f"{self.base_url}/api/v1/compare?model_a={model_a}&model_b={model_b}").json()</code></pre>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-hairline bg-surface-card text-xs mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-hairline">
+        <div class="space-y-3">
+          <div class="font-serif text-2xl tracking-tight-serif text-ink">RankLLMs</div>
+          <p class="text-muted leading-relaxed">
+            The independent benchmark engine and intelligent model router powering production AI infrastructure.
+          </p>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Catalog</div>
+          <ul class="space-y-2">
+            <li><a href="/leaderboard" class="text-body hover:text-primary">🏆 AI Models Leaderboard</a></li>
+            <li><a href="/benchmarks" class="text-body hover:text-primary">🔬 OpenRouter Benchmarks</a></li>
+            <li><a href="/cards" class="text-body hover:text-primary">🎴 Top 200 Model Cards</a></li>
+            <li><a href="/compare" class="text-body hover:text-primary">⚔️ Model Comparison</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Telemetry</div>
+          <ul class="space-y-2">
+            <li><a href="/api/v1/benchmarks/openrouter" target="_blank" class="text-body hover:text-primary">OpenRouter Benchmarks API</a></li>
+            <li><a href="/api/v1/leaderboard" target="_blank" class="text-body hover:text-primary">Leaderboard API</a></li>
+            <li><a href="/api/v1/models/cards" target="_blank" class="text-body hover:text-primary">Model Cards API</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Developers</div>
+          <ul class="space-y-2">
+            <li><a href="/agent-guide" class="text-primary font-semibold">🤖 AI Agent Guide</a></li>
+            <li><a href="/" class="text-body hover:text-primary">⚡ API Studio & Docs</a></li>
+            <li><a href="/docs" target="_blank" class="text-body hover:text-primary">📖 OpenAPI /docs</a></li>
+            <li><a href="/llms.txt" target="_blank" class="text-body hover:text-primary">📄 llms.txt</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 flex items-center justify-between font-mono text-muted text-[11px]">
+        <div>&copy; 2026 RankLLMs Engine</div>
+        <a href="/health" target="_blank" class="hover:text-ink">System Health: 200 OK</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

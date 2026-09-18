@@ -93,21 +93,26 @@ def sync_openrouter_models():
 
     print(f"[OpenRouter Sync] Processing {len(models_data)} models...")
 
-    # Phase 1: Providers
+    # Phase 1: Providers (Bulk)
     provider_cache = {p.slug.strip().lower(): p for p in Provider.objects.all()}
+    new_providers = {}
     for item in models_data:
         openrouter_id = item.get('id')
         if not openrouter_id:
             continue
         raw_provider = openrouter_id.split('/')[0] if '/' in openrouter_id else 'unknown'
         provider_slug = slugify(raw_provider).lower()
-        if provider_slug not in provider_cache:
+        if provider_slug not in provider_cache and provider_slug not in new_providers:
             provider_name = PROVIDER_NAME_MAPPING.get(raw_provider.lower(), raw_provider.replace('-', ' ').title())
-            provider, _ = Provider.objects.get_or_create(
+            new_providers[provider_slug] = Provider(
                 slug=provider_slug,
-                defaults={'name': provider_name, 'description': f'{provider_name} LLMs'}
+                name=provider_name,
+                description=f'{provider_name} AI Models'
             )
-            provider_cache[provider_slug] = provider
+
+    if new_providers:
+        Provider.objects.bulk_create(list(new_providers.values()), ignore_conflicts=True)
+        provider_cache = {p.slug.strip().lower(): p for p in Provider.objects.all()}
 
     # Phase 2: LLMModel Upserts
     existing_models = {m.openrouter_id.lower().strip(): m for m in LLMModel.objects.all()}

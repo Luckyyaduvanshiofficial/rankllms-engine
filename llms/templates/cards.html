@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top 200 Model Cards Catalog | RankLLMs</title>
+  <meta name="description" content="Curated catalog of top 200 AI foundation model cards with strengths, context length, pricing, and benchmark indices.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            canvas: { DEFAULT: '#faf9f5', dark: '#141413' },
+            surface: {
+              card: '#ffffff',
+              soft: '#f3f1eb',
+              cream: '#fbfaf7',
+              'cream-strong': '#eeebe2',
+              dark: '#181715',
+            },
+            primary: { DEFAULT: '#cc785c', hover: '#b8664b' },
+            ink: { DEFAULT: '#181715', dark: '#f2f0e8' },
+            body: { DEFAULT: '#3d3c38', dark: '#c5c2ba' },
+            muted: { DEFAULT: '#6e6c64', dark: '#8d8a80', soft: '#a6a397' },
+            hairline: { DEFAULT: '#e8e5dc', dark: '#302f2c' },
+            accent: { teal: '#3b7a57', amber: '#d97706', red: '#dc2626' }
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          letterSpacing: { 'tight-serif': '-0.02em' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-canvas text-body font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
+
+  <!-- TOP NAV -->
+  <header class="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur-md px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2 group">
+          <span class="font-serif text-2xl font-normal tracking-tight-serif text-ink group-hover:text-primary transition-colors">RankLLMs</span>
+          <span class="text-[11px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-surface-soft text-muted border border-hairline">Cards</span>
+        </a>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
+        <a href="/leaderboard" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🏆 Leaderboard</a>
+        <a href="/benchmarks" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🔬 OpenRouter Benchmarks</a>
+        <a href="/cards" class="px-3 py-1.5 rounded-md text-ink bg-surface-card border border-hairline shadow-sm font-semibold">🎴 Model Cards</a>
+        <a href="/compare" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">⚔️ Compare</a>
+        <a href="/agent-guide" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🤖 Agent Guide</a>
+        <a href="/" class="px-3 py-1.5 rounded-md text-primary font-medium hover:bg-surface-soft transition-all">⚡ API Studio & Docs</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href="/api/v1/models/cards" target="_blank" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium text-ink bg-surface-card border border-hairline hover:bg-surface-soft transition-colors">
+          GET /api/v1/models/cards ➔
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-hairline pb-6">
+      <div>
+        <h1 class="font-serif text-3xl sm:text-4xl font-normal tracking-tight-serif text-ink">Top 200 Model Cards Catalog</h1>
+        <p class="text-sm text-muted mt-1">Structured model profile cards ready for frontend TypeScript and AI router consumption.</p>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="relative">
+      <input type="text" id="cards-search-input" onkeyup="filterCardsGrid()" placeholder="Filter model cards by name, provider (e.g. openai, anthropic, deepseek), or tags..." class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-sm text-ink placeholder:text-muted-soft focus:outline-none focus:border-primary">
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="cards-grid-container">
+      <div class="col-span-full py-16 text-center text-muted font-mono text-xs">Loading Model Cards...</div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-hairline bg-surface-card text-xs mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-hairline">
+        <div class="space-y-3">
+          <div class="font-serif text-2xl tracking-tight-serif text-ink">RankLLMs</div>
+          <p class="text-muted leading-relaxed">
+            The independent benchmark engine and intelligent model router powering production AI infrastructure.
+          </p>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Catalog</div>
+          <ul class="space-y-2">
+            <li><a href="/leaderboard" class="text-body hover:text-primary">🏆 AI Models Leaderboard</a></li>
+            <li><a href="/benchmarks" class="text-body hover:text-primary">🔬 OpenRouter Benchmarks</a></li>
+            <li><a href="/cards" class="text-primary font-semibold">🎴 Top 200 Model Cards</a></li>
+            <li><a href="/compare" class="text-body hover:text-primary">⚔️ Model Comparison</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Telemetry</div>
+          <ul class="space-y-2">
+            <li><a href="/api/v1/models/cards" target="_blank" class="text-body hover:text-primary">Model Cards JSON</a></li>
+            <li><a href="/api/v1/benchmarks/openrouter" target="_blank" class="text-body hover:text-primary">OpenRouter Benchmarks</a></li>
+            <li><a href="/api/v1/leaderboard" target="_blank" class="text-body hover:text-primary">Leaderboard API</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Developers</div>
+          <ul class="space-y-2">
+            <li><a href="/agent-guide" class="text-body hover:text-primary">🤖 AI Agent Guide</a></li>
+            <li><a href="/" class="text-body hover:text-primary">⚡ API Studio & Docs</a></li>
+            <li><a href="/docs" target="_blank" class="text-body hover:text-primary">📖 OpenAPI /docs</a></li>
+            <li><a href="/llms.txt" target="_blank" class="text-body hover:text-primary">📄 llms.txt</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 flex items-center justify-between font-mono text-muted text-[11px]">
+        <div>&copy; 2026 RankLLMs Engine</div>
+        <a href="/health" target="_blank" class="hover:text-ink">System Health: 200 OK</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let globalModelCards = [];
+
+    async function loadModelCardsData() {
+      const container = document.getElementById('cards-grid-container');
+      try {
+        const res = await fetch('/api/v1/models/cards');
+        const cards = await res.json();
+        globalModelCards = cards || [];
+        renderModelCards(globalModelCards);
+      } catch (err) {
+        container.innerHTML = `<div class="col-span-full py-16 text-center text-error font-mono text-xs">Error loading cards: ${err.message}</div>`;
+      }
+    }
+
+    function renderModelCards(cards) {
+      const container = document.getElementById('cards-grid-container');
+      if (!cards || cards.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-16 text-center text-muted font-mono text-xs">No model cards found.</div>`;
+        return;
+      }
+
+      container.innerHTML = cards.map(c => {
+        const intel = c.rankllmsIndex || c.intelligenceIndex || 0;
+        const coding = c.codingIndex || 0;
+        const pIn = c.inputPricePerM ? parseFloat(c.inputPricePerM).toFixed(2) : '0.00';
+        const pOut = c.outputPricePerM ? parseFloat(c.outputPricePerM).toFixed(2) : '0.00';
+        const ctx = c.contextWindow ? (c.contextWindow >= 1000000 ? (c.contextWindow / 1000000).toFixed(1) + 'M' : Math.round(c.contextWindow / 1000) + 'k') : 'N/A';
+        const tags = c.strengths || c.tags || [];
+
+        return `
+          <div class="bg-surface-card border border-hairline rounded-xl p-5 hover:border-primary/50 transition-all flex flex-col justify-between space-y-4 shadow-sm group">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-primary font-bold uppercase tracking-wider">${c.provider}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-soft text-ink font-semibold border border-hairline">${ctx} context</span>
+              </div>
+              <h3 class="font-serif text-xl font-normal text-ink group-hover:text-primary transition-colors">${c.name}</h3>
+              <p class="text-xs text-muted line-clamp-2">${c.description || 'Frontier intelligence model.'}</p>
+            </div>
+
+            <!-- Strengths Tags -->
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              ${tags.map(t => `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-soft text-body border border-hairline">${t}</span>`).join('')}
+            </div>
+
+            <!-- Metric Stats Footer -->
+            <div class="pt-3 border-t border-hairline flex items-center justify-between text-xs font-mono">
+              <div>
+                <span class="text-muted block text-[10px]">RankLLMs</span>
+                <span class="font-bold text-ink text-sm">${parseFloat(intel).toFixed(1)}</span>
+              </div>
+              <div>
+                <span class="text-muted block text-[10px]">Coding</span>
+                <span class="font-semibold text-accent-teal text-sm">${parseFloat(coding).toFixed(1)}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-muted block text-[10px]">$/1M In/Out</span>
+                <span class="font-medium text-ink">$${pIn} / $${pOut}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterCardsGrid() {
+      const query = document.getElementById('cards-search-input').value.toLowerCase();
+      const filtered = globalModelCards.filter(c => {
+        const name = (c.name || '').toLowerCase();
+        const prov = (c.provider || '').toLowerCase();
+        const tags = (c.strengths || c.tags || []).join(' ').toLowerCase();
+        return name.includes(query) || prov.includes(query) || tags.includes(query);
+      });
+      renderModelCards(filtered);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadModelCardsData();
+    });
+  </script>
+</body>
+</html>

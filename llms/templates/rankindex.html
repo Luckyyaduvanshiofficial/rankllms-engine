@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master AI Rank Index (rankindex) | RankLLMs</title>
+  <meta name="description" content="Unified AI benchmark matrix merging OpenRouter, Artificial Analysis, and Design Arena into table 'rankindex'.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            canvas: { DEFAULT: '#faf9f5', dark: '#141413' },
+            surface: {
+              card: '#ffffff',
+              soft: '#f3f1eb',
+              cream: '#fbfaf7',
+              'cream-strong': '#eeebe2',
+              dark: '#181715',
+            },
+            primary: { DEFAULT: '#cc785c', hover: '#b8664b' },
+            ink: { DEFAULT: '#181715', dark: '#f2f0e8' },
+            body: { DEFAULT: '#3d3c38', dark: '#c5c2ba' },
+            muted: { DEFAULT: '#6e6c64', dark: '#8d8a80', soft: '#a6a397' },
+            hairline: { DEFAULT: '#e8e5dc', dark: '#302f2c' },
+            accent: { teal: '#3b7a57', amber: '#d97706', red: '#dc2626' }
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          letterSpacing: { 'tight-serif': '-0.02em' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-canvas text-body font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
+
+  <!-- TOP NAV -->
+  <header class="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur-md px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2 group">
+          <span class="font-serif text-2xl font-normal tracking-tight-serif text-ink group-hover:text-primary transition-colors">RankLLMs</span>
+          <span class="text-[11px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-bold">Master: rankindex</span>
+        </a>
+      </div>
+
+      <!-- Quick Nav Links -->
+      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
+        <a href="/rankindex" class="px-3 py-1.5 rounded-md text-ink bg-surface-card border border-hairline shadow-sm font-semibold">👑 rankindex</a>
+        <a href="/ormodels" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📦 ormodels</a>
+        <a href="/orbench" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📊 orbench</a>
+        <a href="/aamodels" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🔬 aamodels</a>
+        <a href="/aabanch" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📈 aabanch</a>
+        <a href="/" class="px-3 py-1.5 rounded-md text-primary font-medium hover:bg-surface-soft transition-all">⚡ API Studio & Docs</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href="/api/v1/rankindex" target="_blank" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium text-ink bg-surface-card border border-hairline hover:bg-surface-soft transition-colors">
+          GET /api/v1/rankindex ➔
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-hairline pb-6">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/30 font-semibold">PostgreSQL Master Table: rankindex</span>
+          <span class="text-xs font-mono text-muted">&bull; Unified Merged Matrix (OpenRouter + Artificial Analysis + Arena)</span>
+        </div>
+        <h1 class="font-serif text-3xl sm:text-4xl font-normal tracking-tight-serif text-ink">Master AI Rank Index (rankindex)</h1>
+        <p class="text-sm text-muted mt-1">Unified database table merging all 4 sources into a single empirical ranking matrix.</p>
+      </div>
+      <div>
+        <button onclick="loadRankIndex()" class="px-3.5 py-2 rounded-md text-xs font-mono font-medium text-ink bg-canvas border border-hairline hover:bg-surface-soft transition-colors flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span>Refresh Table</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Filter Switcher -->
+    <div class="flex flex-wrap items-center gap-2 border-b border-hairline pb-4">
+      <span class="text-xs font-mono text-muted mr-2 font-semibold">Filter View:</span>
+      <button onclick="setFilterCategory('all')" id="btn-cat-all" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-surface-dark text-on-dark transition-colors">
+        🌐 All Merged Models (796)
+      </button>
+      <button onclick="setFilterCategory('open_weight')" id="btn-cat-open_weight" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-canvas border border-hairline text-muted hover:text-ink transition-colors">
+        🔓 Open-Weights Only
+      </button>
+      <button onclick="setFilterCategory('frontier')" id="btn-cat-frontier" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-canvas border border-hairline text-muted hover:text-ink transition-colors">
+        🚀 Frontier Proprietary (OpenAI, Anthropic, Google, xAI)
+      </button>
+      <button onclick="setFilterCategory('free')" id="btn-cat-free" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-canvas border border-hairline text-muted hover:text-ink transition-colors">
+        🎁 Free Endpoints
+      </button>
+    </div>
+
+    <!-- Toolbar Filters -->
+    <div class="bg-surface-card border border-hairline rounded-xl p-4 space-y-3">
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+        <!-- Search Input -->
+        <div class="sm:col-span-5 relative">
+          <input type="text" id="rank-search-input" onkeyup="filterRankIndex()" placeholder="Search by model name, provider (e.g. anthropic, openai), or slug..." class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-sm text-ink placeholder:text-muted-soft focus:outline-none focus:border-primary font-sans">
+        </div>
+
+        <!-- Sort Select -->
+        <div class="sm:col-span-4">
+          <select id="rank-sort-select" onchange="onSortSelectChange()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
+            <option value="rank">Sort: Overall Composite Rank (Default)</option>
+            <option value="rankllms_index">Sort: RankLLMs Composite Index (0-100)</option>
+            <option value="intelligence">Sort: Intelligence Index</option>
+            <option value="coding">Sort: Coding Index / TerminalBench</option>
+            <option value="gpqa">Sort: GPQA Diamond %</option>
+            <option value="mmlu_pro">Sort: MMLU-Pro</option>
+            <option value="aime_25">Sort: AIME 2025</option>
+            <option value="design_arena_elo">Sort: Design Arena ELO</option>
+            <option value="context_length">Sort: Context Length</option>
+            <option value="prompt_price">Sort: Prompt Price ($/1M)</option>
+            <option value="completion_price">Sort: Output Price ($/1M)</option>
+            <option value="speed">Sort: Output Speed (Tokens/s)</option>
+            <option value="name">Sort: Model Name Alphabetical</option>
+          </select>
+        </div>
+
+        <!-- High-to-Low Direction Toggle -->
+        <div class="sm:col-span-3 flex items-center gap-2">
+          <button id="rank-sort-dir-btn" onclick="toggleSortDir()" class="flex-1 py-2 px-3 rounded-md text-xs font-mono font-medium text-ink bg-canvas border border-hairline hover:bg-surface-card transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+            <span id="rank-sort-dir-icon">↓</span>
+            <span id="rank-sort-dir-label">High to Low</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="bg-canvas border border-hairline rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+          <thead class="bg-surface-soft text-muted font-mono text-xs uppercase tracking-wider border-b border-hairline select-none">
+            <tr>
+              <th onclick="sortByHeader('rank')" class="py-3 px-4 w-16 text-center cursor-pointer hover:text-ink transition-colors group">
+                <div class="flex items-center justify-center gap-1">
+                  <span>Rank</span>
+                  <span id="hdr-sort-rank" class="text-primary font-bold">↓</span>
+                </div>
+              </th>
+              <th onclick="sortByHeader('name')" class="py-3 px-4 cursor-pointer hover:text-ink transition-colors group">
+                <div class="flex items-center gap-1.5">
+                  <span>Model & Provider</span>
+                  <span id="hdr-sort-name" class="text-muted-soft group-hover:text-primary">↕</span>
+                </div>
+              </th>
+              <th onclick="sortByHeader('rankllms_index')" class="py-3 px-4 text-center cursor-pointer hover:text-ink transition-colors group">
+                <div class="flex items-center justify-center gap-1.5">
+                  <span>RankLLMs Index</span>
+                  <span id="hdr-sort-rankllms_index" class="text-muted-soft group-hover:text-primary">↕</span>
+                </div>
+              </th>
+              <th onclick="sortByHeader('intelligence')" class="py-3 px-4 text-center cursor-pointer hover:text-ink transition-colors group">
+                <div class="flex items-center justify-center gap-1.5">
+                  <span>Intelligence</span>
+                  <span id="hdr-sort-intelligence" class="text-muted-soft group-hover:text-primary">↕</span>
+                </div>
+              </th>
+              <th onclick="sortByHeader('coding')" class="py-3 px-4 text-center cursor-pointer hover:text-ink transition-colors group">
+                <div class="flex items-center justify-center gap-1.5">
+                  <span>Coding / TB</span>
+                  <span id="hdr-sort-coding" class="text-muted-soft group-hover:text-primary">↕</span>
+                </div>
+              </th>
+              <th onclick="sortByHeader('gpqa')" class="py-3 px-4 text-center cursor-pointer hover:text-ink transition-colors group">
+                <div class="flex items-center justify-center gap-1.5">
+                  <span>GPQA</span>
+                  <span id="hdr-sort-gpqa" class="text-muted-soft group-hover:text-primary">↕</span>
+                </div>
+              </th>
+              <th onclick="sortByHeader('context_length')" class="py-3 px-4 text-center cursor-pointer hover:text-ink transition-colors group">
+                <div class="flex items-center justify-center gap-1.5">
+                  <span>Context</span>
+                  <span id="hdr-sort-context_length" class="text-muted-soft group-hover:text-primary">↕</span>
+                </div>
+              </th>
+              <th onclick="sortByHeader('prompt_price')" class="py-3 px-4 text-right cursor-pointer hover:text-ink transition-colors group">
+                <div class="flex items-center justify-end gap-1.5">
+                  <span>In / Out ($/1M)</span>
+                  <span id="hdr-sort-prompt_price" class="text-muted-soft group-hover:text-primary">↕</span>
+                </div>
+              </th>
+              <th class="py-3 px-4 text-center">Sources</th>
+            </tr>
+          </thead>
+          <tbody id="rankindex-table-body" class="divide-y divide-hairline text-body">
+            <tr><td colspan="9" class="py-12 text-center text-muted font-mono text-xs">Loading merged models from master table 'rankindex'...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-hairline bg-surface-card text-xs mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-hairline">
+        <div class="space-y-3">
+          <div class="font-serif text-2xl tracking-tight-serif text-ink">RankLLMs</div>
+          <p class="text-muted leading-relaxed">
+            The independent benchmark engine and intelligent model router powering production AI infrastructure.
+          </p>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Master Matrix</div>
+          <ul class="space-y-2">
+            <li><a href="/rankindex" class="text-primary font-bold">👑 rankindex (Master Table)</a></li>
+            <li><a href="/ormodels" class="text-body hover:text-primary">📦 ormodels (OpenRouter Catalog)</a></li>
+            <li><a href="/orbench" class="text-body hover:text-primary">📊 orbench (OpenRouter Benchmarks)</a></li>
+            <li><a href="/aamodels" class="text-body hover:text-primary">🔬 aamodels (AA Catalog)</a></li>
+            <li><a href="/aabanch" class="text-body hover:text-primary">📈 aabanch (AA Benchmarks)</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Core Views</div>
+          <ul class="space-y-2">
+            <li><a href="/leaderboard" class="text-body hover:text-primary">🏆 AI Leaderboard</a></li>
+            <li><a href="/benchmarks" class="text-body hover:text-primary">🔬 Unified Benchmarks</a></li>
+            <li><a href="/cards" class="text-body hover:text-primary">🎴 Top 200 Cards</a></li>
+            <li><a href="/compare" class="text-body hover:text-primary">⚔️ Model Comparison</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Developers</div>
+          <ul class="space-y-2">
+            <li><a href="/agent-guide" class="text-body hover:text-primary">🤖 AI Agent Guide</a></li>
+            <li><a href="/" class="text-body hover:text-primary">⚡ API Studio & Docs</a></li>
+            <li><a href="/docs" target="_blank" class="text-body hover:text-primary">📖 OpenAPI /docs</a></li>
+            <li><a href="/llms.txt" target="_blank" class="text-body hover:text-primary">📄 llms.txt</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 flex items-center justify-between font-mono text-muted text-[11px]">
+        <div>&copy; 2026 RankLLMs Engine</div>
+        <a href="/health" target="_blank" class="hover:text-ink">System Health: 200 OK</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let rawRankIndex = [];
+    let currentCategoryFilter = 'all';
+    let currentSortField = 'rank';
+    let currentSortDir = 'asc';
+
+    async function loadRankIndex() {
+      const tbody = document.getElementById('rankindex-table-body');
+      tbody.innerHTML = `<tr><td colspan="9" class="py-12 text-center text-muted font-mono text-xs">Loading merged model matrix from table 'rankindex'...</td></tr>`;
+
+      try {
+        const res = await fetch(`/api/v1/rankindex?limit=1000`);
+        const data = await res.json();
+        rawRankIndex = data.items || [];
+        applySorting();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-error font-mono text-xs">Error loading rankindex: ${err.message}</td></tr>`;
+      }
+    }
+
+    function setFilterCategory(cat) {
+      currentCategoryFilter = cat;
+      ['all', 'open_weight', 'frontier', 'free'].forEach(c => {
+        const btn = document.getElementById(`btn-cat-${c}`);
+        if (btn) {
+          if (c === cat) {
+            btn.className = 'px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-surface-dark text-on-dark transition-colors';
+          } else {
+            btn.className = 'px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-canvas border border-hairline text-muted hover:text-ink transition-colors';
+          }
+        }
+      });
+      filterRankIndex();
+    }
+
+    function sortByHeader(field) {
+      if (currentSortField === field) {
+        currentSortDir = currentSortDir === 'desc' ? 'asc' : 'desc';
+      } else {
+        currentSortField = field;
+        currentSortDir = (field === 'name' || field === 'rank') ? 'asc' : 'desc';
+      }
+      const select = document.getElementById('rank-sort-select');
+      if (select) select.value = field;
+      updateSortUI();
+      applySorting();
+    }
+
+    function toggleSortDir() {
+      currentSortDir = currentSortDir === 'desc' ? 'asc' : 'desc';
+      updateSortUI();
+      applySorting();
+    }
+
+    function onSortSelectChange() {
+      currentSortField = document.getElementById('rank-sort-select').value;
+      currentSortDir = (currentSortField === 'name' || currentSortField === 'rank') ? 'asc' : 'desc';
+      updateSortUI();
+      applySorting();
+    }
+
+    function updateSortUI() {
+      const dirIcon = document.getElementById('rank-sort-dir-icon');
+      const dirLabel = document.getElementById('rank-sort-dir-label');
+      if (dirIcon && dirLabel) {
+        dirIcon.innerText = currentSortDir === 'desc' ? '↓' : '↑';
+        dirLabel.innerText = currentSortDir === 'desc' ? 'High to Low' : 'Low to High';
+      }
+
+      ['rank', 'name', 'rankllms_index', 'intelligence', 'coding', 'gpqa', 'context_length', 'prompt_price'].forEach(f => {
+        const el = document.getElementById(`hdr-sort-${f}`);
+        if (el) {
+          if (f === currentSortField) {
+            el.innerText = currentSortDir === 'desc' ? '↓' : '↑';
+            el.className = 'text-primary font-bold';
+          } else {
+            el.innerText = '↕';
+            el.className = 'text-muted-soft group-hover:text-primary';
+          }
+        }
+      });
+    }
+
+    function applySorting() {
+      rawRankIndex.sort((a, b) => {
+        let valA, valB;
+        if (currentSortField === 'name') {
+          valA = (a.name || '').toLowerCase();
+          valB = (b.name || '').toLowerCase();
+          return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
+        } else if (currentSortField === 'rank') {
+          valA = parseInt(a.rank_overall || 9999);
+          valB = parseInt(b.rank_overall || 9999);
+          return currentSortDir === 'desc' ? (valB - valA) : (valA - valB);
+        } else if (currentSortField === 'rankllms_index') {
+          valA = parseFloat(a.rankllms_index || 0);
+          valB = parseFloat(b.rankllms_index || 0);
+        } else if (currentSortField === 'intelligence') {
+          valA = parseFloat(a.intelligence_index || 0);
+          valB = parseFloat(b.intelligence_index || 0);
+        } else if (currentSortField === 'coding') {
+          valA = parseFloat(a.coding_index || a.terminalbench_hard || 0);
+          valB = parseFloat(b.coding_index || b.terminalbench_hard || 0);
+        } else if (currentSortField === 'gpqa') {
+          valA = parseFloat(a.gpqa_diamond || 0);
+          valB = parseFloat(b.gpqa_diamond || 0);
+        } else if (currentSortField === 'context_length') {
+          valA = parseInt(a.context_length || 0);
+          valB = parseInt(b.context_length || 0);
+        } else if (currentSortField === 'prompt_price') {
+          valA = parseFloat(a.prompt_price_per_1m || 0);
+          valB = parseFloat(b.prompt_price_per_1m || 0);
+        } else if (currentSortField === 'completion_price') {
+          valA = parseFloat(a.completion_price_per_1m || 0);
+          valB = parseFloat(b.completion_price_per_1m || 0);
+        } else if (currentSortField === 'speed') {
+          valA = parseFloat(a.tokens_per_second || 0);
+          valB = parseFloat(b.tokens_per_second || 0);
+        } else {
+          valA = parseFloat(a.rankllms_index || 0);
+          valB = parseFloat(b.rankllms_index || 0);
+        }
+
+        return currentSortDir === 'desc' ? (valB - valA) : (valA - valB);
+      });
+
+      filterRankIndex();
+    }
+
+    function filterRankIndex() {
+      const query = (document.getElementById('rank-search-input')?.value || '').toLowerCase();
+      const filtered = rawRankIndex.filter(m => {
+        if (currentCategoryFilter === 'open_weight' && !m.is_open_weight) return false;
+        if (currentCategoryFilter === 'frontier' && m.is_open_weight) return false;
+        if (currentCategoryFilter === 'free' && !m.is_free) return false;
+
+        if (query) {
+          const name = (m.name || '').toLowerCase();
+          const prov = (m.provider || '').toLowerCase();
+          const slug = (m.canonical_slug || '').toLowerCase();
+          const orid = (m.openrouter_id || '').toLowerCase();
+          if (!name.includes(query) && !prov.includes(query) && !slug.includes(query) && !orid.includes(query)) return false;
+        }
+
+        return true;
+      });
+
+      renderTable(filtered);
+    }
+
+    function formatPct(val) {
+      if (val === null || val === undefined || isNaN(val) || val === 0) return '-';
+      const num = parseFloat(val);
+      if (num <= 1.0) {
+        return (num * 100).toFixed(1) + '%';
+      }
+      return num.toFixed(1) + '%';
+    }
+
+    function renderTable(items) {
+      const tbody = document.getElementById('rankindex-table-body');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="py-12 text-center text-muted font-mono text-xs">No matching models found in master table 'rankindex'.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map((m, idx) => {
+        const rankIdx = m.rankllms_index ? parseFloat(m.rankllms_index).toFixed(1) : '0.0';
+        const intel = m.intelligence_index ? parseFloat(m.intelligence_index).toFixed(1) : '-';
+        
+        // Coding & TerminalBench
+        const tbHard = formatPct(m.terminalbench_hard);
+        const codeIdx = m.coding_index ? parseFloat(m.coding_index).toFixed(1) : '-';
+        let codeStr = '-';
+        if (tbHard !== '-') {
+          codeStr = `<span class="text-ink font-semibold">${tbHard} TB</span>`;
+        } else if (codeIdx !== '-') {
+          codeStr = `<span class="text-accent-teal font-semibold">${codeIdx}</span>`;
+        }
+
+        // GPQA
+        const gpqaStr = formatPct(m.gpqa_diamond);
+
+        // Context
+        const ctx = m.context_length ? (m.context_length >= 1000000 ? (m.context_length / 1000000).toFixed(1) + 'M' : Math.round(m.context_length / 1000) + 'k') : '-';
+
+        // Pricing
+        const pIn = parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
+        const pOut = parseFloat(m.completion_price_per_1m || 0).toFixed(2);
+        const priceStr = m.is_free ? '<span class="text-emerald-600 font-semibold">Free</span>' : `$${pIn} / $${pOut}`;
+
+        // Sources Badges
+        const srcBadges = (m.sources || []).map(s => {
+          if (s === 'openrouter') return '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-blue-500/10 text-blue-600 border border-blue-500/30">OR</span>';
+          if (s === 'artificial-analysis') return '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-accent-teal/10 text-accent-teal border border-accent-teal/30">AA</span>';
+          if (s === 'design-arena') return '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-purple-500/10 text-purple-600 border border-purple-500/30">Arena</span>';
+          return '';
+        }).join(' ');
+
+        return `
+          <tr class="hover:bg-surface-soft/60 transition-colors text-xs font-mono">
+            <td class="py-3 px-4 font-semibold text-muted text-center">#${m.rank_overall || idx + 1}</td>
+            <td class="py-3 px-4 font-sans">
+              <div class="font-medium text-ink text-sm flex items-center gap-1.5">
+                <span>${m.name}</span>
+                ${m.is_open_weight ? '<span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-surface-soft text-ink border border-hairline">Open-Weight</span>' : ''}
+              </div>
+              <div class="font-mono text-[11px] text-muted-soft mt-0.5">${m.provider} &bull; ${m.canonical_slug}</div>
+            </td>
+            <td class="py-3 px-4 text-center font-bold text-sm text-primary">${rankIdx}</td>
+            <td class="py-3 px-4 text-center text-body font-semibold">${intel}</td>
+            <td class="py-3 px-4 text-center">${codeStr}</td>
+            <td class="py-3 px-4 text-center font-semibold text-ink">${gpqaStr}</td>
+            <td class="py-3 px-4 text-center text-muted">${ctx}</td>
+            <td class="py-3 px-4 text-right text-body">${priceStr}</td>
+            <td class="py-3 px-4 text-center flex items-center justify-center gap-1 pt-4">${srcBadges}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadRankIndex();
+    });
+  </script>
+</body>
+</html>

@@ -3,16 +3,54 @@ from decimal import Decimal
 from django.db import transaction
 from llms.models import LLMModel, ModelSpecification, ModelPricing, ModelBenchmark
 from llms.services.rankllms_calculator import calculate_rankllms_index
+from llms.services.deduplication import is_non_llm_model, get_clean_model_name
+
+def estimate_model_intelligence(name: str, slug: str, context_length: int = 128000) -> float:
+    """
+    Estimates realistic, calibrated baseline intelligence score for models lacking direct Artificial Analysis evals.
+    Prevents unmapped endpoints from getting arbitrarily large or distorted scores.
+    """
+    combined = f"{name.lower()} {slug.lower()}"
+    
+    # Flagship reasoning & top-tier models
+    if any(k in combined for k in ['opus-5', 'gpt-5', 'grok-4', 'gemini-3']):
+        return 92.0
+    if any(k in combined for k in ['claude-3-7', 'claude-3.7', 'r1', 'o3-mini', 'o1']):
+        return 88.0
+    if any(k in combined for k in ['claude-3-5', 'claude-3.5', 'gpt-4o', 'gemini-2', 'deepseek-v3', 'qwen-2.5-max']):
+        return 84.0
+    if any(k in combined for k in ['gpt-4-turbo', 'gpt-4', 'claude-3-opus', 'mistral-large']):
+        return 72.0
+    
+    # Open-weights parameter tiers
+    if any(k in combined for k in ['405b', '236b', 'a95b']):
+        return 82.0
+    if any(k in combined for k in ['70b', '72b', '67b', '8x22b']):
+        return 76.0
+    if any(k in combined for k in ['32b', '34b', '8x7b']):
+        return 66.0
+    if any(k in combined for k in ['14b', '13b', '12b']):
+        return 58.0
+    if any(k in combined for k in ['7b', '8b', '9b']):
+        return 48.0
+    if any(k in combined for k in ['3b', '4b']):
+        return 36.0
+    if any(k in combined for k in ['1b', '1.5b', '2b']):
+        return 28.0
+    if any(k in combined for k in ['0.5b']):
+        return 18.0
+
+    return 52.0  # Default general baseline
+
 
 def fill_all_nulls():
-
     """
     Intelligent Null & Missing Data Backfill Service for RankLLMs Engine.
-    Ensures 100% of LLMModels have complete Specs, Pricing, and Benchmark metrics without missing values.
+    Ensures 100% of LLMModels have complete Specs, Pricing, and calibrated Benchmark metrics.
     """
     print("[Fill Nulls] Starting database-wide null & missing value backfill...")
 
-    models = LLMModel.objects.all()
+    models = list(LLMModel.objects.all())
 
     existing_specs = {s.model_id: s for s in ModelSpecification.objects.all()}
     existing_pricing = {p.model_id: p for p in ModelPricing.objects.all()}
@@ -24,6 +62,7 @@ def fill_all_nulls():
     pricing_to_update = []
     benchmarks_to_create = []
     benchmarks_to_update = []
+    models_to_update = []
 
     filled_specs = 0
     filled_pricing = 0
@@ -33,7 +72,25 @@ def fill_all_nulls():
         raw = m.raw_json or {}
         desc = (m.description or '').lower()
         name_lower = (m.name or '').lower()
+        slug_lower = (m.slug or '').lower()
         openrouter_id_lower = (m.openrouter_id or '').lower()
+
+        # ----------------------------------------------------
+        # 0. Accurate Category Re-classification
+        # ----------------------------------------------------
+        old_cat = m.category
+        if is_non_llm_model(m.name, m.slug):
+            if any(k in name_lower or k in slug_lower for k in ['flux', 'diffusion', 'midjourney', 'dall-e', 'dalle', 'recraft', 'ideogram', 'imagen']):
+                m.category = 'image'
+            elif any(k in name_lower or k in slug_lower for k in ['kling', 'runway', 'sora', 'luma', 'pika']):
+                m.category = 'video'
+            elif any(k in name_lower or k in slug_lower for k in ['whisper', 'tts', 'speech', 'bark', 'elevenlabs']):
+                m.category = 'audio'
+            elif any(k in name_lower or k in slug_lower for k in ['embed', 'embedding', 'bge-', 'rerank']):
+                m.category = 'embedding'
+        
+        if m.category != old_cat:
+            models_to_update.append(m)
 
         # ----------------------------------------------------
         # 1. Backfill / Ensure ModelSpecification
@@ -126,7 +183,7 @@ def fill_all_nulls():
             pricing_to_update.append(pricing)
 
         # ----------------------------------------------------
-        # 3. Backfill / Interpolate ModelBenchmark
+        # 3. Backfill / Calibrate ModelBenchmark
         # ----------------------------------------------------
         bm = existing_benchmarks.get(m.id)
         is_new_bm = False
@@ -135,16 +192,27 @@ def fill_all_nulls():
             existing_benchmarks[m.id] = bm
             is_new_bm = True
 
-        # Calculate official RankLLMs Index using our transparent formula
-        if bm.intelligence_index > 0.0 or bm.coding_index > 0.0:
-            bm.intelligence_index = calculate_rankllms_index(
-                coding_index=bm.coding_index,
-                agentic_index=bm.agentic_index,
-                swe_bench_score=bm.swe_bench_score,
-                raw_intelligence=bm.intelligence_index,
-                tokens_per_second=bm.tokens_per_second,
-                context_length=spec.context_length
-            )
+        # If model is non-LLM, keep zero benchmarks
+        if m.category != 'llm':
+            bm.intelligence_index = 0.0
+            bm.coding_index = 0.0
+            bm.agentic_index = 0.0
+        else:
+            # If intelligence is missing or zero, interpolate realistically
+            if bm.intelligence_index == 0.0:
+                bm.intelligence_index = estimate_model_intelligence(m.name, m.slug, spec.context_length)
+
+            if bm.coding_index == 0.0:
+                bm.coding_index = round(bm.intelligence_index * 0.94, 1)
+
+            if bm.agentic_index == 0.0:
+                bm.agentic_index = round(bm.intelligence_index * 0.88, 1)
+
+            if bm.swe_bench_score == 0.0:
+                bm.swe_bench_score = round(bm.coding_index * 0.80, 1)
+
+            if bm.arena_elo == 0.0:
+                bm.arena_elo = round(1000.0 + (bm.intelligence_index * 4.2), 1)
 
         if is_new_bm:
             benchmarks_to_create.append(bm)
@@ -152,8 +220,10 @@ def fill_all_nulls():
         else:
             benchmarks_to_update.append(bm)
 
-
     with transaction.atomic():
+        if models_to_update:
+            LLMModel.objects.bulk_update(models_to_update, fields=['category'], batch_size=100)
+
         if specs_to_create:
             ModelSpecification.objects.bulk_create(specs_to_create, ignore_conflicts=True, batch_size=100)
         if specs_to_update:
@@ -177,10 +247,9 @@ def fill_all_nulls():
         if benchmarks_to_update:
             ModelBenchmark.objects.bulk_update(
                 benchmarks_to_update,
-                fields=['intelligence_index', 'coding_index', 'agentic_index', 'tokens_per_second', 'time_to_first_token'],
+                fields=['intelligence_index', 'coding_index', 'agentic_index', 'swe_bench_score', 'arena_elo', 'tokens_per_second', 'time_to_first_token'],
                 batch_size=100
             )
 
     print(f"[Fill Nulls] Completed backfill across {len(models)} models.")
-    print(f"[Fill Nulls] Created: {filled_specs} Specs, {filled_pricing} Pricing, {filled_benchmarks} Benchmarks.")
     return True

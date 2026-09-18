@@ -289,3 +289,198 @@ class APIKey(models.Model):
         raw_key = f"rk_live_{secrets.token_hex(20)}"
         return cls.objects.create(key=raw_key, name=name, tier=tier)
 
+
+# ================= DEDICATED SOURCE TABLES (AS REQUESTED) =================
+
+class ORModel(models.Model):
+    """
+    Direct OpenRouter Models Catalog (Table: ormodels).
+    """
+    openrouter_id = models.CharField(max_length=250, unique=True, db_index=True)
+    name = models.CharField(max_length=255)
+    canonical_slug = models.CharField(max_length=250, blank=True, default='')
+    author = models.CharField(max_length=150, blank=True, default='')
+    description = models.TextField(blank=True, default='')
+    context_length = models.IntegerField(default=0, db_index=True)
+    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
+    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
+    is_free = models.BooleanField(default=False, db_index=True)
+    architecture = models.JSONField(default=dict, blank=True)
+    top_provider = models.JSONField(default=dict, blank=True)
+    pricing = models.JSONField(default=dict, blank=True)
+    raw_json = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'ormodels'
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.openrouter_id})"
+
+
+class ORBench(models.Model):
+    """
+    Direct OpenRouter Unified Benchmarks (Table: orbench).
+    Aggregates openrouter, design-arena, and artificial-analysis empirical evals.
+    """
+    model_permaslug = models.CharField(max_length=250, db_index=True)
+    display_name = models.CharField(max_length=255)
+    source = models.CharField(max_length=100, db_index=True)  # openrouter, design-arena, artificial-analysis
+    benchmark_type = models.CharField(max_length=150, blank=True, default='', db_index=True)
+    accuracy = models.FloatField(null=True, blank=True, db_index=True)
+    elo = models.FloatField(null=True, blank=True, db_index=True)
+    win_rate = models.FloatField(null=True, blank=True)
+    category = models.CharField(max_length=100, blank=True, default='', db_index=True)
+    arena = models.CharField(max_length=100, blank=True, default='')
+    intelligence_index = models.FloatField(null=True, blank=True, db_index=True)
+    coding_index = models.FloatField(null=True, blank=True, db_index=True)
+    agentic_index = models.FloatField(null=True, blank=True)
+    avg_cost_per_task = models.FloatField(null=True, blank=True)
+    total_tasks = models.IntegerField(null=True, blank=True)
+    tournament_stats = models.JSONField(default=dict, blank=True)
+    pricing = models.JSONField(default=dict, blank=True)
+    raw_json = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'orbench'
+        ordering = ['-accuracy', '-elo', '-intelligence_index']
+
+    def __str__(self):
+        return f"[{self.source}] {self.display_name} ({self.model_permaslug})"
+
+
+class AAModel(models.Model):
+    """
+    Direct Artificial Analysis Models Catalog (Table: aamodels).
+    """
+    slug = models.CharField(max_length=250, unique=True, db_index=True)
+    name = models.CharField(max_length=255)
+    creator_name = models.CharField(max_length=150, db_index=True)
+    creator_slug = models.CharField(max_length=150, blank=True, default='')
+    release_date = models.DateField(null=True, blank=True)
+    model_type = models.CharField(max_length=100, blank=True, default='')
+    context_window = models.IntegerField(default=0, db_index=True)
+    max_output_tokens = models.IntegerField(null=True, blank=True)
+    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0)
+    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0)
+    modalities = models.JSONField(default=list, blank=True)
+    raw_json = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'aamodels'
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.creator_name})"
+
+
+class AABench(models.Model):
+    """
+    Direct Artificial Analysis Benchmark Evaluations & Telemetry (Table: aabanch).
+    Captures all 17 empirical benchmark evaluation metrics.
+    """
+    model_slug = models.CharField(max_length=250, unique=True, db_index=True)
+    model_name = models.CharField(max_length=255)
+    creator_name = models.CharField(max_length=150, db_index=True)
+    intelligence_index = models.FloatField(default=0.0, db_index=True)
+    coding_index = models.FloatField(default=0.0, db_index=True)
+    math_index = models.FloatField(default=0.0, db_index=True)
+    terminalbench_hard = models.FloatField(null=True, blank=True)
+    terminalbench_v2_1 = models.FloatField(null=True, blank=True)
+    gpqa = models.FloatField(null=True, blank=True)
+    mmlu_pro = models.FloatField(null=True, blank=True)
+    hle = models.FloatField(null=True, blank=True)  # Humanity's Last Exam
+    livecodebench = models.FloatField(null=True, blank=True)
+    scicode = models.FloatField(null=True, blank=True)
+    math_500 = models.FloatField(null=True, blank=True)
+    aime = models.FloatField(null=True, blank=True)
+    aime_25 = models.FloatField(null=True, blank=True)  # AIME 2025
+    ifbench = models.FloatField(null=True, blank=True)  # Instruction Following
+    lcr = models.FloatField(null=True, blank=True)  # Long Context Reasoning
+    tau2 = models.FloatField(null=True, blank=True)  # Tau-Bench 2
+    tau_banking = models.FloatField(null=True, blank=True)
+    tokens_per_second = models.FloatField(default=0.0, db_index=True)
+    time_to_first_token = models.FloatField(default=0.0, db_index=True)
+    raw_json = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'aabanch'
+        ordering = ['-intelligence_index', '-coding_index']
+
+    def __str__(self):
+        return f"{self.model_name} (Intel: {self.intelligence_index}, Code: {self.coding_index})"
+
+
+# ================= MERGED MASTER TABLE: rankindex =================
+
+class RankIndex(models.Model):
+    """
+    Unified Master Table (Table: rankindex).
+    Merges all 4 source tables: ormodels, orbench, aamodels, and aabanch.
+    """
+    canonical_slug = models.CharField(max_length=250, unique=True, db_index=True)
+    name = models.CharField(max_length=255, db_index=True)
+    provider = models.CharField(max_length=150, db_index=True)
+    author_slug = models.CharField(max_length=150, blank=True, default='')
+    openrouter_id = models.CharField(max_length=250, blank=True, default='', db_index=True)
+    aa_slug = models.CharField(max_length=250, blank=True, default='', db_index=True)
+    description = models.TextField(blank=True, default='')
+    release_date = models.DateField(null=True, blank=True)
+    is_open_weight = models.BooleanField(default=False, db_index=True)
+    is_free = models.BooleanField(default=False, db_index=True)
+
+    # Master Composite Rankings
+    rankllms_index = models.FloatField(default=0.0, db_index=True)
+    rank_overall = models.IntegerField(default=0, db_index=True)
+    rank_coding = models.IntegerField(default=0)
+    rank_reasoning = models.IntegerField(default=0)
+    rank_value = models.IntegerField(default=0)
+
+    # Empirical Benchmarks (Merged from orbench + aabanch)
+    intelligence_index = models.FloatField(default=0.0, db_index=True)
+    coding_index = models.FloatField(default=0.0, db_index=True)
+    math_index = models.FloatField(default=0.0, db_index=True)
+    terminalbench_hard = models.FloatField(null=True, blank=True)
+    terminalbench_v2_1 = models.FloatField(null=True, blank=True)
+    gpqa_diamond = models.FloatField(null=True, blank=True)
+    mmlu_pro = models.FloatField(null=True, blank=True)
+    hle = models.FloatField(null=True, blank=True)
+    livecodebench = models.FloatField(null=True, blank=True)
+    scicode = models.FloatField(null=True, blank=True)
+    math_500 = models.FloatField(null=True, blank=True)
+    aime_25 = models.FloatField(null=True, blank=True)
+    design_arena_elo = models.FloatField(null=True, blank=True)
+    design_arena_win_rate = models.FloatField(null=True, blank=True)
+    ifbench = models.FloatField(null=True, blank=True)
+    lcr = models.FloatField(null=True, blank=True)
+    tau2 = models.FloatField(null=True, blank=True)
+    tau_banking = models.FloatField(null=True, blank=True)
+
+    # Hardware Telemetry & Economics (Merged from ormodels + aamodels)
+    context_length = models.IntegerField(default=0, db_index=True)
+    max_output_tokens = models.IntegerField(null=True, blank=True)
+    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
+    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
+    tokens_per_second = models.FloatField(default=0.0, db_index=True)
+    time_to_first_token = models.FloatField(default=0.0, db_index=True)
+
+    # Sources & Metadata
+    has_openrouter = models.BooleanField(default=False)
+    has_artificial_analysis = models.BooleanField(default=False)
+    has_design_arena = models.BooleanField(default=False)
+    sources = models.JSONField(default=list, blank=True)
+    raw_data = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'rankindex'
+        ordering = ['rank_overall', '-rankllms_index', '-intelligence_index']
+
+    def __str__(self):
+        return f"#{self.rank_overall} {self.name} ({self.provider}) - Index: {self.rankllms_index:.1f}"
+

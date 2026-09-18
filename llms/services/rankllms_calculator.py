@@ -13,32 +13,38 @@ def calculate_rankllms_index(
     Official RankLLMs Index Calculation Formula.
     
     Formula:
-    RankLLMs Index = (0.35 * Coding) + (0.30 * Agentic) + (0.20 * Base Evaluation) + (0.15 * Efficiency & Context)
+    RankLLMs Index = (0.40 * Intelligence) + (0.25 * Coding) + (0.15 * Agentic) + (0.10 * SWE-Bench) + (0.10 * Efficiency & Context)
     
-    Returns a normalized 0-100 composite score representing overall model real-world utility.
+    Returns a normalized 0-100 composite score representing overall real-world model capability.
     """
-    # 1. Base Evaluation Component (20%)
-    base_score = raw_intelligence if raw_intelligence > 0.0 else max(coding_index, agentic_index)
-    if base_score == 0.0:
+    base_intel = raw_intelligence if raw_intelligence > 0.0 else max(coding_index, agentic_index)
+    if base_intel == 0.0:
         return 0.0
 
-    # 2. Coding Component (35%)
-    coding = coding_index if coding_index > 0.0 else (base_score * 0.96)
+    # 1. Intelligence (40%)
+    intel_component = base_intel
 
-    # 3. Agentic Component (30%)
-    agentic = agentic_index if agentic_index > 0.0 else (base_score * 0.88)
+    # 2. Coding (25%)
+    coding_component = coding_index if coding_index > 0.0 else (base_intel * 0.94)
 
-    # 4. Efficiency & Context Component (15%)
-    speed_factor = min((tokens_per_second / 150.0) * 100.0, 100.0) if tokens_per_second > 0 else 50.0
+    # 3. Agentic & Tool Execution (15%)
+    agentic_component = agentic_index if agentic_index > 0.0 else (base_intel * 0.88)
+
+    # 4. SWE-Bench / Software Engineering (10%)
+    swe_component = swe_bench_score if swe_bench_score > 0.0 else (coding_component * 0.80)
+
+    # 5. Efficiency & Context Scaling (10%)
+    speed_factor = min((tokens_per_second / 120.0) * 100.0, 100.0) if tokens_per_second > 0 else 50.0
     context_factor = min((math.log10(max(context_length, 4096)) / 6.0) * 100.0, 100.0)
-    efficiency_score = (0.6 * speed_factor) + (0.4 * context_factor)
+    efficiency_component = (0.5 * speed_factor) + (0.5 * context_factor)
 
-    # Weighted Sum Formula
-    composite_index = (
-        (0.35 * coding) +
-        (0.30 * agentic) +
-        (0.20 * base_score) +
-        (0.15 * efficiency_score)
+    # Composite weighted calculation
+    composite = (
+        (0.40 * intel_component) +
+        (0.25 * coding_component) +
+        (0.15 * agentic_component) +
+        (0.10 * swe_component) +
+        (0.10 * efficiency_component)
     )
 
-    return round(composite_index, 1)
+    return round(min(composite, 99.5), 1)
