@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Leaderboard | RankLLMs</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #fafafa; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #eee; }
+    .logo { font-size: 1.25rem; font-weight: 700; color: #1a1a1a; text-decoration: none; }
+    nav a { margin-left: 1.5rem; color: #666; text-decoration: none; font-size: 0.9rem; }
+    nav a:hover { color: #1a1a1a; }
+    nav a.active { color: #1a1a1a; font-weight: 600; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+    h1 { font-size: 1.5rem; }
+    .filters { display: flex; gap: 0.5rem; align-items: center; }
+    .filters select { padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85rem; }
+    #loading { text-align: center; padding: 2rem; color: #666; }
+    table { width: 100%; background: white; border-radius: 8px; border: 1px solid #eee; overflow: hidden; }
+    th { text-align: left; padding: 0.75rem 1rem; background: #f9f9f9; font-size: 0.75rem; font-weight: 600; color: #666; text-transform: uppercase; border-bottom: 1px solid #eee; }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid #f3f3f3; font-size: 0.9rem; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #fafafa; }
+    .rank { font-weight: 700; }
+    .rank-1 { color: #fbbf24; }
+    .rank-2 { color: #9ca3af; }
+    .rank-3 { color: #cd7f32; }
+    .score { font-family: 'Monaco', 'Menlo', monospace; font-size: 0.8rem; }
+    .provider { color: #666; font-size: 0.8rem; }
+    .badge { display: inline-block; padding: 0.15rem 0.4rem; font-size: 0.65rem; border-radius: 3px; margin-right: 0.25rem; }
+    .badge-free { background: #dcfce7; color: #166534; }
+    .badge-open { background: #dbeafe; color: #1e40af; }
+    footer { text-align: center; padding: 2rem 0; color: #999; font-size: 0.8rem; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="/" class="logo">RankLLMs</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/leaderboard" class="active">Leaderboard</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/api/v1/docs" target="_blank">API</a>
+      </nav>
+    </header>
+
+    <div class="page-header">
+      <h1>AI Models Leaderboard</h1>
+      <div class="filters">
+        <select id="sortBy" onchange="loadLeaderboard()">
+          <option value="intelligence">Intelligence</option>
+          <option value="coding">Coding</option>
+          <option value="swe_bench">SWE-Bench</option>
+          <option value="agentic">Agentic</option>
+          <option value="context">Context Length</option>
+        </select>
+        <select id="limit" onchange="loadLeaderboard()">
+          <option value="50">Top 50</option>
+          <option value="100">Top 100</option>
+          <option value="200" selected>Top 200</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="loading">Loading leaderboard data...</div>
+    <table id="leaderboard" style="display: none;">
+      <thead>
+        <tr>
+          <th style="width: 50px;">Rank</th>
+          <th>Model</th>
+          <th>Provider</th>
+          <th>Context</th>
+          <th>Intelligence</th>
+          <th>Coding</th>
+          <th>Agentic</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+
+    <footer>
+      <p>RankLLMs Engine &copy; 2026 &middot; Data from OpenRouter & Artificial Analysis</p>
+    </footer>
+  </div>
+
+  <script>
+    async function loadLeaderboard() {
+      const sortBy = document.getElementById('sortBy').value;
+      const limit = document.getElementById('limit').value;
+      const loading = document.getElementById('loading');
+      const table = document.getElementById('leaderboard');
+      const tbody = document.getElementById('leaderboard-body');
+
+      loading.style.display = 'block';
+      table.style.display = 'none';
+
+      try {
+        const res = await fetch(`/api/v1/leaderboard?sort_by=${sortBy}&limit=${limit}`);
+        const data = await res.json();
+
+        tbody.innerHTML = '';
+
+        for (const model of data.rankings || []) {
+          const row = document.createElement('tr');
+          
+          let rankClass = '';
+          if (model.rank === 1) rankClass = 'rank-1';
+          else if (model.rank === 2) rankClass = 'rank-2';
+          else if (model.rank === 3) rankClass = 'rank-3';
+
+          const badges = [];
+          if (model.is_free) badges.push('<span class="badge badge-free">FREE</span>');
+          if (model.is_open_weight) badges.push('<span class="badge badge-open">OPEN</span>');
+
+          const price = model.prompt_price_per_1m === '0' ? 'Free' : `$${model.prompt_price_per_1m}/M`;
+
+          row.innerHTML = `
+            <td class="rank ${rankClass}">#${model.rank}</td>
+            <td>${badges.join('')} ${model.name}</td>
+            <td class="provider">${model.provider}</td>
+            <td>${model.context_length ? model.context_length.toLocaleString() : '-'}</td>
+            <td class="score">${model.intelligence_index.toFixed(1)}</td>
+            <td class="score">${model.coding_index.toFixed(1)}</td>
+            <td class="score">${model.agentic_index.toFixed(1)}</td>
+            <td>${price}</td>
+          `;
+          tbody.appendChild(row);
+        }
+
+        loading.style.display = 'none';
+        table.style.display = 'table';
+      } catch (err) {
+        loading.textContent = 'Error loading leaderboard: ' + err.message;
+      }
+    }
+
+    loadLeaderboard();
+  </script>
+</body>
+</html>

@@ -3,917 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RankLLMs Engine — Developer API Dashboard & Studio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>RankLLMs Engine - AI Model Rankings</title>
   <style>
-    :root {
-      --bg-body: #F8FAFC;
-      --bg-card: #FFFFFF;
-      --bg-sidebar: #FFFFFF;
-      --border-color: #E2E8F0;
-      --border-hover: #CBD5E1;
-      --text-main: #0F172A;
-      --text-muted: #64748B;
-      --accent-indigo: #4F46E5;
-      --accent-indigo-hover: #4338CA;
-      --accent-indigo-light: #EEF2FF;
-      --accent-emerald: #059669;
-      --accent-emerald-light: #ECFDF5;
-      --accent-purple: #7C3AED;
-      --accent-purple-light: #F5F3FF;
-      --badge-get: #059669;
-      --badge-post: #2563EB;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: var(--bg-body);
-      color: var(--text-main);
-      font-family: var(--font-sans);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* Sidebar Navigation */
-    aside {
-      width: 290px;
-      background: var(--bg-sidebar);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-
-    .brand {
-      padding: 24px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .brand-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--accent-indigo), #3B82F6);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 22px;
-      color: #FFF;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
-    }
-    .brand-text {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: var(--text-main);
-    }
-    .brand-tag {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 8px;
-      background: var(--accent-indigo-light);
-      color: var(--accent-indigo);
-      border-radius: 6px;
-      margin-left: auto;
-    }
-
-    .nav-tabs {
-      padding: 16px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    .nav-btn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.15s ease;
-      width: 100%;
-    }
-    .nav-btn:hover {
-      background: var(--bg-body);
-      color: var(--text-main);
-    }
-    .nav-btn.active {
-      background: var(--accent-indigo-light);
-      color: var(--accent-indigo);
-      font-weight: 700;
-    }
-    .nav-icon {
-      font-size: 18px;
-      width: 24px;
-      text-align: center;
-    }
-
-    .sidebar-footer {
-      padding: 16px 20px;
-      border-top: 1px solid var(--border-color);
-      background: #FAFAFA;
-    }
-    .status-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--accent-emerald);
-    }
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--accent-emerald);
-      border-radius: 50%;
-      box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
-      70% { box-shadow: 0 0 0 8px rgba(5, 150, 105, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
-    }
-
-    /* Main Area Layout */
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: var(--bg-body);
-    }
-
-    header {
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border-color);
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 72px;
-    }
-    .header-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
-    .quick-links { display: flex; gap: 12px; align-items: center; }
-
-    .btn-action {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid var(--border-color);
-      background: var(--bg-card);
-      color: var(--text-main);
-      transition: all 0.15s ease;
-      text-decoration: none;
-    }
-    .btn-action:hover { background: #F1F5F9; border-color: var(--border-hover); }
-    .btn-sync {
-      background: var(--accent-indigo);
-      color: #FFF;
-      border: none;
-      box-shadow: var(--shadow-sm);
-    }
-    .btn-sync:hover { background: var(--accent-indigo-hover); }
-
-    .content-area {
-      flex: 1;
-      padding: 32px;
-      overflow-y: auto;
-    }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Dashboard Cards */
-    .hero-banner {
-      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-      border: 1px solid #C7D2FE;
-      border-radius: 16px;
-      padding: 28px;
-      margin-bottom: 28px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .hero-banner h1 { font-size: 24px; font-weight: 800; color: #1E1B4B; margin-bottom: 6px; }
-    .hero-banner p { color: #3730A3; font-size: 14px; line-height: 1.5; max-width: 700px; }
-
-    .domain-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      background: #FFF;
-      border: 1px solid #C7D2FE;
-      border-radius: 20px;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--accent-indigo);
-      margin-top: 10px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 20px;
-      box-shadow: var(--shadow-sm);
-    }
-    .stat-val { font-size: 28px; font-weight: 800; color: var(--accent-indigo); font-family: var(--font-mono); }
-    .stat-lbl { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
-
-    /* Tables & Inputs */
-    .card-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow-sm);
-    }
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .panel-title { font-size: 18px; font-weight: 800; color: var(--text-main); }
-
-    .form-group { margin-bottom: 16px; }
-    .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
-    .form-input, .form-select {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: var(--font-sans);
-      color: var(--text-main);
-      background: #FFF;
-      outline: none;
-      transition: border 0.15s ease;
-    }
-    .form-input:focus, .form-select:focus { border-color: var(--accent-indigo); }
-
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      text-align: left;
-    }
-    .data-table th {
-      padding: 12px 14px;
-      background: #F8FAFC;
-      border-bottom: 1px solid var(--border-color);
-      color: var(--text-muted);
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 11px;
-      letter-spacing: 0.5px;
-    }
-    .data-table td {
-      padding: 14px;
-      border-bottom: 1px solid var(--border-color);
-      color: var(--text-main);
-      font-weight: 500;
-    }
-    .data-table tr:hover td { background: #F8FAFC; }
-
-    /* Badges */
-    .badge-rank {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: 12px;
-      background: var(--accent-indigo-light);
-      color: var(--accent-indigo);
-    }
-    .badge-score {
-      font-family: var(--font-mono);
-      font-weight: 800;
-      color: var(--accent-emerald);
-      font-size: 14px;
-    }
-
-    /* Terminal Box */
-    .console-box {
-      background: #0F172A;
-      color: #38BDF8;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      line-height: 1.6;
-      padding: 20px;
-      border-radius: 12px;
-      min-height: 220px;
-      max-height: 380px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-    }
-
-    /* Playground Studio */
-    .playground-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .json-output-box {
-      background: #0F172A;
-      color: #4ADE80;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      padding: 16px;
-      border-radius: 10px;
-      height: 380px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #fafafa; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #eee; }
+    .logo { font-size: 1.5rem; font-weight: 700; color: #1a1a1a; }
+    nav a { margin-left: 1.5rem; color: #666; text-decoration: none; }
+    nav a:hover { color: #1a1a1a; }
+    nav a.active { color: #1a1a1a; font-weight: 600; }
+    .hero { text-align: center; padding: 4rem 0; }
+    .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .hero p { color: #666; font-size: 1.1rem; max-width: 600px; margin: 0 auto 2rem; }
+    .btn { display: inline-block; padding: 0.75rem 1.5rem; background: #1a1a1a; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; }
+    .btn:hover { background: #333; }
+    .btn-outline { background: transparent; border: 1px solid #ddd; color: #333; }
+    .btn-outline:hover { border-color: #333; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; padding: 3rem 0; }
+    .feature { padding: 1.5rem; background: white; border-radius: 8px; border: 1px solid #eee; }
+    .feature h3 { margin-bottom: 0.5rem; }
+    .feature p { color: #666; font-size: 0.9rem; }
+    .api-section { background: white; border-radius: 8px; padding: 2rem; margin: 2rem 0; border: 1px solid #eee; }
+    .api-section h2 { margin-bottom: 1rem; }
+    .endpoint { display: flex; align-items: center; gap: 1rem; margin: 1rem 0; padding: 0.75rem; background: #f9f9f9; border-radius: 4px; }
+    .method { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .method.get { background: #22c55e; color: white; }
+    .method.post { background: #3b82f6; color: white; }
+    code { background: #f3f3f3; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
+    footer { text-align: center; padding: 2rem 0; color: #999; font-size: 0.85rem; border-top: 1px solid #eee; margin-top: 3rem; }
   </style>
 </head>
 <body>
-
-  <!-- Sidebar -->
-  <aside>
-    <div class="brand">
-      <div class="brand-icon">R</div>
-      <div>
-        <div class="brand-text">RankLLMs</div>
-        <div style="font-size:11px; color:var(--text-muted); font-weight:600;">api.rankllms.com</div>
-      </div>
-      <span class="brand-tag">DASHBOARD</span>
-    </div>
-
-    <nav class="nav-tabs">
-      <button class="nav-btn active" onclick="switchTab(this, 'overview')">
-        <span class="nav-icon">📊</span> Overview & System Status
-      </button>
-      <button class="nav-btn" onclick="switchTab(this, 'api-keys')">
-        <span class="nav-icon">🔑</span> API Keys & Rate Limits
-      </button>
-      <button class="nav-btn" onclick="switchTab(this, 'playground')">
-        <span class="nav-icon">⚡</span> Interactive API Studio
-      </button>
-      <button class="nav-btn" onclick="switchTab(this, 'models-explorer')">
-        <span class="nav-icon">🏆</span> Models & Leaderboard (1,299)
-      </button>
-      <button class="nav-btn" onclick="switchTab(this, 'compare-tool')">
-        <span class="nav-icon">⚔️</span> Model Comparison Tool
-      </button>
-      <button class="nav-btn" onclick="switchTab(this, 'sync-console')">
-        <span class="nav-icon">⚙️</span> One-Click Master Sync
-      </button>
-      <button class="nav-btn" onclick="switchTab(this, 'endpoints-guide')">
-        <span class="nav-icon">📖</span> API Routes Catalog (11)
-      </button>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="status-pill">
-        <div class="pulse-dot"></div>
-        api.rankllms.com Live (24/7 Awake)
-      </div>
-    </div>
-  </aside>
-
-  <!-- Main Area -->
-  <main>
+  <div class="container">
     <header>
-      <div class="header-title" id="page-title">Overview & System Status</div>
-      <div class="quick-links">
-        <button class="btn-action" onclick="switchTab(document.querySelectorAll('.nav-btn')[2], 'playground')">
-          ⚡ API Studio
-        </button>
-        <button class="btn-action btn-sync" onclick="triggerMasterSync()">
-          🔄 Run Master Sync
-        </button>
-      </div>
+      <div class="logo">RankLLMs</div>
+      <nav>
+        <a href="/" class="active">Home</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/api/v1/docs" target="_blank">API Docs</a>
+      </nav>
     </header>
 
-    <div class="content-area">
+    <section class="hero">
+      <h1>AI Model Rankings & Benchmark Data</h1>
+      <p>Comprehensive rankings for LLMs, benchmarks, and model comparisons. Access intelligence, coding, and agentic indices for 1000+ models.</p>
+      <a href="/leaderboard" class="btn">View Leaderboard</a>
+      <a href="/api/v1/leaderboard" class="btn btn-outline" target="_blank">API</a>
+    </section>
 
-      <!-- TAB 1: OVERVIEW -->
-      <section id="tab-overview" class="tab-content active">
-        <div class="hero-banner">
-          <div>
-            <h1>RankLLMs Engine — Live API Platform</h1>
-            <p>High-performance data engine powering LLM model catalog, official RankLLMs Index benchmark evaluations, pricing analytics, and token usage leaderboards.</p>
-            <div class="domain-badge">⚡ Base URL: https://api.rankllms.com</div>
-          </div>
-        </div>
+    <section class="features">
+      <div class="feature">
+        <h3>🏆 Leaderboard</h3>
+        <p>Ranked by Intelligence Index, then Advanced Coding capability. Models without verified scores excluded.</p>
+      </div>
+      <div class="feature">
+        <h3>🔬 Benchmarks</h3>
+        <p>OpenRouter unified benchmarks including GPQA, Tau-bench, Design Arena, and Artificial Analysis.</p>
+      </div>
+      <div class="feature">
+        <h3>⚔️ Compare</h3>
+        <p>Side-by-side comparison of model specs, pricing, and benchmark scores.</p>
+      </div>
+    </section>
 
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-val" id="stat-total-models">1,299</div>
-            <div class="stat-lbl">Active AI Models</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="stat-total-providers">162</div>
-            <div class="stat-lbl">Global Model Providers</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="stat-total-benchmarks">1,299</div>
-            <div class="stat-lbl">RankLLMs Benchmark Evaluations</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" style="color:var(--accent-emerald);">100%</div>
-            <div class="stat-lbl">Non-Null Data Coverage</div>
-          </div>
-        </div>
+    <section class="api-section">
+      <h2>API Endpoints</h2>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/v1/leaderboard</code>
+        <span>Main leaderboard ranked by intelligence</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/v1/benchmarks</code>
+        <span>Benchmark evaluation matrix</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/v1/models</code>
+        <span>Query and filter all models</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/v1/providers</code>
+        <span>List of AI providers</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/v1/health</code>
+        <span>System health check</span>
+      </div>
+    </section>
 
-        <div class="card-panel">
-          <div class="panel-header">
-            <div class="panel-title">System Infrastructure & Keep-Alive Probe</div>
-            <span class="badge-rank" style="background:var(--accent-emerald-light); color:var(--accent-emerald);">ONLINE (Render Free Tier)</span>
-          </div>
-          <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">The engine includes 1ms light ping probes (<code>/ping</code>, <code>/healthz</code>) so external cron monitors (UptimeRobot, Cron-Job.org) keep your instance awake 24/7 without sleeping.</p>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Probe Endpoint</th>
-                <th>Method</th>
-                <th>Latency</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>/ping</code></td>
-                <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
-                <td>~ 1ms</td>
-                <td><span style="color:#059669; font-weight:700;">200 OK</span></td>
-              </tr>
-              <tr>
-                <td><code>/healthz</code></td>
-                <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
-                <td>~ 2ms</td>
-                <td><span style="color:#059669; font-weight:700;">200 OK</span></td>
-              </tr>
-              <tr>
-                <td><code>/api/v1/health</code></td>
-                <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
-                <td>~ 15ms (Neon PostgreSQL Audit)</td>
-                <td><span style="color:#059669; font-weight:700;">200 OK</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- TAB 2: API KEYS MANAGER -->
-      <section id="tab-api-keys" class="tab-content">
-        <div class="card-panel">
-          <div class="panel-header">
-            <div class="panel-title">Generate New Developer API Key</div>
-          </div>
-          <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">Generate unique <code>rk_live_...</code> API keys for your applications and frontend integrations.</p>
-          <div style="display:flex; gap:16px; align-items:flex-end;">
-            <div style="flex:1;">
-              <label class="form-label">Application / App Name</label>
-              <input type="text" id="key-app-name" class="form-input" placeholder="e.g. Astro Frontend Production">
-            </div>
-            <div style="width:200px;">
-              <label class="form-label">Tier Access Level</label>
-              <select id="key-tier" class="form-select">
-                <option value="free">Free Tier (60 req/min)</option>
-                <option value="pro">Pro Tier (1,000 req/min)</option>
-                <option value="admin">Admin Tier (Unlimited)</option>
-              </select>
-            </div>
-            <button class="btn-action btn-sync" onclick="generateApiKeyLive()">Generate API Key ➔</button>
-          </div>
-          <div id="new-key-display" style="display:none; margin-top:16px; padding:12px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:8px; color:#065F46; font-family:var(--font-mono); font-weight:700; font-size:13px;"></div>
-        </div>
-
-        <div class="card-panel">
-          <div class="panel-header">
-            <div class="panel-title">Active API Keys & Usage</div>
-            <button class="btn-action" onclick="loadActiveKeysTable()">🔄 Refresh Keys</button>
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Key Name</th>
-                <th>API Key Token</th>
-                <th>Tier</th>
-                <th>Total Requests</th>
-                <th>Created Date</th>
-              </tr>
-            </thead>
-            <tbody id="keys-table-body">
-              <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Loading active keys...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- TAB 3: INTERACTIVE API STUDIO / PLAYGROUND -->
-      <section id="tab-playground" class="tab-content">
-        <div class="card-panel">
-          <div class="panel-header">
-            <div class="panel-title">⚡ Interactive API Studio & Endpoint Tester</div>
-          </div>
-          <div class="playground-grid">
-            <div>
-              <div class="form-group">
-                <label class="form-label">Target Endpoint</label>
-                <select id="pg-endpoint" class="form-select" onchange="updatePlaygroundDefaults()">
-                  <option value="/api/v1/models?limit=10">GET /api/v1/models (Models Catalog)</option>
-                  <option value="/api/v1/benchmarks?sort_by=rankllms_index&limit=10">GET /api/v1/benchmarks (RankLLMs Benchmarks Matrix)</option>
-                  <option value="/api/v1/leaderboard?sort_by=rankllms_index">GET /api/v1/leaderboard (Main Leaderboard)</option>
-                  <option value="/api/v1/compare?model_a=claude-3-7-sonnet&model_b=gpt-4o">GET /api/v1/compare (Side-by-Side Comparison)</option>
-                  <option value="/api/v1/health">GET /api/v1/health (System Health Audit)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Query Parameters / Endpoint Path</label>
-                <input type="text" id="pg-params" class="form-input" value="limit=10">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Optional API Key Header (X-API-Key)</label>
-                <input type="text" id="pg-header-key" class="form-input" placeholder="rk_live_...">
-              </div>
-              <button class="btn-action btn-sync" style="width:100%; justify-content:center; padding:12px;" onclick="runStudioTest()">⚡ Execute Request Live</button>
-            </div>
-            <div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <span class="form-label">Response JSON</span>
-                <span id="pg-status-badge" class="badge-rank" style="display:none;">200 OK</span>
-              </div>
-              <pre class="json-output-box" id="pg-json-output">// Click 'Execute Request Live' to send HTTP query...</pre>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 4: MODELS & LEADERBOARD EXPLORER -->
-      <section id="tab-models-explorer" class="tab-content">
-        <div class="card-panel">
-          <div class="panel-header">
-            <div class="panel-title">AI Models & Benchmark Explorer</div>
-            <button class="btn-action" onclick="loadModelsExplorerTable()">🔄 Refresh List</button>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px;">
-            <input type="text" id="models-search-input" class="form-input" style="flex:1;" placeholder="🔍 Search by model name, provider, slug..." onkeyup="filterModelsTable()">
-            <div style="display:flex; gap:8px;">
-              <button class="btn-action" id="btn-dedup-curated" style="background:var(--accent-indigo-light); color:var(--accent-indigo); font-weight:700;" onclick="setDedupMode(true)">✨ Curated Unique (~200 Core Models)</button>
-              <button class="btn-action" id="btn-dedup-all" onclick="setDedupMode(false)">🌐 All Endpoints (1,299 Raw Records)</button>
-            </div>
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Model Name</th>
-                <th>Provider</th>
-                <th>RankLLMs Index</th>
-                <th>Coding Index</th>
-                <th>Context Length</th>
-                <th>Prompt / 1M</th>
-                <th>Throughput</th>
-              </tr>
-            </thead>
-            <tbody id="models-table-body">
-              <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Loading curated models from Neon PostgreSQL...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-
-      <!-- TAB 5: MODEL COMPARISON TOOL -->
-      <section id="tab-compare-tool" class="tab-content">
-        <div class="card-panel">
-          <div class="panel-header">
-            <div class="panel-title">⚔️ Side-by-Side Model Comparison Tool</div>
-          </div>
-          <div style="display:flex; gap:16px; align-items:flex-end; margin-bottom:24px;">
-            <div style="flex:1;">
-              <label class="form-label">Model A Slug / ID</label>
-              <input type="text" id="cmp-model-a" class="form-input" value="claude-3-7-sonnet" placeholder="e.g. claude-3-7-sonnet">
-            </div>
-            <div style="flex:1;">
-              <label class="form-label">Model B Slug / ID</label>
-              <input type="text" id="cmp-model-b" class="form-input" value="gpt-4o" placeholder="e.g. gpt-4o">
-            </div>
-            <button class="btn-action btn-sync" onclick="runModelComparison()">⚔️ Compare Models</button>
-          </div>
-          <div id="cmp-results-area" style="display:none;" class="playground-grid">
-            <div class="card-panel" style="border-top:4px solid var(--accent-indigo);" id="cmp-card-a"></div>
-            <div class="card-panel" style="border-top:4px solid var(--accent-emerald);" id="cmp-card-b"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 6: ONE-CLICK MASTER SYNC CONSOLE -->
-      <section id="tab-sync-console" class="tab-content">
-        <div class="card-panel">
-          <div class="panel-header">
-            <div class="panel-title">⚙️ Data Pipeline Master Sync Console</div>
-            <button class="btn-action btn-sync" onclick="triggerMasterSync()">⚡ Run One-Click Master Sync</button>
-          </div>
-          <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">Triggers the complete 3-step master ingestion pipeline: OpenRouter API Sync ➔ Artificial Analysis Ingestion ➔ Database Null Backfill & RankLLMs Index calculation.</p>
-          <div class="console-box" id="master-console">[System Ready] Click 'Run Master Sync' above to trigger data pipeline execution...</div>
-        </div>
-      </section>
-
-      <!-- TAB 7: ENDPOINTS CATALOG -->
-      <section id="tab-endpoints-guide" class="tab-content">
-        <h2>Complete REST API Catalog (11 Endpoints)</h2>
-        <br>
-        <p>Explore all active endpoints available on <code>https://api.rankllms.com</code>:</p>
-        <br>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Endpoint Path</th>
-              <th>Description</th>
-              <th>Tag</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
-              <td><code>/api/v1/models</code></td>
-              <td>Full LLM catalog (Supports <code>limit=1000</code> to fetch all models)</td>
-              <td>Models API</td>
-            </tr>
-            <tr>
-              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
-              <td><code>/api/v1/benchmarks</code></td>
-              <td>Dedicated Model Benchmark Evaluations Matrix (RankLLMs Index)</td>
-              <td>Benchmarks API</td>
-            </tr>
-            <tr>
-              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
-              <td><code>/api/v1/leaderboard</code></td>
-              <td>Main LLM Leaderboard (Sorted by rankllms_index, coding, context, cost)</td>
-              <td>Leaderboard</td>
-            </tr>
-            <tr>
-              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
-              <td><code>/api/v1/compare</code></td>
-              <td>Side-by-side comparison between 2 AI models</td>
-              <td>Compare</td>
-            </tr>
-            <tr>
-              <td><span class="badge-rank" style="background:#EFF6FF; color:#2563EB;">POST</span></td>
-              <td><code>/api/v1/keys/generate</code></td>
-              <td>Generate new Developer API Key (<code>rk_live_...</code>)</td>
-              <td>API Key Manager</td>
-            </tr>
-            <tr>
-              <td><span class="badge-rank" style="background:#ECFDF5; color:#059669;">GET</span></td>
-              <td><code>/api/v1/keys</code></td>
-              <td>List active API keys and usage statistics</td>
-              <td>API Key Manager</td>
-            </tr>
-            <tr>
-              <td><span class="badge-rank" style="background:#EFF6FF; color:#2563EB;">POST</span></td>
-              <td><code>/api/v1/sync</code></td>
-              <td>Trigger One-Click Master Pipeline Ingestion Sync</td>
-              <td>Sync</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-    </div>
-  </main>
-
-  <script>
-    let globalModels = [];
-
-    function switchTab(btn, tabId) {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-      const target = document.getElementById('tab-' + tabId);
-      if (target) target.classList.add('active');
-      document.getElementById('page-title').innerText = btn.innerText.replace(/^[^\s]+\s*/, '');
-
-      if (tabId === 'models-explorer' && globalModels.length === 0) {
-        loadModelsExplorerTable();
-      } else if (tabId === 'api-keys') {
-        loadActiveKeysTable();
-      }
-    }
-
-    async function setDedupMode(isDedup) {
-      currentDedupMode = isDedup;
-      document.getElementById('btn-dedup-curated').style.background = isDedup ? 'var(--accent-indigo-light)' : '#FFF';
-      document.getElementById('btn-dedup-curated').style.color = isDedup ? 'var(--accent-indigo)' : 'var(--text-main)';
-      document.getElementById('btn-dedup-curated').style.fontWeight = isDedup ? '700' : '500';
-
-      document.getElementById('btn-dedup-all').style.background = !isDedup ? 'var(--accent-indigo-light)' : '#FFF';
-      document.getElementById('btn-dedup-all').style.color = !isDedup ? 'var(--accent-indigo)' : 'var(--text-main)';
-      document.getElementById('btn-dedup-all').style.fontWeight = !isDedup ? '700' : '500';
-
-      await loadModelsExplorerTable();
-    }
-
-    async function loadModelsExplorerTable() {
-      const tbody = document.getElementById('models-table-body');
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Loading ${currentDedupMode ? 'curated unique (~200 core)' : 'all 1,299 raw'} models from Neon PostgreSQL...</td></tr>`;
-      try {
-        const res = await fetch(`/api/v1/models?limit=1000&dedup=${currentDedupMode}`);
-        const data = await res.json();
-        globalModels = data.items || [];
-
-        renderModelsTable(globalModels);
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" style="color:red;">Error loading models: ${err.message}</td></tr>`;
-      }
-    }
-
-    function renderModelsTable(models) {
-      const tbody = document.getElementById('models-table-body');
-      if (!models || models.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No models found.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = models.map((m, idx) => `
-        <tr>
-          <td><span class="badge-rank">#${idx + 1}</span></td>
-          <td><strong>${m.name}</strong><br><span style="font-size:11px; color:var(--text-muted);">${m.openrouter_id}</span></td>
-          <td>${m.provider_name}</td>
-          <td><span class="badge-score">${m.rankllms_index || 0.0}</span></td>
-          <td><span style="font-family:var(--font-mono); font-weight:700;">${m.coding_index || 0.0}</span></td>
-          <td>${m.context_length ? (m.context_length / 1000) + 'k' : 'N/A'}</td>
-          <td>$${parseFloat(m.prompt_price_per_1m).toFixed(2)}</td>
-          <td>${m.is_open_weight ? 'Open-Weight' : 'API'}</td>
-        </tr>
-      `).join('');
-    }
-
-    function filterModelsTable() {
-      const query = document.getElementById('models-search-input').value.toLowerCase();
-      const filtered = globalModels.filter(m => 
-        m.name.toLowerCase().includes(query) || 
-        m.provider_name.toLowerCase().includes(query) || 
-        m.openrouter_id.toLowerCase().includes(query)
-      );
-      renderModelsTable(filtered);
-    }
-
-    async function loadActiveKeysTable() {
-      const tbody = document.getElementById('keys-table-body');
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading keys...</td></tr>';
-      try {
-        const res = await fetch('/api/v1/keys');
-        const keys = await res.json();
-        if (!keys || keys.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No active API keys found. Generate one above!</td></tr>';
-          return;
-        }
-        tbody.innerHTML = keys.map(k => `
-          <tr>
-            <td><strong>${k.name}</strong></td>
-            <td><code style="font-family:var(--font-mono); color:var(--accent-indigo); font-weight:700;">${k.key}</code></td>
-            <td><span class="badge-rank" style="text-transform:uppercase;">${k.tier}</span></td>
-            <td>${k.total_requests.toLocaleString()}</td>
-            <td>${new Date(k.created_at).toLocaleDateString()}</td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Error loading keys: ${err.message}</td></tr>`;
-      }
-    }
-
-    async function generateApiKeyLive() {
-      const appName = document.getElementById('key-app-name').value.trim() || 'My App';
-      const tier = document.getElementById('key-tier').value;
-      const display = document.getElementById('new-key-display');
-      display.style.display = 'block';
-      display.innerText = 'Generating key...';
-
-      try {
-        const res = await fetch('/api/v1/keys/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: appName, tier: tier })
-        });
-        const keyObj = await res.json();
-        display.innerHTML = `✅ Key Created Successfully!<br>Token: <span style="user-select:all;">${keyObj.key}</span> (${keyObj.tier.toUpperCase()})`;
-        loadActiveKeysTable();
-      } catch (err) {
-        display.innerText = 'Error generating key: ' + err.message;
-      }
-    }
-
-    async function runStudioTest() {
-      const endpoint = document.getElementById('pg-endpoint').value;
-      const keyHeader = document.getElementById('pg-header-key').value.trim();
-      const output = document.getElementById('pg-json-output');
-      const badge = document.getElementById('pg-status-badge');
-
-      output.innerText = 'Sending GET request to ' + endpoint + '...';
-      badge.style.display = 'none';
-
-      const t0 = performance.now();
-      try {
-        const headers = {};
-        if (keyHeader) headers['X-API-Key'] = keyHeader;
-
-        const res = await fetch(endpoint, { headers });
-        const data = await res.json();
-        const t1 = performance.now();
-
-        badge.style.display = 'inline-block';
-        badge.innerText = `${res.status} ${res.statusText} (${Math.round(t1 - t0)}ms)`;
-        output.innerText = JSON.stringify(data, null, 2);
-      } catch (err) {
-        output.innerText = 'Error: ' + err.message;
-      }
-    }
-
-    async function runModelComparison() {
-      const mA = document.getElementById('cmp-model-a').value.trim();
-      const mB = document.getElementById('cmp-model-b').value.trim();
-      const area = document.getElementById('cmp-results-area');
-      const cardA = document.getElementById('cmp-card-a');
-      const cardB = document.getElementById('cmp-card-b');
-
-      if (!mA || !mB) return alert('Please enter both model slugs!');
-      area.style.display = 'grid';
-      cardA.innerHTML = '<p>Loading Model A...</p>';
-      cardB.innerHTML = '<p>Loading Model B...</p>';
-
-      try {
-        const res = await fetch(`/api/v1/compare?model_a=${mA}&model_b=${mB}`);
-        const data = await res.json();
-        const models = data.models || [];
-
-        if (models.length >= 1) renderCompareCard(cardA, models[0]);
-        if (models.length >= 2) renderCompareCard(cardB, models[1]);
-      } catch (err) {
-        cardA.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
-      }
-    }
-
-    function renderCompareCard(container, m) {
-      container.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div class="panel-title">${m.name}</div>
-          <span class="badge-score" style="font-size:20px;">${m.benchmarks.rankllms_index}</span>
-        </div>
-        <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;">Provider: <strong>${m.provider}</strong></p>
-        <table class="data-table">
-          <tr><td><strong>RankLLMs Index</strong></td><td><span class="badge-score">${m.benchmarks.rankllms_index}</span></td></tr>
-          <tr><td>Coding Index</td><td>${m.benchmarks.coding_index}</td></tr>
-          <tr><td>Context Window</td><td>${(m.specs.context_length / 1000)}k tokens</td></tr>
-          <tr><td>Prompt Cost</td><td>$${m.pricing.prompt_price_per_1m} / 1M</td></tr>
-        </table>
-      `;
-    }
-
-    async function triggerMasterSync() {
-      const consoleBox = document.getElementById('master-console');
-      consoleBox.innerText = `[${new Date().toLocaleTimeString()}] Triggering Master Ingestion Pipeline...\n[Step 1/3] OpenRouter Sync running...\n[Step 2/3] Artificial Analysis Sync running...\n[Step 3/3] RankLLMs Index calculation running...`;
-      try {
-        const res = await fetch('/api/v1/sync', { method: 'POST' });
-        const data = await res.json();
-        consoleBox.innerText += `\n\n✅ SYNC COMPLETE!\n${JSON.stringify(data.summary, null, 2)}`;
-      } catch (err) {
-        consoleBox.innerText += `\n❌ Error triggering sync: ${err.message}`;
-      }
-    }
-  </script>
+    <footer>
+      <p>RankLLMs Engine &copy; 2026 &middot; <a href="/api/v1/docs" target="_blank">API Documentation</a></p>
+    </footer>
+  </div>
 </body>
 </html>
