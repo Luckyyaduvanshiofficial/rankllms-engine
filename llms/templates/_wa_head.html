@@ -358,4 +358,271 @@
     wa-page[view='mobile'] .toggle-nav {
       display: inline-flex;
     }
+
+    /* Page header (title + meta + controls) */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: var(--wa-space-m);
+      padding-bottom: var(--wa-space-m);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+    }
+
+    .page-header h1 {
+      font-family: var(--wa-font-family-display);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      margin: 0;
+      font-size: var(--wa-font-size-2xl);
+    }
+
+    .page-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--wa-space-s);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      color: var(--wa-color-text-quiet);
+      margin-top: var(--wa-space-2xs);
+    }
+
+    .page-meta strong {
+      color: var(--wa-color-text-normal);
+    }
+
+    .page-meta a {
+      color: var(--wa-color-text-link);
+      text-decoration: none;
+    }
+
+    .page-meta a:hover {
+      text-decoration: underline;
+    }
+
+    .page-lede {
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-s);
+      max-width: 40rem;
+      margin: var(--wa-space-2xs) 0 0;
+      line-height: 1.55;
+    }
+
+    .page-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: var(--wa-space-s);
+    }
+
+    .page-controls wa-input,
+    .page-controls wa-select {
+      min-width: 10rem;
+    }
+
+    .category-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--wa-space-2xs);
+      margin-top: var(--wa-space-s);
+    }
+
+    /* Semantic HTML tables (no wa-table on free tier) */
+    .lb-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--wa-color-surface-border);
+      border-radius: var(--wa-border-radius-l);
+      background: var(--wa-color-surface-raised);
+    }
+
+    .lb-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--wa-font-size-s);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .lb-table th {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--wa-color-text-quiet);
+      background: var(--wa-color-surface-lowered);
+      padding: var(--wa-space-s) var(--wa-space-m);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+      user-select: none;
+    }
+
+    .lb-table td {
+      padding: var(--wa-space-s) var(--wa-space-m);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+      color: var(--wa-color-text-normal);
+      vertical-align: middle;
+    }
+
+    .lb-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .lb-table tbody tr:hover td {
+      background: var(--wa-color-surface-lowered);
+    }
+
+    .lb-table .num {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      text-align: center;
+    }
+
+    .lb-table .score {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .lb-table .model-cell {
+      font-weight: 500;
+    }
+
+    .lb-table .model-cell .slug {
+      display: block;
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+      font-weight: 400;
+      margin-top: 0.1rem;
+    }
+
+    .lb-table .provider {
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-2xs);
+    }
+
+    .lb-rank {
+      font-weight: 700;
+      font-family: var(--wa-font-family-mono);
+    }
+
+    .lb-rank.rank-1 { color: #d97706; }
+    .lb-rank.rank-2 { color: #6e6c64; }
+    .lb-rank.rank-3 { color: #b45309; }
+
+    .lb-medal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 50%;
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      font-weight: 700;
+      background: var(--wa-color-surface-lowered);
+      color: var(--wa-color-text-quiet);
+    }
+
+    .lb-medal.medal-1 {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .lb-medal.medal-2 {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .lb-medal.medal-3 {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+
+    .wa-dark .lb-medal.medal-1 {
+      background: #451a03;
+      color: #fbbf24;
+    }
+
+    .wa-dark .lb-medal.medal-2 {
+      background: #1f2937;
+      color: #d1d5db;
+    }
+
+    .wa-dark .lb-medal.medal-3 {
+      background: #431407;
+      color: #fb923c;
+    }
+
+    .score-index {
+      color: var(--wa-color-brand-fill-normal);
+      font-weight: 700;
+      font-size: var(--wa-font-size-xs);
+    }
+
+    .score-code {
+      color: #3b7a57;
+      font-weight: 600;
+    }
+
+    .wa-dark .score-code {
+      color: #6ee7a0;
+    }
+
+    .price-free {
+      color: #3b7a57;
+      font-weight: 600;
+    }
+
+    .wa-dark .price-free {
+      color: #6ee7a0;
+    }
+
+    .loading-row {
+      text-align: center;
+      padding: var(--wa-space-2xl) var(--wa-space-m) !important;
+      color: var(--wa-color-text-quiet);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+    }
+
+    .loading-row.is-error {
+      color: var(--wa-color-danger-fill-normal, #dc2626);
+    }
+
+    .table-empty {
+      text-align: center;
+      padding: var(--wa-space-2xl) var(--wa-space-m) !important;
+      color: var(--wa-color-text-quiet);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+    }
+
+    /* Controls card / API footnote */
+    .controls-card {
+      padding: var(--wa-space-m);
+    }
+
+    .api-note {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      color: var(--wa-color-text-quiet);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .api-note code {
+      background: var(--wa-color-surface-lowered);
+      border: 1px solid var(--wa-color-surface-border);
+      padding: 0.1rem 0.35rem;
+      border-radius: var(--wa-border-radius-s);
+      color: var(--wa-color-text-normal);
+    }
+
+    .api-note a {
+      color: var(--wa-color-text-link);
+      font-weight: 600;
+    }
   </style>

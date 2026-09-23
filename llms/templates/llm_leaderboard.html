@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="wa-theme-default wa-palette-default wa-light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include "_wa_head.html" %}
   <title>LLM Leaderboard — Free AI Model Rankings by Intelligence, Coding &amp; Value | RankLLMs</title>
   <meta name="description" content="Free LLM leaderboard ranked by the RankLLMs composite index. Compare AI models by intelligence, coding, reasoning, value, context, and price — powered by the merged rankindex source of truth.">
   <meta name="robots" content="index, follow">
@@ -23,222 +23,179 @@
     "url": "https://api.rankllms.com/llm-leaderboard"
   }
   </script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            canvas: { DEFAULT: '#faf9f5', dark: '#141413' },
-            surface: {
-              card: '#ffffff',
-              soft: '#f3f1eb',
-              cream: '#fbfaf7',
-              'cream-strong': '#eeebe2',
-              dark: '#181715',
-            },
-            primary: { DEFAULT: '#cc785c', hover: '#b8664b' },
-            ink: { DEFAULT: '#181715', dark: '#f2f0e8' },
-            body: { DEFAULT: '#3d3c38', dark: '#c5c2ba' },
-            muted: { DEFAULT: '#6e6c64', dark: '#8d8a80', soft: '#a6a397' },
-            hairline: { DEFAULT: '#e8e5dc', dark: '#302f2c' },
-            accent: { teal: '#3b7a57', amber: '#d97706', red: '#dc2626' }
-          },
-          fontFamily: {
-            serif: ['Newsreader', 'Georgia', 'serif'],
-            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace']
-          },
-          letterSpacing: { 'tight-serif': '-0.02em' }
-        }
-      }
+  <style>
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--wa-space-s);
     }
-  </script>
+
+    .api-btn {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+    }
+
+    .brand-badge {
+      margin-inline-start: var(--wa-space-xs);
+    }
+  </style>
 </head>
-<body class="bg-canvas text-body font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
-
-  <header class="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur-md px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2 group">
-          <span class="font-serif text-2xl font-normal tracking-tight-serif text-ink group-hover:text-primary transition-colors">RankLLMs</span>
-          <span class="text-[11px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-bold">Leaderboard</span>
-        </a>
+<body>
+  <wa-page>
+    <header slot="header" class="site-header section">
+      <div class="wa-cluster wa-gap-xs">
+        <a class="brand-wordmark" href="/">RankLLMs</a>
+        <wa-badge variant="brand" appearance="outlined" pill class="brand-badge">Leaderboard</wa-badge>
       </div>
-
-      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
-        <a href="/rankllms" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">👑 rankllms</a>
-        <a href="/rankllms/models" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📚 models</a>
-        <a href="/llm-leaderboard" class="px-3 py-1.5 rounded-md text-ink bg-surface-card border border-hairline shadow-sm font-semibold">🏆 leaderboard</a>
-        <a href="/leaderboard" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">legacy</a>
-        <a href="/ormodels" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📦 or</a>
-        <a href="/orbench" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📊 orbench</a>
-        <a href="/aamodels" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🔬 aa</a>
-        <a href="/aabanch" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📈 aabanch</a>
-        <a href="/modelsdev" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🧩 models.dev</a>
-        <a href="/" class="px-3 py-1.5 rounded-md text-primary font-medium hover:bg-surface-soft transition-all">⚡ API</a>
-      </nav>
-
-      <div class="flex items-center gap-2">
-        <a href="/api/v1/leaderboard/rankindex" target="_blank" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium text-ink bg-surface-card border border-hairline hover:bg-surface-soft transition-colors">
+      {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+      <div class="header-actions">
+        <wa-button href="/api/v1/leaderboard/rankindex" appearance="outlined" size="s" class="api-btn" target="_blank" rel="noopener">
           GET /api/v1/leaderboard/rankindex ➔
-        </a>
+        </wa-button>
+        <wa-button data-toggle-nav appearance="plain" class="toggle-nav" aria-label="Open menu">
+          <wa-icon name="bars"></wa-icon>
+        </wa-button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-    <div class="border-b border-hairline pb-6">
-      <div class="flex items-center gap-2 mb-1">
-        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/30 font-semibold">Merged source of truth</span>
-        <span class="text-xs font-mono text-muted">&bull; rankindex · OpenRouter + Artificial Analysis + Design Arena</span>
-      </div>
-      <h1 class="font-serif text-3xl sm:text-4xl font-normal tracking-tight-serif text-ink">LLM Leaderboard</h1>
-      <p class="text-sm text-muted mt-1 max-w-2xl">Free rankings of AI models by the RankLLMs composite index, intelligence, coding, reasoning, and value — built from the merged rankindex table.</p>
-      <div class="mt-3 flex flex-wrap gap-3 font-mono text-xs text-muted">
-        <span>Ranked: <strong id="lb-count" class="text-ink">—</strong></span>
-        <span>Source: <a href="/rankllms" class="text-primary hover:underline">/rankllms</a></span>
-        <span>Full catalog: <a href="/rankllms/models" class="text-primary hover:underline">/rankllms/models</a></span>
-      </div>
-    </div>
+    {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
 
-    <!-- Controls -->
-    <div class="bg-surface-card border border-hairline rounded-xl p-4 space-y-3">
-      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-        <div class="sm:col-span-5">
-          <input type="text" id="lb-search" onkeyup="loadLeaderboard()" placeholder="Search model or provider…" class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-sm text-ink placeholder:text-muted-soft focus:outline-none focus:border-primary font-sans">
-        </div>
-        <div class="sm:col-span-4">
-          <select id="lb-sort" onchange="loadLeaderboard()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
-            <option value="rank">Sort: Overall Rank</option>
-            <option value="rankllms_index">Sort: RankLLMs Index</option>
-            <option value="intelligence">Sort: Intelligence</option>
-            <option value="coding">Sort: Coding</option>
-            <option value="reasoning">Sort: Reasoning</option>
-            <option value="value">Sort: Value (score/$)</option>
-            <option value="context">Sort: Context</option>
-            <option value="price">Sort: Price (low → high)</option>
-            <option value="speed">Sort: Speed</option>
-          </select>
-        </div>
-        <div class="sm:col-span-3">
-          <select id="lb-limit" onchange="loadLeaderboard()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
-            <option value="25">Top 25</option>
-            <option value="50" selected>Top 50</option>
-            <option value="100">Top 100</option>
-            <option value="200">Top 200</option>
-          </select>
+    <main class="wa-stack wa-gap-xl section content-wrap">
+      <div class="page-header">
+        <div>
+          <div class="page-meta">
+            <wa-badge variant="brand" appearance="outlined" pill>Merged source of truth</wa-badge>
+            <span>&bull; rankindex · OpenRouter + Artificial Analysis + Design Arena</span>
+          </div>
+          <h1>LLM Leaderboard</h1>
+          <p class="page-lede">Free rankings of AI models by the RankLLMs composite index, intelligence, coding, reasoning, and value — built from the merged rankindex table.</p>
+          <div class="page-meta">
+            <span>Ranked: <strong id="lb-count">—</strong></span>
+            <span>Source: <a href="/rankllms">/rankllms</a></span>
+            <span>Full catalog: <a href="/rankllms/models">/rankllms/models</a></span>
+          </div>
         </div>
       </div>
-      <div class="flex flex-wrap gap-2 pt-1" role="group" aria-label="Leaderboard category">
-        <button onclick="setCategory('')" id="cat-all" class="px-2.5 py-1 rounded text-[11px] font-mono border border-primary bg-primary/10 text-primary font-semibold">All models</button>
-        <button onclick="setCategory('open')" id="cat-open" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Open weights</button>
-        <button onclick="setCategory('proprietary')" id="cat-proprietary" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Proprietary</button>
-        <button onclick="setCategory('free')" id="cat-free" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Free</button>
-      </div>
-    </div>
 
-    <!-- Leaderboard table -->
-    <div class="bg-canvas border border-hairline rounded-xl overflow-hidden shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm whitespace-nowrap">
-          <thead class="bg-surface-soft text-muted font-mono text-xs uppercase tracking-wider border-b border-hairline select-none">
+      <wa-card class="controls-card">
+        <div class="wa-stack wa-gap-s">
+          <div class="page-controls">
+            <wa-input
+              type="search"
+              label="Search"
+              placeholder="Search model or provider…"
+              size="s"
+              id="lb-search"
+              onkeyup="loadLeaderboard()"
+            >
+              <wa-icon slot="start" name="magnifying-glass"></wa-icon>
+            </wa-input>
+            <wa-select label="Sort by" size="s" id="lb-sort" onchange="loadLeaderboard()">
+              <wa-option value="rank" selected>Overall Rank</wa-option>
+              <wa-option value="rankllms_index">RankLLMs Index</wa-option>
+              <wa-option value="intelligence">Intelligence</wa-option>
+              <wa-option value="coding">Coding</wa-option>
+              <wa-option value="reasoning">Reasoning</wa-option>
+              <wa-option value="value">Value (score/$)</wa-option>
+              <wa-option value="context">Context</wa-option>
+              <wa-option value="price">Price (low → high)</wa-option>
+              <wa-option value="speed">Speed</wa-option>
+            </wa-select>
+            <wa-select label="Limit" size="s" id="lb-limit" onchange="loadLeaderboard()">
+              <wa-option value="25">Top 25</wa-option>
+              <wa-option value="50" selected>Top 50</wa-option>
+              <wa-option value="100">Top 100</wa-option>
+              <wa-option value="200">Top 200</wa-option>
+            </wa-select>
+          </div>
+          <div class="category-pills" role="group" aria-label="Leaderboard category">
+            <wa-button id="cat-all" size="s" appearance="outlined" onclick="setCategory('')">All models</wa-button>
+            <wa-button id="cat-open" size="s" appearance="outlined" onclick="setCategory('open')">Open weights</wa-button>
+            <wa-button id="cat-proprietary" size="s" appearance="outlined" onclick="setCategory('proprietary')">Proprietary</wa-button>
+            <wa-button id="cat-free" size="s" appearance="outlined" onclick="setCategory('free')">Free</wa-button>
+          </div>
+        </div>
+      </wa-card>
+
+      <div class="lb-table-wrap">
+        <table class="lb-table">
+          <thead>
             <tr>
-              <th class="py-3 px-4 w-16 text-center">Rank</th>
-              <th class="py-3 px-4">Model</th>
-              <th class="py-3 px-4">Provider</th>
-              <th class="py-3 px-4 text-center">Index</th>
-              <th class="py-3 px-4 text-center">Intel</th>
-              <th class="py-3 px-4 text-center">Code</th>
-              <th class="py-3 px-4 text-center">GPQA</th>
-              <th class="py-3 px-4 text-center">Context</th>
-              <th class="py-3 px-4 text-right">In $/1M</th>
-              <th class="py-3 px-4 text-center">Sources</th>
+              <th style="width: 56px; text-align: center;">Rank</th>
+              <th>Model</th>
+              <th>Provider</th>
+              <th style="text-align: center;">Index</th>
+              <th style="text-align: center;">Intel</th>
+              <th style="text-align: center;">Code</th>
+              <th style="text-align: center;">GPQA</th>
+              <th style="text-align: center;">Context</th>
+              <th style="text-align: right;">In $/1M</th>
+              <th style="text-align: center;">Sources</th>
             </tr>
           </thead>
-          <tbody id="lb-body" class="divide-y divide-hairline text-body">
-            <tr><td colspan="10" class="py-12 text-center text-muted font-mono text-xs">Loading leaderboard…</td></tr>
+          <tbody id="lb-body">
+            <tr><td colspan="10" class="loading-row">Loading leaderboard…</td></tr>
           </tbody>
         </table>
       </div>
-    </div>
 
-    <div class="bg-surface-card border border-hairline rounded-xl p-4 font-mono text-xs text-muted">
-      API: <span class="text-ink">GET /api/v1/leaderboard/rankindex?sort_by=rank&amp;limit=50</span> —
-      <a href="/api/v1/leaderboard/rankindex" target="_blank" class="text-primary hover:underline">try it</a>
-      · Legacy leaderboard: <a href="/leaderboard" class="text-primary hover:underline">/leaderboard</a>
-      · Methodology: <a href="/rankllms" class="text-primary hover:underline">source of truth</a>
-    </div>
-  </main>
+      <wa-card class="controls-card">
+        <p class="api-note">
+          API: <code>GET /api/v1/leaderboard/rankindex?sort_by=rank&amp;limit=50</code> —
+          <a href="/api/v1/leaderboard/rankindex" target="_blank" rel="noopener">try it</a>
+          · Legacy leaderboard: <a href="/leaderboard">/leaderboard</a>
+          · Methodology: <a href="/rankllms">source of truth</a>
+        </p>
+      </wa-card>
+    </main>
 
-  <footer class="border-t border-hairline bg-surface-card text-xs mt-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-hairline">
-        <div class="space-y-3">
-          <div class="font-serif text-2xl tracking-tight-serif text-ink">RankLLMs</div>
-          <p class="text-muted leading-relaxed">The independent benchmark engine and intelligent model router powering production AI infrastructure.</p>
-        </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Core Views</div>
-          <ul class="space-y-2">
-            <li><a href="/rankllms" class="text-body hover:text-primary">👑 rankllms (source of truth)</a></li>
-            <li><a href="/rankllms/models" class="text-body hover:text-primary">📚 All Models</a></li>
-            <li><a href="/llm-leaderboard" class="text-primary font-semibold">🏆 LLM Leaderboard</a></li>
-            <li><a href="/benchmarks" class="text-body hover:text-primary">🔬 Unified Benchmarks</a></li>
-          </ul>
-        </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Raw Tables</div>
-          <ul class="space-y-2">
-            <li><a href="/ormodels" class="text-body hover:text-primary">📦 ormodels</a></li>
-            <li><a href="/orbench" class="text-body hover:text-primary">📊 orbench</a></li>
-            <li><a href="/aamodels" class="text-body hover:text-primary">🔬 aamodels</a></li>
-            <li><a href="/aabanch" class="text-body hover:text-primary">📈 aabanch</a></li>
-            <li><a href="/modelsdev" class="text-body hover:text-primary">🧩 modelsdev</a></li>
-          </ul>
-        </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Developers</div>
-          <ul class="space-y-2">
-            <li><a href="/" class="text-body hover:text-primary">⚡ API Studio & Docs</a></li>
-            <li><a href="/api/v1/docs" target="_blank" class="text-body hover:text-primary">📖 OpenAPI /docs</a></li>
-            <li><a href="/llms.txt" target="_blank" class="text-body hover:text-primary">📄 llms.txt</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-muted text-[11px]">
-        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" class="hover:text-ink" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" class="hover:text-ink" rel="noopener">CodaiPro</a></div>
-        <div>Data: <a href="https://openrouter.ai" class="hover:text-ink" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" class="hover:text-ink" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" class="hover:text-ink" rel="noopener">models.dev</a></div>
-      </div>
-    </div>
-  </footer>
+    <footer slot="footer" class="section site-footer content-wrap">
+      <p>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" rel="noopener">CodaiPro</a></p>
+      <p>Data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></p>
+      <p>Core: <a href="/rankllms">👑 source of truth</a> &middot; <a href="/rankllms/models">📚 models</a> &middot; <a href="/benchmarks">🔬 benchmarks</a> &middot; <a href="/">⚡ API</a></p>
+    </footer>
+  </wa-page>
 
   <script>
     let category = '';
+    const CAT_ACTIVE = 'variant="brand" appearance="filled"';
+    const CAT_IDLE = 'appearance="outlined"';
 
     function setCategory(cat) {
       category = cat;
-      ['','open','proprietary','free'].forEach(c => {
-        const btn = document.getElementById('cat-' + (c || 'all'));
+      ['all', 'open', 'proprietary', 'free'].forEach(c => {
+        const btn = document.getElementById('cat-' + c);
         if (!btn) return;
-        if (c === category) {
-          btn.className = 'px-2.5 py-1 rounded text-[11px] font-mono border border-primary bg-primary/10 text-primary font-semibold';
+        const key = c === 'all' ? '' : c;
+        const attrs = key === category ? CAT_ACTIVE : CAT_IDLE;
+        btn.setAttribute('appearance', key === category ? 'filled' : 'outlined');
+        if (key === category) {
+          btn.setAttribute('variant', 'brand');
         } else {
-          btn.className = 'px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors';
+          btn.removeAttribute('variant');
         }
       });
       loadLeaderboard();
     }
 
+    function syncCatStyles() {
+      ['all', 'open', 'proprietary', 'free'].forEach(c => {
+        const btn = document.getElementById('cat-' + c);
+        if (!btn) return;
+        const key = c === 'all' ? '' : c;
+        if (key === category) {
+          btn.setAttribute('appearance', 'filled');
+          btn.setAttribute('variant', 'brand');
+        } else {
+          btn.setAttribute('appearance', 'outlined');
+          btn.removeAttribute('variant');
+        }
+      });
+    }
+
     async function loadLeaderboard() {
       const tbody = document.getElementById('lb-body');
-      tbody.innerHTML = `<tr><td colspan="10" class="py-12 text-center text-muted font-mono text-xs">Loading leaderboard…</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" class="loading-row">Loading leaderboard…</td></tr>`;
       const sortBy = document.getElementById('lb-sort').value;
       const limit = document.getElementById('lb-limit').value;
       const search = document.getElementById('lb-search').value;
@@ -252,15 +209,15 @@
         document.getElementById('lb-count').textContent = (data.total ?? rankings.length).toLocaleString();
         render(rankings);
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="10" class="py-8 text-center text-red-600 font-mono text-xs">Error: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="loading-row is-error">Error: ${err.message}</td></tr>`;
       }
     }
 
     function medal(rank) {
-      if (rank === 1) return '<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400/20 text-amber-700 font-bold text-xs">#1</span>';
-      if (rank === 2) return '<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-300/40 text-gray-700 font-bold text-xs">#2</span>';
-      if (rank === 3) return '<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-orange-400/20 text-orange-700 font-bold text-xs">#3</span>';
-      return `<span class="font-semibold text-muted">#${rank}</span>`;
+      if (rank === 1) return '<span class="lb-medal medal-1">#1</span>';
+      if (rank === 2) return '<span class="lb-medal medal-2">#2</span>';
+      if (rank === 3) return '<span class="lb-medal medal-3">#3</span>';
+      return `<span class="lb-medal">#${rank}</span>`;
     }
 
     function formatCtx(n) {
@@ -274,46 +231,53 @@
       return (num <= 1.0 ? (num * 100).toFixed(1) : num.toFixed(1)) + '%';
     }
 
+    function sourceBadge(s) {
+      if (s === 'openrouter') return '<wa-badge appearance="outlined" pill>OR</wa-badge>';
+      if (s === 'artificial-analysis') return '<wa-badge appearance="outlined" pill>AA</wa-badge>';
+      if (s === 'design-arena') return '<wa-badge appearance="outlined" pill>Arena</wa-badge>';
+      return '';
+    }
+
     function render(items) {
       const tbody = document.getElementById('lb-body');
       if (!items.length) {
-        tbody.innerHTML = `<tr><td colspan="10" class="py-12 text-center text-muted font-mono text-xs">No models match this leaderboard filter.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="table-empty">No models match this leaderboard filter.</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map(m => {
-        const pIn = m.is_free ? 'Free' : '$' + parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
-        const badges = (m.sources || []).map(s => {
-          if (s === 'openrouter') return '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-blue-500/10 text-blue-600 border border-blue-500/30">OR</span>';
-          if (s === 'artificial-analysis') return '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-accent-teal/10 text-accent-teal border border-accent-teal/30">AA</span>';
-          if (s === 'design-arena') return '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-purple-500/10 text-purple-600 border border-purple-500/30">Arena</span>';
-          return '';
-        }).filter(Boolean).join(' ');
+        const pIn = m.is_free
+          ? '<span class="price-free">Free</span>'
+          : '$' + parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
+        const badges = (m.sources || []).map(sourceBadge).filter(Boolean).join(' ');
 
         const openBadge = m.is_open_weight
-          ? ' <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">Open</span>'
+          ? ' <wa-badge variant="success" appearance="outlined" pill>Open</wa-badge>'
           : '';
 
         return `
-          <tr class="hover:bg-surface-soft/60 transition-colors text-xs font-mono">
-            <td class="py-3 px-4 text-center">${medal(m.rank)}</td>
-            <td class="py-3 px-4 font-sans">
-              <div class="font-medium text-ink text-sm">${m.name || '—'}${openBadge}</div>
-              <div class="font-mono text-[11px] text-muted-soft mt-0.5">${m.canonical_slug || m.openrouter_id || ''}</div>
+          <tr>
+            <td class="num">${medal(m.rank)}</td>
+            <td class="model-cell">
+              ${m.name || '—'}${openBadge}
+              <span class="slug">${m.canonical_slug || m.openrouter_id || ''}</span>
             </td>
-            <td class="py-3 px-4 text-body">${m.provider || '—'}</td>
-            <td class="py-3 px-4 text-center font-bold text-sm text-primary">${m.rankllms_index ? parseFloat(m.rankllms_index).toFixed(1) : '0.0'}</td>
-            <td class="py-3 px-4 text-center text-ink font-semibold">${m.intelligence_index ? parseFloat(m.intelligence_index).toFixed(1) : '—'}</td>
-            <td class="py-3 px-4 text-center text-accent-teal font-semibold">${m.coding_index ? parseFloat(m.coding_index).toFixed(1) : '—'}</td>
-            <td class="py-3 px-4 text-center text-ink font-semibold">${formatPct(m.gpqa_diamond)}</td>
-            <td class="py-3 px-4 text-center text-muted">${formatCtx(m.context_length)}</td>
-            <td class="py-3 px-4 text-right text-body">${m.is_free ? '<span class="text-emerald-600 font-semibold">Free</span>' : pIn}</td>
-            <td class="py-3 px-4 text-center">${badges || '<span class="text-muted-soft">—</span>'}</td>
+            <td class="provider">${m.provider || '—'}</td>
+            <td class="score score-index">${m.rankllms_index ? parseFloat(m.rankllms_index).toFixed(1) : '0.0'}</td>
+            <td class="score">${m.intelligence_index ? parseFloat(m.intelligence_index).toFixed(1) : '—'}</td>
+            <td class="score score-code">${m.coding_index ? parseFloat(m.coding_index).toFixed(1) : '—'}</td>
+            <td class="score">${formatPct(m.gpqa_diamond)}</td>
+            <td class="num">${formatCtx(m.context_length)}</td>
+            <td class="num" style="text-align: right;">${pIn}</td>
+            <td class="num">${badges || '—'}</td>
           </tr>
         `;
       }).join('');
     }
 
-    document.addEventListener('DOMContentLoaded', loadLeaderboard);
+    document.addEventListener('DOMContentLoaded', () => {
+      syncCatStyles();
+      loadLeaderboard();
+    });
   </script>
 </body>
 </html>
