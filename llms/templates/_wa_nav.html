@@ -1,7 +1,9 @@
-{# Shared RankLLMs primary nav — dual-include (header desktop / drawer mobile).
-   {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
-   {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
-   Pass active_path=request.path to highlight the current page. #}
+{% comment %}
+Shared RankLLMs primary nav — dual-include (header desktop / drawer mobile).
+  {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+  {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
+Pass active_path=request.path to highlight the current page.
+{% endcomment %}
 {% if nav_class == "header-nav" %}
 <nav class="header-nav" aria-label="Primary">
 {% else %}
