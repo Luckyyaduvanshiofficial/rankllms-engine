@@ -14,6 +14,10 @@ def sync_artificial_analysis_data():
     api_key = getattr(settings, 'ARTIFICIAL_ANALYSIS_API_KEY', '') or ''
     base_url = getattr(settings, 'ARTIFICIAL_ANALYSIS_API_URL', 'https://artificialanalysis.ai/api/v2')
 
+    if not api_key:
+        print('[Artificial Analysis Sync] ARTIFICIAL_ANALYSIS_API_KEY is not set; skipping AA sync.')
+        return False
+
     headers = {
         'x-api-key': api_key,
         'User-Agent': 'RankLLMs-Engine/1.0',
