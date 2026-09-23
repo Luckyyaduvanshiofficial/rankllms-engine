@@ -90,18 +90,35 @@ Analytics tracking real-world application usage:
 
 ## ⚙️ Data Pipeline Synchronization (`sync_all`)
 
-The `run_master_sync()` pipeline executes in three fault-tolerant bulk steps:
+The `run_master_sync()` pipeline executes in four fault-tolerant bulk steps:
 
 1. **Step 1: OpenRouter Sync (`openrouter_sync.py`)**
    - Fetches 410+ models from OpenRouter catalog.
    - Bulk inserts/updates `LLMModel`, `ModelSpecification`, `ModelPricing`, and provider relationships.
    - Ingests top app rankings and task shares.
 
-2. **Step 2: Artificial Analysis Ingestion (`artificial_analysis_sync.py`)**
+2. **Step 2: models.dev Sync (`models_dev_sync.py`)**
+   - Fetches free public catalog from `https://models.dev/api.json` (200+ providers, 8000+ models).
+   - Bulk inserts/updates dedicated `modelsdev` table and creates missing `Provider` rows.
+   - Lightly enriches matching main-catalog models (description, open-weight flag, context, pricing, tool/JSON capabilities).
+
+3. **Step 3: Artificial Analysis Ingestion (`artificial_analysis_sync.py`)**
    - Fetches official benchmark evaluations from Artificial Analysis Data API (`/data/llms/models`).
    - Fetches media ratings for text-to-image, image-editing, text-to-video, and text-to-speech endpoints.
    - Bulk enriches matched database models with exact `intelligence_index`, `coding_index`, and `tokens_per_second` metrics.
 
-3. **Step 3: Intelligent Null Backfill (`fill_nulls.py`)**
+4. **Step 4: Intelligent Null Backfill (`fill_nulls.py`)**
    - Scans all database models for any missing specifications, pricing, or benchmarks.
    - Uses context length heuristics, modality tags, and intelligence score interpolation to ensure **100% of models are fully populated**.
+
+---
+
+## 🙏 Acknowledgments & Data Sources
+
+| Source | Role | Link |
+| :--- | :--- | :--- |
+| OpenRouter | Model catalog, pricing, unified benchmarks | https://openrouter.ai |
+| Artificial Analysis | Intelligence / coding / agentic indices | https://artificialanalysis.ai |
+| models.dev | Provider & model metadata catalog | https://models.dev |
+| RankLLMs | Product & leaderboards | https://rankllms.com |
+| CodaiPro | Engineering & open-source maintenance | https://codaipro.com |

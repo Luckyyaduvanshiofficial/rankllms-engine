@@ -3,6 +3,7 @@ import time
 
 sys.stdout.reconfigure(line_buffering=True)
 from llms.services.openrouter_sync import sync_openrouter_models
+from llms.services.models_dev_sync import sync_models_dev_catalog
 from llms.services.artificial_analysis_sync import sync_artificial_analysis_data
 from llms.services.fill_nulls import fill_all_nulls
 from llms.models import Provider, LLMModel, ModelSpecification, ModelPricing, ModelBenchmark, AppRanking, TaskClassification
@@ -12,8 +13,9 @@ def run_master_sync():
     Unified Master Pipeline for RankLLMs Engine.
     Executes in sequence:
       1. OpenRouter catalog & analytics sync
-      2. Artificial Analysis LLMs & Media benchmark sync
-      3. Intelligent Null & Missing Value Backfill
+      2. models.dev provider/model metadata sync
+      3. Artificial Analysis LLMs & Media benchmark sync
+      4. Intelligent Null & Missing Value Backfill
     """
     t0 = time.time()
     print("==================================================================")
@@ -21,15 +23,23 @@ def run_master_sync():
     print("==================================================================")
 
     # Step 1: OpenRouter Sync
-    print("\n[Step 1/3] OpenRouter Data Ingestion Pipeline")
+    print("\n[Step 1/4] OpenRouter Data Ingestion Pipeline")
     or_summary = sync_openrouter_models()
 
-    # Step 2: Artificial Analysis Sync
-    print("\n[Step 2/3] Artificial Analysis Benchmark & Media Sync")
+    # Step 2: models.dev catalog sync
+    print("\n[Step 2/4] models.dev Provider & Model Metadata Sync")
+    try:
+        md_summary = sync_models_dev_catalog()
+    except Exception as e:
+        print(f"[Master Sync] models.dev sync warning (non-fatal): {e}")
+        md_summary = {}
+
+    # Step 3: Artificial Analysis Sync
+    print("\n[Step 3/4] Artificial Analysis Benchmark & Media Sync")
     aa_success = sync_artificial_analysis_data()
 
-    # Step 3: Null & Missing Value Backfill
-    print("\n[Step 3/3] Database Null & Missing Field Backfill")
+    # Step 4: Null & Missing Value Backfill
+    print("\n[Step 4/4] Database Null & Missing Field Backfill")
     fill_success = fill_all_nulls()
 
     elapsed = time.time() - t0

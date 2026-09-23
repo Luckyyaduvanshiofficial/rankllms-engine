@@ -148,3 +148,10 @@ CORS_ALLOW_ALL_ORIGINS = True  # Allows rankllms.com frontend or any origin to a
 OPENROUTER_API_URL = os.getenv('OPENROUTER_API_URL', 'https://openrouter.ai/api/v1/models')
 OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY', '')
 
+# Artificial Analysis Settings
+ARTIFICIAL_ANALYSIS_API_URL = os.getenv('ARTIFICIAL_ANALYSIS_API_URL', 'https://artificialanalysis.ai/api/v2')
+ARTIFICIAL_ANALYSIS_API_KEY = os.getenv('ARTIFICIAL_ANALYSIS_API_KEY', '')
+
+# models.dev Settings (provider + model metadata catalog)
+MODELS_DEV_API_URL = os.getenv('MODELS_DEV_API_URL', 'https://models.dev/api.json')
+

@@ -44,8 +44,9 @@ RankLLMs Engine includes specialized CLI management commands for data ingestion 
 ### 1. `python manage.py sync_all`
 **Unified Master Pipeline Command**. Runs:
 1. `sync_openrouter_models()` (Catalog & Pricing)
-2. `sync_artificial_analysis_data()` (LLM Benchmarks & Media Arena ELO)
-3. `fill_all_nulls()` (Intelligent backfill for 100% data coverage)
+2. `sync_models_dev_catalog()` (models.dev provider/model metadata)
+3. `sync_artificial_analysis_data()` (LLM Benchmarks & Media Arena ELO)
+4. `fill_all_nulls()` (Intelligent backfill for 100% data coverage)
 
 ```bash
 python manage.py sync_all
@@ -57,13 +58,19 @@ Runs OpenRouter model catalog & token-usage analytics ingestion only.
 python manage.py sync_openrouter
 ```
 
-### 3. `python manage.py sync_artificial_analysis`
+### 3. `python manage.py sync_models_dev`
+Runs models.dev catalog sync only (free public JSON — no API key).
+```bash
+python manage.py sync_models_dev
+```
+
+### 4. `python manage.py sync_artificial_analysis`
 Runs Artificial Analysis benchmark ratings and media model sync only.
 ```bash
 python manage.py sync_artificial_analysis
 ```
 
-### 4. `python manage.py fill_nulls`
+### 5. `python manage.py fill_nulls`
 Runs database-wide null and missing field backfill only.
 ```bash
 python manage.py fill_nulls

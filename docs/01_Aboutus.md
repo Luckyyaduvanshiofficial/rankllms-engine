@@ -140,8 +140,22 @@ python manage.py sync_all
 
 ---
 
-## 👥 Credits & Organization
+## 👥 Credits & Acknowledgments
 
 - **Organization**: [LuckyLabs](https://github.com/Luckyyaduvanshiofficial)
 - **Project**: RankLLMs Engine
+- **Product**: [rankllms.com](https://rankllms.com)
+- **Maintainer**: [CodaiPro](https://codaipro.com)
 - **License**: MIT
+
+### Data sources we thank
+
+| Source | What we use | Link |
+| :--- | :--- | :--- |
+| **OpenRouter** | Model catalog, pricing, unified benchmarks, usage rankings | [openrouter.ai](https://openrouter.ai) |
+| **Artificial Analysis** | Intelligence, coding, agentic indices & telemetry | [artificialanalysis.ai](https://artificialanalysis.ai) |
+| **models.dev** | Provider + model metadata (context, cost, capabilities) | [models.dev](https://models.dev) |
+| **RankLLMs** | Product, leaderboards, and community | [rankllms.com](https://rankllms.com) |
+| **CodaiPro** | Engineering, hosting, and open-source sponsorship | [codaipro.com](https://codaipro.com) |
+
+See also the [User Guide](../USER_GUIDE.md) for free API usage.

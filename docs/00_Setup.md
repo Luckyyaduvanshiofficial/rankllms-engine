@@ -2,6 +2,8 @@
 
 Welcome to the **RankLLMs Engine** documentation. This engine powers [RankLLMs.com](https://rankllms.com) by fetching, structuring, caching, and serving Large Language Model (LLM) metadata, pricing, capabilities, Artificial Analysis benchmark scores, daily usage trends, top app rankings, and task classification market share backed by a cloud-native **Neon PostgreSQL** database.
 
+**Acknowledgments / data sources:** [OpenRouter](https://openrouter.ai) · [Artificial Analysis](https://artificialanalysis.ai) · [models.dev](https://models.dev) · Product: [rankllms.com](https://rankllms.com) · Built by [CodaiPro](https://codaipro.com). See the free [User Guide](../USER_GUIDE.md).
+
 ---
 
 ## 1. Project Overview & Vision

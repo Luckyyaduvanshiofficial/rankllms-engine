@@ -22,7 +22,12 @@ from .services.openrouter_benchmarks_service import fetch_openrouter_unified_ben
 api = NinjaAPI(
     title="RankLLMs Engine API",
     version="1.0.0",
-    description="High-performance API engine powering LLM leaderboards, Open-LLM rankings, model comparisons, and weekly top 10 charts.",
+    description=(
+        "Free high-performance API powering LLM leaderboards, open-weights rankings, "
+        "model comparisons, and weekly top 10 charts. "
+        "Data sources: OpenRouter, Artificial Analysis, and models.dev. "
+        "Product: https://rankllms.com · Maintainer: https://codaipro.com"
+    ),
     docs_url="/docs"
 )
 

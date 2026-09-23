@@ -34,7 +34,8 @@ DEBUG=False
 SECRET_KEY=your-super-secret-production-key
 DATABASE_URL=postgresql://user:password@ep-sample-123.neon.tech/neondb?sslmode=require
 ARTIFICIAL_ANALYSIS_API_URL=https://artificialanalysis.ai/api/v2
-ARTIFICIAL_ANALYSIS_API_KEY=aa_DtsFXIHlTbHDWSJdfhNFKjlZfHKnAeBk
+ARTIFICIAL_ANALYSIS_API_KEY=your-artificial-analysis-api-key-here
+MODELS_DEV_API_URL=https://models.dev/api.json
 ```
 
 ### Step 3: Prevent Render Free Tier Sleeping (24/7 Keep-Alive Setup)

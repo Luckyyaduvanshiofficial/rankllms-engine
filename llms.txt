@@ -1,0 +1,25 @@
+# RankLLMs Engine
+> High-performance free API and benchmark intelligence engine for 900+ Large Language Models and Foundation AI Models.
+> Product: https://rankllms.com · Maintainer: https://codaipro.com
+
+## Core API Endpoints
+- Main Leaderboard: https://api.rankllms.com/api/v1/leaderboard
+- Query & Filter Models: https://api.rankllms.com/api/v1/models
+- Top 200 Model Cards: https://api.rankllms.com/api/v1/models/cards
+- Model Comparison: https://api.rankllms.com/api/v1/compare?model_a={slug}&model_b={slug}
+- Weekly Top 10: https://api.rankllms.com/api/v1/top-10
+- Provider Catalog: https://api.rankllms.com/api/v1/providers
+- System Health: https://api.rankllms.com/api/v1/health
+
+## Documentation
+- User Guide (free API): https://github.com/Luckyyaduvanshiofficial/rankllms-engine/blob/main/USER_GUIDE.md
+- AI Agent Guide: https://api.rankllms.com/docs/00_AI_AGENT_GUIDE.md
+- About Us & Tech Stack: https://api.rankllms.com/docs/01_Aboutus.md
+- Swagger UI: https://api.rankllms.com/api/v1/docs
+- OpenAPI JSON Spec: https://api.rankllms.com/api/v1/openapi.json
+
+## Data Sources (Acknowledgments)
+- OpenRouter: https://openrouter.ai
+- Artificial Analysis: https://artificialanalysis.ai
+- models.dev: https://models.dev
+

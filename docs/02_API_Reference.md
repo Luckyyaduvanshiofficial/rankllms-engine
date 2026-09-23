@@ -4,6 +4,10 @@ The RankLLMs REST API is powered by **Django Ninja** and **Pydantic v2**. It off
 
 Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
 
+> **Free & open-source.** Product: [rankllms.com](https://rankllms.com) · Maintainer: [CodaiPro](https://codaipro.com) · User guide: [USER_GUIDE.md](../USER_GUIDE.md)
+
+**Data sources (acknowledgments):** [OpenRouter](https://openrouter.ai), [Artificial Analysis](https://artificialanalysis.ai), [models.dev](https://models.dev).
+
 ---
 
 ## 📌 Summary of Endpoints

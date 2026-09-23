@@ -416,6 +416,42 @@ class AABench(models.Model):
         return f"{self.model_name} (Intel: {self.intelligence_index}, Code: {self.coding_index})"
 
 
+class ModelsDevModel(models.Model):
+    """
+    Direct models.dev catalog (Table: modelsdev).
+    Source: https://models.dev/api.json — free public provider/model metadata.
+    """
+    modelsdev_id = models.CharField(max_length=250, unique=True, db_index=True)
+    provider_slug = models.CharField(max_length=150, db_index=True)
+    provider_name = models.CharField(max_length=150, blank=True, default='')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, default='')
+    family = models.CharField(max_length=100, blank=True, default='', db_index=True)
+    reasoning = models.BooleanField(default=False, db_index=True)
+    tool_call = models.BooleanField(default=False, db_index=True)
+    structured_output = models.BooleanField(default=False)
+    temperature = models.BooleanField(default=True)
+    open_weights = models.BooleanField(default=False, db_index=True)
+    release_date = models.DateField(null=True, blank=True, db_index=True)
+    last_updated = models.DateField(null=True, blank=True)
+    modalities = models.JSONField(default=dict, blank=True)
+    context_length = models.IntegerField(default=0, db_index=True)
+    max_output_tokens = models.IntegerField(null=True, blank=True)
+    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
+    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0)
+    cache_read_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
+    status = models.CharField(max_length=50, blank=True, default='')
+    raw_json = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'modelsdev'
+        ordering = ['provider_name', 'name']
+
+    def __str__(self):
+        return f"{self.name} ({self.provider_name})"
+
+
 # ================= MERGED MASTER TABLE: rankindex =================
 
 class RankIndex(models.Model):

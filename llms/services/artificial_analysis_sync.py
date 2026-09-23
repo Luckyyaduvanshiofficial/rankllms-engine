@@ -11,7 +11,7 @@ def sync_artificial_analysis_data():
     Ultra-fast Bulk Ingestion Service for Artificial Analysis API v2.
     Ingests official LLM benchmark evaluations, pricing, throughput, and media ratings.
     """
-    api_key = getattr(settings, 'ARTIFICIAL_ANALYSIS_API_KEY', 'aa_DtsFXIHlTbHDWSJdfhNFKjlZfHKnAeBk')
+    api_key = getattr(settings, 'ARTIFICIAL_ANALYSIS_API_KEY', '') or ''
     base_url = getattr(settings, 'ARTIFICIAL_ANALYSIS_API_URL', 'https://artificialanalysis.ai/api/v2')
 
     headers = {

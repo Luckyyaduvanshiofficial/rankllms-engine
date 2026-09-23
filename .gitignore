@@ -6,3 +6,7 @@ db.sqlite3
 .idea/
 venv/
 *.log
+.agent/
+.agents/
+.zcode/
+skills-lock.json
