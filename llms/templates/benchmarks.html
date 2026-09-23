@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="wa-theme-default wa-palette-default wa-light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include "_wa_head.html" %}
   <title>AI Model Benchmarks — GPQA, SWE-bench, Intelligence Indices | RankLLMs</title>
   <meta name="description" content="Free AI benchmark matrix: OpenRouter, Design Arena, and Artificial Analysis scores including GPQA, SWE-bench, intelligence and coding indices.">
   <meta name="keywords" content="AI benchmarks, SWE-bench, GPQA, intelligence index, coding index, LLM evaluation">
@@ -15,97 +15,100 @@
   <meta name="twitter:title" content="AI Model Benchmarks | RankLLMs">
   <meta name="twitter:description" content="Unified benchmark evaluations for AI models: intelligence, coding, GPQA, SWE-bench, and more.">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #fafafa; }
-    .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
-    header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #eee; }
-    .logo { font-size: 1.25rem; font-weight: 700; color: #1a1a1a; text-decoration: none; }
-    nav a { margin-left: 1.5rem; color: #666; text-decoration: none; font-size: 0.9rem; }
-    nav a:hover { color: #1a1a1a; }
-    nav a.active { color: #1a1a1a; font-weight: 600; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
-    h1 { font-size: 1.5rem; }
-    .filters { display: flex; gap: 0.5rem; align-items: center; }
-    .filters select { padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85rem; }
-    #loading { text-align: center; padding: 2rem; color: #666; }
-    table { width: 100%; background: white; border-radius: 8px; border: 1px solid #eee; overflow: hidden; }
-    th { text-align: left; padding: 0.75rem 1rem; background: #f9f9f9; font-size: 0.75rem; font-weight: 600; color: #666; text-transform: uppercase; border-bottom: 1px solid #eee; }
-    td { padding: 0.75rem 1rem; border-bottom: 1px solid #f3f3f3; font-size: 0.9rem; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover { background: #fafafa; }
-    .rank { font-weight: 700; }
-    .score { font-family: 'Monaco', 'Menlo', monospace; font-size: 0.8rem; }
-    .source { display: inline-block; padding: 0.15rem 0.4rem; font-size: 0.65rem; border-radius: 3px; }
-    .source-openrouter { background: #fef3c7; color: #92400e; }
-    .source-design { background: #dbeafe; color: #1e40af; }
-    .source-artificial { background: #d1fae5; color: #065f46; }
-    footer { text-align: center; padding: 2rem 0; color: #999; font-size: 0.8rem; margin-top: 2rem; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--wa-space-s);
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <a href="/" class="logo">RankLLMs</a>
-      <nav>
-        <a href="/">Home</a>
-        <a href="/leaderboard">Leaderboard</a>
-        <a href="/benchmarks" class="active">Benchmarks</a>
-        <a href="/api/v1/docs" target="_blank">API</a>
-      </nav>
+  <wa-page>
+    <header slot="header" class="site-header section">
+      <div class="wa-cluster wa-gap-xs">
+        <a class="brand-wordmark" href="/">RankLLMs</a>
+        <wa-badge variant="neutral" appearance="outlined" pill class="brand-badge">Benchmarks</wa-badge>
+      </div>
+      {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+      <div class="header-actions">
+        <wa-button href="/api/v1/docs" appearance="outlined" size="s" class="api-link-btn" target="_blank" rel="noopener">
+          API ➔
+        </wa-button>
+        <wa-button data-toggle-nav appearance="plain" class="toggle-nav" aria-label="Open menu">
+          <wa-icon name="bars"></wa-icon>
+        </wa-button>
+      </div>
     </header>
 
-    <div class="page-header">
-      <h1>Model Benchmark Evaluations</h1>
-      <div class="filters">
-        <select id="source" onchange="loadBenchmarks()">
-          <option value="all">All Sources</option>
-          <option value="openrouter">OpenRouter</option>
-          <option value="design-arena">Design Arena</option>
-          <option value="artificial-analysis">Artificial Analysis</option>
-        </select>
-        <select id="sortBy" onchange="loadBenchmarks()">
-          <option value="score">Score</option>
-          <option value="accuracy">Accuracy</option>
-          <option value="elo">ELO</option>
-          <option value="intelligence">Intelligence</option>
-          <option value="coding">Coding</option>
-        </select>
+    {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
+
+    <main class="wa-stack wa-gap-xl section content-wrap">
+      <div class="page-header">
+        <div>
+          <div class="page-meta">
+            <wa-badge variant="neutral" appearance="outlined" pill>Unified benchmark matrix</wa-badge>
+            <span>&bull; OpenRouter · Design Arena · Artificial Analysis</span>
+          </div>
+          <h1>Model Benchmark Evaluations</h1>
+          <p class="page-lede">GPQA, SWE-bench, intelligence and coding indices from OpenRouter, Design Arena, and Artificial Analysis — free to explore.</p>
+        </div>
       </div>
-    </div>
 
-    <div id="loading">Loading benchmark data...</div>
-    <table id="benchmarks" style="display: none;">
-      <thead>
-        <tr>
-          <th style="width: 50px;">#</th>
-          <th>Model</th>
-          <th>Source</th>
-          <th>Type</th>
-          <th>Accuracy</th>
-          <th>ELO</th>
-          <th>Intelligence</th>
-          <th>Coding</th>
-        </tr>
-      </thead>
-      <tbody id="benchmarks-body"></tbody>
-    </table>
+      <wa-card class="controls-card">
+        <div class="page-controls">
+          <wa-select label="Source" size="s" id="source" onchange="loadBenchmarks()">
+            <wa-option value="all" selected>All Sources</wa-option>
+            <wa-option value="openrouter">OpenRouter</wa-option>
+            <wa-option value="design-arena">Design Arena</wa-option>
+            <wa-option value="artificial-analysis">Artificial Analysis</wa-option>
+          </wa-select>
+          <wa-select label="Sort by" size="s" id="sortBy" onchange="loadBenchmarks()">
+            <wa-option value="score" selected>Score</wa-option>
+            <wa-option value="accuracy">Accuracy</wa-option>
+            <wa-option value="elo">ELO</wa-option>
+            <wa-option value="intelligence">Intelligence</wa-option>
+            <wa-option value="coding">Coding</wa-option>
+          </wa-select>
+        </div>
+      </wa-card>
 
-    <footer>
-      <p>RankLLMs Engine &copy; 2026 &middot; Data from <a href="https://openrouter.ai" rel="noopener">OpenRouter</a>, <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &amp; <a href="https://models.dev" rel="noopener">models.dev</a></p>
+      <div id="loading" class="loading-row" style="display: block;">Loading benchmark data…</div>
+      <div class="lb-table-wrap" id="benchmarks-wrap" style="display: none;">
+        <table id="benchmarks" class="lb-table">
+          <thead>
+            <tr>
+              <th style="width: 56px; text-align: center;">#</th>
+              <th>Model</th>
+              <th style="text-align: center;">Source</th>
+              <th>Type</th>
+              <th style="text-align: center;">Accuracy</th>
+              <th style="text-align: center;">ELO</th>
+              <th style="text-align: center;">Intelligence</th>
+              <th style="text-align: center;">Coding</th>
+            </tr>
+          </thead>
+          <tbody id="benchmarks-body"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <footer slot="footer" class="section site-footer content-wrap">
+      <p>&copy; 2026 RankLLMs Engine &middot; Data from <a href="https://openrouter.ai" rel="noopener">OpenRouter</a>, <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &amp; <a href="https://models.dev" rel="noopener">models.dev</a></p>
       <p><a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; Built by <a href="https://codaipro.com" rel="noopener">CodaiPro</a></p>
+      <p>Core: <a href="/rankllms">👑 source of truth</a> &middot; <a href="/rankllms/models">📚 models</a> &middot; <a href="/llm-leaderboard">🏆 leaderboard</a> &middot; <a href="/">⚡ API</a></p>
     </footer>
-  </div>
+  </wa-page>
 
   <script>
     async function loadBenchmarks() {
       const source = document.getElementById('source').value;
       const sortBy = document.getElementById('sortBy').value;
       const loading = document.getElementById('loading');
-      const table = document.getElementById('benchmarks');
+      const wrap = document.getElementById('benchmarks-wrap');
       const tbody = document.getElementById('benchmarks-body');
 
       loading.style.display = 'block';
-      table.style.display = 'none';
+      wrap.style.display = 'none';
 
       try {
         const url = `/api/v1/benchmarks/openrouter?source=${source}&sort_by=${sortBy}&limit=100`;
@@ -118,28 +121,30 @@
           const item = data.items[i];
           const row = document.createElement('tr');
 
-          let sourceClass = '';
-          if (item.source === 'openrouter') sourceClass = 'source-openrouter';
-          else if (item.source === 'design-arena') sourceClass = 'source-design';
-          else if (item.source === 'artificial-analysis') sourceClass = 'source-artificial';
+          let sourceBadge = '';
+          if (item.source === 'openrouter') sourceBadge = '<wa-badge appearance="outlined" pill>OpenRouter</wa-badge>';
+          else if (item.source === 'design-arena') sourceBadge = '<wa-badge variant="neutral" appearance="outlined" pill>Design Arena</wa-badge>';
+          else if (item.source === 'artificial-analysis') sourceBadge = '<wa-badge variant="success" appearance="outlined" pill>Artificial Analysis</wa-badge>';
+          else sourceBadge = `<wa-badge appearance="outlined" pill>${item.source || '-'}</wa-badge>`;
 
           row.innerHTML = `
-            <td class="rank">${i + 1}</td>
-            <td>${item.display_name || item.model_permaslug || '-'}</td>
-            <td><span class="source ${sourceClass}">${item.source || '-'}</span></td>
-            <td>${item.benchmark_type || item.category || '-'}</td>
+            <td class="num lb-rank">${i + 1}</td>
+            <td class="model-cell">${item.display_name || item.model_permaslug || '-'}</td>
+            <td class="num">${sourceBadge}</td>
+            <td class="provider">${item.benchmark_type || item.category || '-'}</td>
             <td class="score">${item.accuracy ? item.accuracy.toFixed(1) + '%' : '-'}</td>
             <td class="score">${item.elo ? item.elo.toFixed(0) : '-'}</td>
             <td class="score">${item.intelligence_index ? item.intelligence_index.toFixed(1) : '-'}</td>
-            <td class="score">${item.coding_index ? item.coding_index.toFixed(1) : '-'}</td>
+            <td class="score score-code">${item.coding_index ? item.coding_index.toFixed(1) : '-'}</td>
           `;
           tbody.appendChild(row);
         }
 
         loading.style.display = 'none';
-        table.style.display = 'table';
+        wrap.style.display = 'block';
       } catch (err) {
         loading.textContent = 'Error loading benchmarks: ' + err.message;
+        loading.classList.add('is-error');
       }
     }
 

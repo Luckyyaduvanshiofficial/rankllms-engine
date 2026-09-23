@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="wa-theme-default wa-palette-default wa-light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include "_wa_head.html" %}
   <title>models.dev Catalog (modelsdev) | RankLLMs</title>
   <meta name="description" content="Visual explorer for models.dev catalog table (modelsdev): free provider and model metadata — modalities, open-weights, reasoning/tools flags, context limits, and $/M pricing, shown as-is.">
   <meta name="robots" content="index, follow">
@@ -14,188 +14,139 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="models.dev Catalog | RankLLMs">
   <meta name="twitter:description" content="Browse models.dev catalog with pricing, context, open-weights, and capabilities.">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            canvas: { DEFAULT: '#faf9f5', dark: '#141413' },
-            surface: {
-              card: '#ffffff',
-              soft: '#f3f1eb',
-              cream: '#fbfaf7',
-              'cream-strong': '#eeebe2',
-              dark: '#181715',
-            },
-            primary: { DEFAULT: '#cc785c', hover: '#b8664b' },
-            ink: { DEFAULT: '#181715', dark: '#f2f0e8' },
-            body: { DEFAULT: '#3d3c38', dark: '#c5c2ba' },
-            muted: { DEFAULT: '#6e6c64', dark: '#8d8a80', soft: '#a6a397' },
-            hairline: { DEFAULT: '#e8e5dc', dark: '#302f2c' },
-            accent: { teal: '#3b7a57', amber: '#d97706', red: '#dc2626' }
-          },
-          fontFamily: {
-            serif: ['Newsreader', 'Georgia', 'serif'],
-            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace']
-          },
-          letterSpacing: { 'tight-serif': '-0.02em' }
-        }
-      }
-    }
-  </script>
 </head>
-<body class="bg-canvas text-body font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
-
-  <header class="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur-md px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2 group">
-          <span class="font-serif text-2xl font-normal tracking-tight-serif text-ink group-hover:text-primary transition-colors">RankLLMs</span>
-          <span class="text-[11px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 font-bold">Table: modelsdev</span>
-        </a>
+<body>
+  <wa-page>
+    <header slot="header" class="site-header section">
+      <div class="wa-cluster wa-gap-xs">
+        <a class="brand-wordmark" href="/">RankLLMs</a>
+        <wa-badge variant="success" appearance="outlined" pill class="brand-badge">Table: modelsdev</wa-badge>
       </div>
-
-      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
-        <a href="/rankllms" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">👑 rankllms</a>
-        <a href="/rankllms/models" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📚 models</a>
-        <a href="/llm-leaderboard" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🏆 leaderboard</a>
-        <a href="/ormodels" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📦 or</a>
-        <a href="/orbench" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📊 orbench</a>
-        <a href="/aamodels" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🔬 aa</a>
-        <a href="/aabanch" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📈 aabanch</a>
-        <a href="/modelsdev" class="px-3 py-1.5 rounded-md text-ink bg-surface-card border border-hairline shadow-sm font-semibold">🧩 models.dev</a>
-        <a href="/" class="px-3 py-1.5 rounded-md text-primary font-medium hover:bg-surface-soft transition-all">⚡ API</a>
-      </nav>
-
-      <div class="flex items-center gap-2">
-        <a href="/api/v1/modelsdev" target="_blank" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium text-ink bg-surface-card border border-hairline hover:bg-surface-soft transition-colors">
+      {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+      <div class="header-actions">
+        <wa-button href="/api/v1/modelsdev" appearance="outlined" size="s" class="api-link-btn" target="_blank" rel="noopener">
           GET /api/v1/modelsdev ➔
-        </a>
+        </wa-button>
+        <wa-button data-toggle-nav appearance="plain" class="toggle-nav" aria-label="Open menu">
+          <wa-icon name="bars"></wa-icon>
+        </wa-button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-hairline pb-6">
-      <div>
-        <div class="flex items-center gap-2 mb-1">
-          <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 font-semibold">PostgreSQL Table: modelsdev</span>
-          <span class="text-xs font-mono text-muted">&bull; Source: models.dev/api.json (as-is)</span>
-        </div>
-        <h1 class="font-serif text-3xl sm:text-4xl font-normal tracking-tight-serif text-ink">models.dev Catalog (modelsdev)</h1>
-        <p class="text-sm text-muted mt-1">Direct database view of the free models.dev provider &amp; model metadata — modalities, open-weights, reasoning/tools, context, and cost.</p>
-      </div>
-      <div>
-        <button onclick="loadModelsDev()" class="px-3.5 py-2 rounded-md text-xs font-mono font-medium text-ink bg-canvas border border-hairline hover:bg-surface-soft transition-colors flex items-center gap-1.5 shadow-sm">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          <span>Refresh Table</span>
-        </button>
-      </div>
-    </div>
+    {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
 
-    <div class="bg-surface-card border border-hairline rounded-xl p-4 space-y-3">
-      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-        <div class="sm:col-span-5">
-          <input type="text" id="md-search-input" onkeyup="filterModelsDev()" placeholder="Search by name, id, provider, or family..." class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-sm text-ink placeholder:text-muted-soft focus:outline-none focus:border-primary font-sans">
+    <main class="wa-stack wa-gap-xl section content-wrap">
+      <div class="page-header">
+        <div>
+          <div class="page-meta">
+            <wa-badge variant="success" appearance="outlined" pill>PostgreSQL Table: modelsdev</wa-badge>
+            <span>&bull; Source: models.dev/api.json (as-is)</span>
+          </div>
+          <h1>models.dev Catalog (modelsdev)</h1>
+          <p class="page-lede">Direct database view of the free models.dev provider &amp; model metadata — modalities, open-weights, reasoning/tools, context, and cost.</p>
         </div>
-        <div class="sm:col-span-4">
-          <select id="md-sort-select" onchange="onSortSelectChange()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
-            <option value="release_date">Sort: Release Date (Newest First)</option>
-            <option value="name">Sort: Model Name Alphabetical</option>
-            <option value="provider">Sort: Provider</option>
-            <option value="context">Sort: Context Length</option>
-            <option value="prompt_price">Sort: Prompt Price ($/1M)</option>
-            <option value="completion_price">Sort: Output Price ($/1M)</option>
-            <option value="family">Sort: Family</option>
-          </select>
-        </div>
-        <div class="sm:col-span-3 flex items-center gap-2">
-          <button onclick="toggleSortDir()" class="flex-1 py-2 px-3 rounded-md text-xs font-mono font-medium text-ink bg-canvas border border-hairline hover:bg-surface-card transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-            <span id="md-sort-dir-icon">↓</span>
-            <span id="md-sort-dir-label">High to Low</span>
-          </button>
+        <div class="page-actions">
+          <wa-button appearance="outlined" size="s" onclick="loadModelsDev()">
+            <wa-icon slot="start" name="arrows-rotate"></wa-icon>
+            Refresh Table
+          </wa-button>
         </div>
       </div>
-      <div class="flex flex-wrap gap-2 pt-1">
-        <button onclick="toggleFlagFilter('open')" id="flag-open" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Open weights</button>
-        <button onclick="toggleFlagFilter('reason')" id="flag-reason" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Reasoning</button>
-        <button onclick="toggleFlagFilter('tools')" id="flag-tools" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Tool call</button>
-      </div>
-    </div>
 
-    <div class="bg-canvas border border-hairline rounded-xl overflow-hidden shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm whitespace-nowrap">
-          <thead class="bg-surface-soft text-muted font-mono text-xs uppercase tracking-wider border-b border-hairline select-none">
+      <wa-card class="controls-card">
+        <div class="wa-stack wa-gap-s">
+          <div class="page-controls">
+            <wa-input
+              type="search"
+              label="Search"
+              placeholder="Search by name, id, provider, or family…"
+              size="s"
+              id="md-search-input"
+              onkeyup="filterModelsDev()"
+            >
+              <wa-icon slot="start" name="magnifying-glass"></wa-icon>
+            </wa-input>
+            <wa-select label="Sort by" size="s" id="md-sort-select" onchange="onSortSelectChange()">
+              <wa-option value="release_date" selected>Sort: Release Date (Newest First)</wa-option>
+              <wa-option value="name">Sort: Model Name Alphabetical</wa-option>
+              <wa-option value="provider">Sort: Provider</wa-option>
+              <wa-option value="context">Sort: Context Length</wa-option>
+              <wa-option value="prompt_price">Sort: Prompt Price ($/1M)</wa-option>
+              <wa-option value="completion_price">Sort: Output Price ($/1M)</wa-option>
+              <wa-option value="family">Sort: Family</wa-option>
+            </wa-select>
+            <wa-button appearance="outlined" size="s" class="sort-dir-btn" onclick="toggleSortDir()">
+              <span id="md-sort-dir-icon">↓</span>&nbsp;<span id="md-sort-dir-label">High to Low</span>
+            </wa-button>
+          </div>
+          <div class="filter-pills" role="group" aria-label="Flag filters">
+            <wa-button size="s" appearance="outlined" id="flag-open" onclick="toggleFlagFilter('open')">Open weights</wa-button>
+            <wa-button size="s" appearance="outlined" id="flag-reason" onclick="toggleFlagFilter('reason')">Reasoning</wa-button>
+            <wa-button size="s" appearance="outlined" id="flag-tools" onclick="toggleFlagFilter('tools')">Tool call</wa-button>
+          </div>
+        </div>
+      </wa-card>
+
+      <div class="lb-table-wrap">
+        <table class="lb-table">
+          <thead>
             <tr>
-              <th class="py-3 px-4 w-16 text-center">#</th>
-              <th class="py-3 px-4">Model &amp; models.dev ID</th>
-              <th class="py-3 px-4">Provider</th>
-              <th class="py-3 px-4 text-center">Context</th>
-              <th class="py-3 px-4 text-right">Prompt / 1M</th>
-              <th class="py-3 px-4 text-right">Output / 1M</th>
-              <th class="py-3 px-4 text-center">Flags</th>
+              <th style="width: 56px; text-align: center;">#</th>
+              <th>Model &amp; models.dev ID</th>
+              <th>Provider</th>
+              <th style="text-align: center;">Context</th>
+              <th style="text-align: right;">Prompt / 1M</th>
+              <th style="text-align: right;">Output / 1M</th>
+              <th style="text-align: center;">Flags</th>
             </tr>
           </thead>
-          <tbody id="modelsdev-table-body" class="divide-y divide-hairline text-body">
-            <tr><td colspan="7" class="py-12 text-center text-muted font-mono text-xs">Loading models.dev catalog from table 'modelsdev'...</td></tr>
+          <tbody id="modelsdev-table-body">
+            <tr><td colspan="7" class="loading-row">Loading models.dev catalog from table 'modelsdev'…</td></tr>
           </tbody>
         </table>
       </div>
-    </div>
-  </main>
+    </main>
 
-  <footer class="border-t border-hairline bg-surface-card text-xs mt-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-hairline">
-        <div class="space-y-3">
-          <div class="font-serif text-2xl tracking-tight-serif text-ink">RankLLMs</div>
-          <p class="text-muted leading-relaxed">
-            The independent benchmark engine and intelligent model router powering production AI infrastructure.
-          </p>
+    <footer slot="footer" class="section site-footer content-wrap">
+      <div class="footer-cols">
+        <div>
+          <div class="brand-wordmark" style="font-size: var(--wa-font-size-xl);">RankLLMs</div>
+          <p class="col-blurb">The independent benchmark engine and intelligent model router powering production AI infrastructure.</p>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Raw Tables</div>
-          <ul class="space-y-2">
-            <li><a href="/ormodels" class="text-body hover:text-primary">📦 ormodels (OpenRouter Catalog)</a></li>
-            <li><a href="/orbench" class="text-body hover:text-primary">📊 orbench (OpenRouter Benchmarks)</a></li>
-            <li><a href="/aamodels" class="text-body hover:text-primary">🔬 aamodels (AA Catalog)</a></li>
-            <li><a href="/aabanch" class="text-body hover:text-primary">📈 aabanch (AA Benchmarks)</a></li>
-            <li><a href="/modelsdev" class="text-primary font-semibold">🧩 modelsdev (models.dev)</a></li>
+        <div>
+          <div class="col-title">Raw Tables</div>
+          <ul>
+            <li><a href="/ormodels">📦 ormodels (OpenRouter Catalog)</a></li>
+            <li><a href="/orbench">📊 orbench (OpenRouter Benchmarks)</a></li>
+            <li><a href="/aamodels">🔬 aamodels (AA Catalog)</a></li>
+            <li><a href="/aabanch">📈 aabanch (AA Benchmarks)</a></li>
+            <li><a href="/modelsdev" class="is-active">🧩 modelsdev (models.dev)</a></li>
           </ul>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Core Views</div>
-          <ul class="space-y-2">
-            <li><a href="/rankllms" class="text-body hover:text-primary">👑 rankllms (source of truth)</a></li>
-            <li><a href="/rankllms/models" class="text-body hover:text-primary">📚 All Models</a></li>
-            <li><a href="/llm-leaderboard" class="text-body hover:text-primary">🏆 LLM Leaderboard</a></li>
-            <li><a href="/benchmarks" class="text-body hover:text-primary">🔬 Unified Benchmarks</a></li>
+        <div>
+          <div class="col-title">Core Views</div>
+          <ul>
+            <li><a href="/rankllms">👑 rankllms (source of truth)</a></li>
+            <li><a href="/rankllms/models">📚 All Models</a></li>
+            <li><a href="/llm-leaderboard">🏆 LLM Leaderboard</a></li>
+            <li><a href="/benchmarks">🔬 Unified Benchmarks</a></li>
           </ul>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Developers</div>
-          <ul class="space-y-2">
-            <li><a href="/" class="text-body hover:text-primary">⚡ API Studio & Docs</a></li>
-            <li><a href="/api/v1/docs" target="_blank" class="text-body hover:text-primary">📖 OpenAPI /docs</a></li>
-            <li><a href="/llms.txt" target="_blank" class="text-body hover:text-primary">📄 llms.txt</a></li>
+        <div>
+          <div class="col-title">Developers</div>
+          <ul>
+            <li><a href="/">⚡ API Studio &amp; Docs</a></li>
+            <li><a href="/api/v1/docs" target="_blank" rel="noopener">📖 OpenAPI /docs</a></li>
+            <li><a href="/llms.txt" target="_blank" rel="noopener">📄 llms.txt</a></li>
           </ul>
         </div>
       </div>
-      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-muted text-[11px]">
-        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" class="hover:text-ink" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" class="hover:text-ink" rel="noopener">CodaiPro</a></div>
-        <div>Data: <a href="https://openrouter.ai" class="hover:text-ink" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" class="hover:text-ink" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" class="hover:text-ink" rel="noopener">models.dev</a></div>
+      <div class="footer-bar">
+        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" rel="noopener">CodaiPro</a></div>
+        <div>Data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></div>
       </div>
-    </div>
-  </footer>
+    </footer>
+  </wa-page>
 
   <script>
     let rawModelsDev = [];
@@ -205,14 +156,14 @@
 
     async function loadModelsDev() {
       const tbody = document.getElementById('modelsdev-table-body');
-      tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-muted font-mono text-xs">Loading models.dev catalog from database table 'modelsdev'...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Loading models.dev catalog from database table 'modelsdev'…</td></tr>`;
       try {
         const res = await fetch(`/api/v1/modelsdev?limit=1000`);
         const data = await res.json();
         rawModelsDev = data.items || [];
         applySorting();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-red-600 font-mono text-xs">Error loading modelsdev: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="loading-row is-error">Error loading modelsdev: ${err.message}</td></tr>`;
       }
     }
 
@@ -220,9 +171,13 @@
       flagFilters[key] = !flagFilters[key];
       const btn = document.getElementById('flag-' + (key === 'open' ? 'open' : key === 'reason' ? 'reason' : 'tools'));
       if (btn) {
-        btn.className = flagFilters[key]
-          ? 'px-2.5 py-1 rounded text-[11px] font-mono border border-primary bg-primary/10 text-primary font-semibold'
-          : 'px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors';
+        if (flagFilters[key]) {
+          btn.setAttribute('appearance', 'filled');
+          btn.setAttribute('variant', 'brand');
+        } else {
+          btn.removeAttribute('variant');
+          btn.setAttribute('appearance', 'outlined');
+        }
       }
       filterModelsDev();
     }
@@ -297,7 +252,7 @@
     function renderTable(items) {
       const tbody = document.getElementById('modelsdev-table-body');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-muted font-mono text-xs">No matching models found in table 'modelsdev'.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="table-empty">No matching models found in table 'modelsdev'.</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map((m, idx) => {
@@ -305,22 +260,19 @@
         const pIn = m.prompt_price_per_1m != null ? parseFloat(m.prompt_price_per_1m).toFixed(2) : '—';
         const pOut = m.completion_price_per_1m != null ? parseFloat(m.completion_price_per_1m).toFixed(2) : '—';
         const flags = [
-          m.open_weights ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">Open</span>' : '',
-          m.reasoning ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-violet-500/10 text-violet-700 border border-violet-500/30">Reason</span>' : '',
-          m.tool_call ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-500/10 text-sky-700 border border-sky-500/30">Tools</span>' : '',
+          m.open_weights ? '<wa-badge variant="success" appearance="outlined" pill>Open</wa-badge>' : '',
+          m.reasoning ? '<wa-badge variant="neutral" appearance="outlined" pill>Reason</wa-badge>' : '',
+          m.tool_call ? '<wa-badge variant="neutral" appearance="outlined" pill>Tools</wa-badge>' : '',
         ].filter(Boolean).join(' ');
         return `
-          <tr class="hover:bg-surface-soft/60 transition-colors">
-            <td class="py-3 px-4 font-mono text-xs font-semibold text-muted text-center">#${idx + 1}</td>
-            <td class="py-3 px-4">
-              <div class="font-medium text-ink">${m.name}</div>
-              <div class="font-mono text-[11px] text-muted-soft mt-0.5">${m.modelsdev_id}</div>
-            </td>
-            <td class="py-3 px-4 font-mono text-xs text-body">${m.provider_name || m.provider_slug || '-'}</td>
-            <td class="py-3 px-4 text-center font-mono text-xs text-ink font-semibold">${ctx}</td>
-            <td class="py-3 px-4 text-right font-mono text-xs text-body">$${pIn}</td>
-            <td class="py-3 px-4 text-right font-mono text-xs text-body">$${pOut}</td>
-            <td class="py-3 px-4"><div class="flex gap-1 flex-wrap">${flags || '<span class="text-muted-soft">—</span>'}</div></td>
+          <tr>
+            <td class="num">#${idx + 1}</td>
+            <td class="model-cell">${m.name}<span class="slug">${m.modelsdev_id}</span></td>
+            <td class="provider">${m.provider_name || m.provider_slug || '-'}</td>
+            <td class="score">${ctx}</td>
+            <td class="num" style="text-align: right;">$${pIn}</td>
+            <td class="num" style="text-align: right;">$${pOut}</td>
+            <td class="num">${flags || '<span class="provider">—</span>'}</td>
           </tr>
         `;
       }).join('');
