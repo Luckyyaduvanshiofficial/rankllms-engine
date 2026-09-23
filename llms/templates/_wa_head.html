@@ -343,7 +343,7 @@
     }
 
     .content-wrap {
-      max-width: 72rem;
+      max-width: min(88rem, 100%);
       margin-inline: auto;
       width: 100%;
     }
@@ -627,34 +627,65 @@
       display: inline-flex;
     }
 
-    /* Page header (title + meta + controls) */
+    /* Page intro card (title + meta + actions) — boxed like controls/table */
     .page-header {
+      position: relative;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       flex-wrap: wrap;
-      gap: var(--wa-space-m);
-      padding-bottom: var(--wa-space-m);
-      border-bottom: 1px solid var(--wa-color-surface-border);
+      gap: var(--wa-space-l);
+      padding: var(--wa-space-l);
+      background: var(--wa-color-surface-raised);
+      border: 1px solid var(--wa-color-surface-border);
+      border-radius: var(--wa-border-radius-l);
+      overflow: hidden;
+    }
+
+    .page-header::before {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: 0;
+      width: 3px;
+      background: var(--wa-color-brand-fill-normal);
+      opacity: 0.85;
+    }
+
+    .page-header > div:first-child {
+      flex: 1 1 18rem;
+      min-width: 0;
     }
 
     .page-header h1 {
       font-family: var(--wa-font-family-display);
       font-weight: 500;
       letter-spacing: -0.02em;
-      margin: 0;
-      font-size: var(--wa-font-size-2xl);
+      margin: var(--wa-space-s) 0 0;
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      line-height: 1.2;
       text-wrap: balance;
     }
 
     .page-meta {
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       gap: var(--wa-space-s);
       font-family: var(--wa-font-family-mono);
       font-size: var(--wa-font-size-2xs);
       color: var(--wa-color-text-quiet);
-      margin-top: var(--wa-space-2xs);
+      margin-top: 0;
+      line-height: 1.5;
+    }
+
+    .page-meta wa-badge {
+      flex: 0 0 auto;
+    }
+
+    .page-meta > span {
+      min-width: 0;
+      text-wrap: pretty;
     }
 
     .page-meta strong {
@@ -673,9 +704,33 @@
     .page-lede {
       color: var(--wa-color-text-quiet);
       font-size: var(--wa-font-size-s);
-      max-width: 40rem;
-      margin: var(--wa-space-2xs) 0 0;
+      max-width: 52rem;
+      margin: var(--wa-space-s) 0 0;
       line-height: 1.55;
+      text-wrap: pretty;
+    }
+
+    .page-lede + .page-meta {
+      margin-top: var(--wa-space-m);
+      padding-top: var(--wa-space-s);
+      border-top: 1px dashed var(--wa-color-surface-border);
+    }
+
+    .page-header .page-actions {
+      margin-inline-start: auto;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 640px) {
+      .page-header {
+        padding: var(--wa-space-m);
+        gap: var(--wa-space-m);
+      }
+
+      .page-header .page-actions {
+        margin-inline-start: 0;
+        width: 100%;
+      }
     }
 
     .page-controls {
@@ -688,6 +743,7 @@
     .page-controls wa-input,
     .page-controls wa-select {
       min-width: 10rem;
+      flex: 1 1 12rem;
     }
 
     .category-pills {
