@@ -1,0 +1,8 @@
+{
+  "name": "rankllms-engine",
+  "private": true,
+  "description": "Sidecar for Web Awesome agent skills (Django app has no JS build)",
+  "devDependencies": {
+    "@awesome.me/webawesome": "^3.13.0"
+  }
+}
