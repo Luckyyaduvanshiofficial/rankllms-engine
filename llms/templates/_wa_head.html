@@ -175,14 +175,17 @@
       --wa-color-brand-border-normal: #cc785c;
       --wa-color-brand-border-quiet: #e8b8a8;
 
-      /* RankLLMs canvas / ink / muted */
-      --wa-color-surface-default: #faf9f5;
-      --wa-color-surface-raised: #ffffff;
-      --wa-color-surface-lowered: #f3f1eb;
-      --wa-color-surface-border: #e8e5dc;
+      /* Brand-tinted canvas / ink / muted (warm terracotta neutrals, not pure gray) */
+      --wa-color-surface-default: color-mix(in oklab, #faf9f5 94%, #cc785c);
+      --wa-color-surface-raised: color-mix(in oklab, #fffdfb 96%, #cc785c);
+      --wa-color-surface-lowered: color-mix(in oklab, #f3efe9 82%, #cc785c);
+      --wa-color-surface-border: color-mix(in oklab, #e8e5dc 55%, #cc785c);
       --wa-color-text-normal: #181715;
-      --wa-color-text-quiet: #6e6c64;
+      --wa-color-text-quiet: color-mix(in oklab, #6e6c64 78%, #cc785c);
       --wa-color-text-link: #b8664b;
+      /* Brand-tinted elevation shadow (brown, not black) */
+      --wa-color-shadow: color-mix(in srgb, #3a1c12 22%, transparent);
+      --wa-color-mix-hover: color-mix(in srgb, #cc785c 10%, transparent);
 
       --wa-font-family-display: "Newsreader", Georgia, serif;
       --wa-font-family-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -190,15 +193,17 @@
     }
 
     .wa-dark {
-      --wa-color-surface-default: #141413;
-      --wa-color-surface-raised: #181715;
-      --wa-color-surface-lowered: #100f0e;
-      --wa-color-surface-border: #302f2c;
+      --wa-color-surface-default: color-mix(in oklab, #141413 92%, #cc785c);
+      --wa-color-surface-raised: color-mix(in oklab, #1c1917 90%, #cc785c);
+      --wa-color-surface-lowered: color-mix(in oklab, #100f0e 88%, #cc785c);
+      --wa-color-surface-border: color-mix(in oklab, #302f2c 55%, #cc785c);
       --wa-color-text-normal: #f2f0e8;
-      --wa-color-text-quiet: #8d8a80;
+      --wa-color-text-quiet: color-mix(in oklab, #8d8a80 72%, #cc785c);
       --wa-color-text-link: #e8b8a8;
       --wa-color-brand-on-quiet: #e8b8a8;
       --wa-color-brand-fill-quiet: #2a221e;
+      --wa-color-shadow: color-mix(in srgb, #000000 40%, #cc785c 12%);
+      --wa-color-mix-hover: color-mix(in srgb, #cc785c 14%, transparent);
     }
 
     body {
@@ -212,7 +217,12 @@
     }
 
     .section {
-      padding-inline: var(--wa-space-xl);
+      padding-inline: var(--wa-space-2xl);
+    }
+
+    /* Roomier vertical rhythm between stacked page blocks */
+    main.wa-stack.wa-gap-xl {
+      gap: var(--wa-space-2xl);
     }
 
     .brand-wordmark {
@@ -234,7 +244,7 @@
       align-items: center;
       flex-wrap: wrap;
       gap: var(--wa-space-m) var(--wa-space-l);
-      padding-block: var(--wa-space-s);
+      padding-block: var(--wa-space-m);
       border-bottom: 1px solid var(--wa-color-surface-border);
       background: color-mix(in srgb, var(--wa-color-surface-default) 88%, transparent);
       backdrop-filter: blur(12px);
@@ -293,7 +303,7 @@
     .drawer-nav .drawer-nav-group {
       display: flex;
       flex-direction: column;
-      gap: var(--wa-space-2xs);
+      gap: var(--wa-space-xs);
       margin-top: var(--wa-space-xs);
       padding-top: var(--wa-space-xs);
       border-top: 1px solid var(--wa-color-surface-border);
@@ -350,7 +360,7 @@
 
     .hero {
       text-align: center;
-      padding-block: var(--wa-space-3xl) var(--wa-space-2xl);
+      padding-block: var(--wa-space-4xl) var(--wa-space-3xl);
     }
 
     .hero h1 {
@@ -443,7 +453,7 @@
     }
 
     .section-block {
-      padding-block: var(--wa-space-xl);
+      padding-block: var(--wa-space-2xl);
     }
 
     .feature-card h3 {
@@ -492,7 +502,7 @@
     .source-card .card-links {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--wa-space-2xs);
+      gap: var(--wa-space-xs);
     }
 
     .flow-card {
@@ -511,13 +521,13 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      gap: var(--wa-space-2xs) var(--wa-space-xs);
+      gap: var(--wa-space-xs) var(--wa-space-m);
       font-family: var(--wa-font-family-mono);
       font-size: var(--wa-font-size-2xs);
     }
 
     .flow-step {
-      padding: var(--wa-space-3xs) var(--wa-space-s);
+      padding: var(--wa-space-2xs) var(--wa-space-m);
       background: var(--wa-color-surface-lowered);
       border: 1px solid var(--wa-color-surface-border);
       border-radius: var(--wa-border-radius-m);
@@ -539,7 +549,7 @@
     .endpoint-list {
       display: flex;
       flex-direction: column;
-      gap: var(--wa-space-2xs);
+      gap: var(--wa-space-xs);
       margin: 0;
       padding: 0;
       list-style: none;
@@ -550,7 +560,7 @@
       align-items: center;
       gap: var(--wa-space-s);
       flex-wrap: wrap;
-      padding: var(--wa-space-s);
+      padding: var(--wa-space-m) var(--wa-space-l);
       background: var(--wa-color-surface-lowered);
       border: 1px solid var(--wa-color-surface-border);
       border-radius: var(--wa-border-radius-m);
@@ -576,7 +586,7 @@
       padding: 0;
       margin: 0;
       display: grid;
-      gap: var(--wa-space-2xs);
+      gap: var(--wa-space-xs);
     }
 
     .credits-list li {
@@ -601,13 +611,13 @@
 
     .site-footer {
       border-top: 1px solid var(--wa-color-surface-border);
-      padding-block: var(--wa-space-l);
+      padding-block: var(--wa-space-xl);
       text-align: center;
       color: var(--wa-color-text-quiet);
       font-size: var(--wa-font-size-s);
       display: flex;
       flex-direction: column;
-      gap: var(--wa-space-2xs);
+      gap: var(--wa-space-xs);
       align-items: center;
     }
 
@@ -634,12 +644,13 @@
       justify-content: space-between;
       align-items: flex-start;
       flex-wrap: wrap;
-      gap: var(--wa-space-l);
-      padding: var(--wa-space-l);
+      gap: var(--wa-space-xl);
+      padding: var(--wa-space-2xl);
       background: var(--wa-color-surface-raised);
       border: 1px solid var(--wa-color-surface-border);
       border-radius: var(--wa-border-radius-l);
       overflow: hidden;
+      box-shadow: var(--wa-shadow-s);
     }
 
     .page-header::before {
@@ -661,7 +672,7 @@
       font-family: var(--wa-font-family-display);
       font-weight: 500;
       letter-spacing: -0.02em;
-      margin: var(--wa-space-s) 0 0;
+      margin: var(--wa-space-m) 0 0;
       font-size: clamp(1.5rem, 2.5vw, 2rem);
       line-height: 1.2;
       text-wrap: balance;
@@ -705,14 +716,14 @@
       color: var(--wa-color-text-quiet);
       font-size: var(--wa-font-size-s);
       max-width: 52rem;
-      margin: var(--wa-space-s) 0 0;
+      margin: var(--wa-space-m) 0 0;
       line-height: 1.55;
       text-wrap: pretty;
     }
 
     .page-lede + .page-meta {
-      margin-top: var(--wa-space-m);
-      padding-top: var(--wa-space-s);
+      margin-top: var(--wa-space-l);
+      padding-top: var(--wa-space-m);
       border-top: 1px dashed var(--wa-color-surface-border);
     }
 
@@ -723,7 +734,7 @@
 
     @media (max-width: 640px) {
       .page-header {
-        padding: var(--wa-space-m);
+        padding: var(--wa-space-l);
         gap: var(--wa-space-m);
       }
 
@@ -737,7 +748,7 @@
       display: flex;
       flex-wrap: wrap;
       align-items: flex-end;
-      gap: var(--wa-space-s);
+      gap: var(--wa-space-m);
     }
 
     .page-controls wa-input,
@@ -749,8 +760,8 @@
     .category-pills {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--wa-space-2xs);
-      margin-top: var(--wa-space-s);
+      gap: var(--wa-space-xs);
+      margin-top: var(--wa-space-m);
     }
 
     /* Semantic HTML tables (no wa-table on free tier) */
@@ -759,6 +770,7 @@
       border: 1px solid var(--wa-color-surface-border);
       border-radius: var(--wa-border-radius-l);
       background: var(--wa-color-surface-raised);
+      box-shadow: var(--wa-shadow-s);
     }
 
     .lb-table {
@@ -777,13 +789,13 @@
       letter-spacing: 0.04em;
       color: var(--wa-color-text-quiet);
       background: var(--wa-color-surface-lowered);
-      padding: var(--wa-space-s) var(--wa-space-m);
+      padding: var(--wa-space-m) var(--wa-space-l);
       border-bottom: 1px solid var(--wa-color-surface-border);
       user-select: none;
     }
 
     .lb-table td {
-      padding: var(--wa-space-s) var(--wa-space-m);
+      padding: var(--wa-space-m) var(--wa-space-l);
       border-bottom: 1px solid var(--wa-color-surface-border);
       color: var(--wa-color-text-normal);
       vertical-align: middle;
@@ -933,7 +945,8 @@
 
     /* Controls card / API footnote */
     .controls-card {
-      padding: var(--wa-space-m);
+      padding: var(--wa-space-l);
+      box-shadow: var(--wa-shadow-s);
     }
 
     .api-note {
@@ -1042,7 +1055,7 @@
     .filter-pills {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--wa-space-2xs);
+      gap: var(--wa-space-xs);
     }
 
     /* Sort direction toggle */
@@ -1078,7 +1091,7 @@
       margin: 0;
       padding: 0;
       display: grid;
-      gap: var(--wa-space-2xs);
+      gap: var(--wa-space-xs);
     }
 
     .footer-cols a {
