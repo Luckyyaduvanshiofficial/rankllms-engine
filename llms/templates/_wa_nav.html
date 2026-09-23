@@ -1,6 +1,6 @@
-{# Shared RankLLMs primary nav.
-   Header-only today; dual-include (header + drawer) lands with the wa-page shell.
+{# Shared RankLLMs primary nav — dual-include (header desktop / drawer mobile).
    {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+   {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
    Pass active_path=request.path to highlight the current page. #}
 {% if nav_class == "header-nav" %}
 <nav class="header-nav" aria-label="Primary">
