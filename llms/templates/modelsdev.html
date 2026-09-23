@@ -108,12 +108,12 @@
         </div>
         <div class="sm:col-span-4">
           <select id="md-sort-select" onchange="onSortSelectChange()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
+            <option value="release_date">Sort: Release Date (Newest First)</option>
             <option value="name">Sort: Model Name Alphabetical</option>
             <option value="provider">Sort: Provider</option>
             <option value="context">Sort: Context Length</option>
             <option value="prompt_price">Sort: Prompt Price ($/1M)</option>
             <option value="completion_price">Sort: Output Price ($/1M)</option>
-            <option value="release_date">Sort: Release Date</option>
             <option value="family">Sort: Family</option>
           </select>
         </div>
@@ -199,8 +199,8 @@
 
   <script>
     let rawModelsDev = [];
-    let currentSortField = 'name';
-    let currentSortDir = 'asc';
+    let currentSortField = 'release_date';
+    let currentSortDir = 'desc';
     const flagFilters = { open: false, reason: false, tools: false };
 
     async function loadModelsDev() {
@@ -266,6 +266,9 @@
         } else if (currentSortField === 'release_date') {
           valA = a.release_date || '';
           valB = b.release_date || '';
+          if (!valA && !valB) return 0;
+          if (!valA) return 1;
+          if (!valB) return -1;
           return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else {
           valA = parseInt(a.context_length || 0);

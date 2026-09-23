@@ -133,7 +133,8 @@
         <!-- Sort Select -->
         <div class="sm:col-span-4">
           <select id="rank-sort-select" onchange="onSortSelectChange()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
-            <option value="rank">Sort: Overall Composite Rank (Default)</option>
+            <option value="release_date">Sort: Release Date (Newest First)</option>
+            <option value="rank">Sort: Overall Composite Rank</option>
             <option value="rankllms_index">Sort: RankLLMs Composite Index (0-100)</option>
             <option value="intelligence">Sort: Intelligence Index</option>
             <option value="coding">Sort: Coding Index / TerminalBench</option>
@@ -273,15 +274,15 @@
   <script>
     let rawRankIndex = [];
     let currentCategoryFilter = 'all';
-    let currentSortField = 'rank';
-    let currentSortDir = 'asc';
+    let currentSortField = 'release_date';
+    let currentSortDir = 'desc';
 
     async function loadRankIndex() {
       const tbody = document.getElementById('rankindex-table-body');
       tbody.innerHTML = `<tr><td colspan="9" class="py-12 text-center text-muted font-mono text-xs">Loading merged model matrix from table 'rankindex'...</td></tr>`;
 
       try {
-        const res = await fetch(`/api/v1/rankindex?limit=1000`);
+        const res = await fetch(`/api/v1/rankindex?limit=1000&sort_by=release_date&sort_dir=desc`);
         const data = await res.json();
         rawRankIndex = data.items || [];
         applySorting();
@@ -359,6 +360,13 @@
         if (currentSortField === 'name') {
           valA = (a.name || '').toLowerCase();
           valB = (b.name || '').toLowerCase();
+          return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
+        } else if (currentSortField === 'release_date') {
+          valA = a.release_date || '';
+          valB = b.release_date || '';
+          if (!valA && !valB) return 0;
+          if (!valA) return 1;
+          if (!valB) return -1;
           return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else if (currentSortField === 'rank') {
           valA = parseInt(a.rank_overall || 9999);

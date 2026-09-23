@@ -939,8 +939,8 @@ def list_ormodels(
     search: str = "",
     author: str = "",
     is_free: Optional[bool] = None,
-    sort_by: str = "name",
-    sort_dir: str = "asc",
+    sort_by: str = "created_at",
+    sort_dir: str = "desc",
     limit: int = Field(100, ge=1, le=1000),
     offset: int = 0
 ):
@@ -966,8 +966,9 @@ def list_ormodels(
         'prompt_price': 'prompt_price_per_1m',
         'completion_price': 'completion_price_per_1m',
         'author': 'author',
+        'created_at': 'created_at',
     }
-    field = order_fields.get(sort_by, 'name')
+    field = order_fields.get(sort_by, 'created_at')
     prefix = '-' if sort_dir.lower() == 'desc' else ''
     qs = qs.order_by(f"{prefix}{field}")
 
@@ -1072,8 +1073,8 @@ def list_aamodels(
     request,
     search: str = "",
     creator: str = "",
-    sort_by: str = "name",
-    sort_dir: str = "asc",
+    sort_by: str = "release_date",
+    sort_dir: str = "desc",
     limit: int = Field(100, ge=1, le=1000),
     offset: int = 0
 ):
@@ -1097,9 +1098,13 @@ def list_aamodels(
         'completion_price': 'completion_price_per_1m',
         'release_date': 'release_date',
     }
-    field = order_fields.get(sort_by, 'name')
+    field = order_fields.get(sort_by, 'release_date')
     prefix = '-' if sort_dir.lower() == 'desc' else ''
-    qs = qs.order_by(f"{prefix}{field}")
+    if field == 'release_date':
+        expr = F('release_date').desc(nulls_last=True) if prefix else F('release_date').asc(nulls_last=True)
+        qs = qs.order_by(expr)
+    else:
+        qs = qs.order_by(f"{prefix}{field}")
 
     total = qs.count()
     items = list(qs[offset:offset + limit].values(
@@ -1196,8 +1201,8 @@ def list_rankindex(
     provider: str = "",
     is_open_weight: Optional[bool] = None,
     is_free: Optional[bool] = None,
-    sort_by: str = "rank",
-    sort_dir: str = "asc",
+    sort_by: str = "release_date",
+    sort_dir: str = "desc",
     limit: int = Field(100, ge=1, le=1000),
     offset: int = 0
 ):
@@ -1243,9 +1248,14 @@ def list_rankindex(
         'latency': 'time_to_first_token',
         'name': 'name',
     }
-    field = order_fields.get(sort_by, 'rank_overall')
+    field = order_fields.get(sort_by, 'release_date')
     prefix = '-' if sort_dir.lower() == 'desc' else ''
-    qs = qs.order_by(f"{prefix}{field}")
+    if field == 'release_date':
+        qs = qs.order_by(
+            F('release_date').desc(nulls_last=True) if prefix else F('release_date').asc(nulls_last=True)
+        )
+    else:
+        qs = qs.order_by(f"{prefix}{field}")
 
     total = qs.count()
     items = list(qs[offset:offset + limit].values(
@@ -1282,8 +1292,8 @@ def list_modelsdev(
     open_weights: Optional[bool] = None,
     reasoning: Optional[bool] = None,
     tool_call: Optional[bool] = None,
-    sort_by: str = "name",
-    sort_dir: str = "asc",
+    sort_by: str = "release_date",
+    sort_dir: str = "desc",
     limit: int = Field(100, ge=1, le=1000),
     offset: int = 0
 ):
@@ -1324,9 +1334,14 @@ def list_modelsdev(
         'release_date': 'release_date',
         'modelsdev_id': 'modelsdev_id',
     }
-    field = order_fields.get(sort_by, 'name')
+    field = order_fields.get(sort_by, 'release_date')
     prefix = '-' if sort_dir.lower() == 'desc' else ''
-    qs = qs.order_by(f"{prefix}{field}")
+    if field == 'release_date':
+        qs = qs.order_by(
+            F('release_date').desc(nulls_last=True) if prefix else F('release_date').asc(nulls_last=True)
+        )
+    else:
+        qs = qs.order_by(f"{prefix}{field}")
 
     total = qs.count()
     items = list(qs[offset:offset + limit].values(

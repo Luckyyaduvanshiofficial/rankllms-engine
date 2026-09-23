@@ -106,6 +106,7 @@
         </div>
         <div class="sm:col-span-4">
           <select id="models-sort" onchange="onSortChange()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
+            <option value="release_date">Sort: Release Date (Newest First)</option>
             <option value="rank">Sort: Overall Rank</option>
             <option value="rankllms_index">Sort: RankLLMs Index</option>
             <option value="intelligence">Sort: Intelligence</option>
@@ -116,13 +117,12 @@
             <option value="prompt_price">Sort: Input $/1M</option>
             <option value="completion_price">Sort: Output $/1M</option>
             <option value="speed">Sort: Speed (tok/s)</option>
-            <option value="release_date">Sort: Release Date</option>
           </select>
         </div>
         <div class="sm:col-span-3 flex items-center gap-2">
           <button onclick="toggleSortDir()" class="flex-1 py-2 px-3 rounded-md text-xs font-mono font-medium text-ink bg-canvas border border-hairline hover:bg-surface-card transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-            <span id="sort-dir-icon">↑</span>
-            <span id="sort-dir-label">Low to High</span>
+            <span id="sort-dir-icon">↓</span>
+            <span id="sort-dir-label">High to Low</span>
           </button>
         </div>
       </div>
@@ -166,7 +166,7 @@
 
     <!-- API callout -->
     <div class="bg-surface-card border border-hairline rounded-xl p-4 font-mono text-xs text-muted">
-      Want this data? <span class="text-ink">GET /api/v1/rankindex?limit=1000&amp;sort_by=rank</span> —
+      Want this data? <span class="text-ink">GET /api/v1/rankindex?limit=1000&amp;sort_by=release_date</span> —
       <a href="/api/v1/rankindex" target="_blank" class="text-primary hover:underline">try it</a>
       · Source of truth: <a href="/rankllms" class="text-primary hover:underline">/rankllms</a>
     </div>
@@ -216,8 +216,8 @@
 
   <script>
     let rawModels = [];
-    let sortField = 'rank';
-    let sortDir = 'asc';
+    let sortField = 'release_date';
+    let sortDir = 'desc';
     let flagFilter = 'all';
 
     const orderFields = {
@@ -231,7 +231,7 @@
       prompt_price: 'prompt_price',
       completion_price: 'completion_price',
       speed: 'speed',
-      release_date: 'name'
+      release_date: 'release_date'
     };
 
     const numericSort = {
@@ -249,7 +249,7 @@
       const tbody = document.getElementById('models-table-body');
       tbody.innerHTML = `<tr><td colspan="14" class="py-12 text-center text-muted font-mono text-xs">Loading full model catalog…</td></tr>`;
       try {
-        const res = await fetch('/api/v1/rankindex?limit=1000&sort_by=rank&sort_dir=asc');
+        const res = await fetch('/api/v1/rankindex?limit=1000&sort_by=release_date&sort_dir=desc');
         const data = await res.json();
         rawModels = data.items || [];
         document.getElementById('models-total').textContent = (data.total ?? rawModels.length).toLocaleString();
@@ -315,6 +315,14 @@
           const key = sortField === 'provider' ? 'provider' : 'name';
           const va = (a[key] || '').toLowerCase();
           const vb = (b[key] || '').toLowerCase();
+          return sortDir === 'desc' ? vb.localeCompare(va) : va.localeCompare(vb);
+        }
+        if (sortField === 'release_date') {
+          const va = a.release_date || '';
+          const vb = b.release_date || '';
+          if (!va && !vb) return 0;
+          if (!va) return 1;
+          if (!vb) return -1;
           return sortDir === 'desc' ? vb.localeCompare(va) : va.localeCompare(vb);
         }
         const fn = numericSort[sortField];

@@ -115,6 +115,7 @@
         <!-- Sort Select -->
         <div class="sm:col-span-4">
           <select id="or-sort-select" onchange="onSortSelectChange()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
+            <option value="created_at">Sort: Newest First</option>
             <option value="name">Sort: Model Name Alphabetical</option>
             <option value="context_length">Sort: Context Length</option>
             <option value="prompt_price">Sort: Prompt Price ($/1M)</option>
@@ -227,8 +228,8 @@
 
   <script>
     let rawORModels = [];
-    let currentSortField = 'name';
-    let currentSortDir = 'asc';
+    let currentSortField = 'created_at';
+    let currentSortDir = 'desc';
 
     async function loadORModels() {
       const tbody = document.getElementById('ormodels-table-body');
@@ -300,6 +301,10 @@
         } else if (currentSortField === 'author') {
           valA = (a.author || '').toLowerCase();
           valB = (b.author || '').toLowerCase();
+          return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
+        } else if (currentSortField === 'created_at') {
+          valA = a.created_at || '';
+          valB = b.created_at || '';
           return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else if (currentSortField === 'prompt_price') {
           valA = parseFloat(a.prompt_price_per_1m || 0);
