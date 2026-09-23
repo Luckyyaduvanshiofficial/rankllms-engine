@@ -1349,3 +1349,100 @@ def list_modelsdev(
         "items": items
     }
 
+
+# ================= LEADERBOARD FROM MERGED RANKINDEX =================
+
+@api.get("/leaderboard/rankindex", response=dict, tags=["LLM Leaderboard"])
+def get_rankindex_leaderboard(
+    request,
+    sort_by: str = "rank",
+    category: str = "",
+    search: str = "",
+    is_open_weight: Optional[bool] = None,
+    is_free: Optional[bool] = None,
+    limit: int = Field(50, ge=1, le=500),
+    offset: int = 0
+):
+    """
+    Leaderboard built from the merged 'rankindex' source of truth.
+    sort_by: rank | rankllms_index | intelligence | coding | reasoning | value | context | price | speed
+    category: '' | open | proprietary | free
+    """
+    qs = RankIndex.objects.all()
+
+    if category == 'open':
+        qs = qs.filter(is_open_weight=True)
+    elif category == 'proprietary':
+        qs = qs.filter(is_open_weight=False)
+    elif category == 'free':
+        qs = qs.filter(is_free=True)
+
+    if is_open_weight is not None:
+        qs = qs.filter(is_open_weight=is_open_weight)
+
+    if is_free is not None:
+        qs = qs.filter(is_free=is_free)
+
+    if search:
+        s = search.strip()
+        qs = qs.filter(
+            Q(name__icontains=s)
+            | Q(provider__icontains=s)
+            | Q(canonical_slug__icontains=s)
+            | Q(openrouter_id__icontains=s)
+            | Q(aa_slug__icontains=s)
+        )
+
+    order_fields = {
+        'rank': 'rank_overall',
+        'rankllms_index': '-rankllms_index',
+        'intelligence': '-intelligence_index',
+        'coding': '-coding_index',
+        'reasoning': '-rank_reasoning',
+        'value': '-rank_value',
+        'context': '-context_length',
+        'price': 'prompt_price_per_1m',
+        'speed': '-tokens_per_second',
+    }
+    field = order_fields.get(sort_by, 'rank_overall')
+    if not field.startswith('-') and sort_by in ('rank',):
+        qs = qs.order_by(field, '-rankllms_index')
+    else:
+        # order_fields values already carry direction where needed
+        if field.startswith('-'):
+            qs = qs.order_by(field, '-rankllms_index')
+        else:
+            qs = qs.order_by(field, '-rankllms_index')
+
+    total = qs.count()
+    items = list(qs[offset:offset + limit].values(
+        'id', 'canonical_slug', 'name', 'provider', 'openrouter_id', 'aa_slug',
+        'description', 'release_date', 'is_open_weight', 'is_free',
+        'rankllms_index', 'rank_overall', 'rank_coding', 'rank_reasoning', 'rank_value',
+        'intelligence_index', 'coding_index', 'math_index', 'gpqa_diamond',
+        'terminalbench_hard', 'livecodebench', 'context_length', 'max_output_tokens',
+        'prompt_price_per_1m', 'completion_price_per_1m', 'tokens_per_second',
+        'time_to_first_token', 'has_openrouter', 'has_artificial_analysis',
+        'has_design_arena', 'sources', 'updated_at'
+    ))
+
+    rankings = []
+    for idx, item in enumerate(items, start=offset + 1):
+        row = dict(item)
+        row['rank'] = item.get('rank_overall') or idx
+        rankings.append(row)
+
+    return {
+        "leaderboard": "rankindex",
+        "source_table": "rankindex",
+        "source_page": "/rankllms",
+        "api": "/api/v1/leaderboard/rankindex",
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "sort_by": sort_by,
+        "category": category,
+        "count": len(rankings),
+        "rankings": rankings,
+    }
+

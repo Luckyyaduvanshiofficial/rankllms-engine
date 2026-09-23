@@ -13,6 +13,10 @@ def leaderboard_page(request):
     return render(request, 'leaderboard.html')
 
 
+def llm_leaderboard_page(request):
+    return render(request, 'llm_leaderboard.html')
+
+
 def benchmarks_page(request):
     return render(request, 'benchmarks.html')
 
@@ -72,6 +76,8 @@ urlpatterns = [
     path('rankindex', rankllms_page, name='rankindex_page'),
     # Full model catalog from rankindex
     path('rankllms/models', rankllms_models_page, name='rankllms_models_page'),
+    # Leaderboard from merged rankindex (product path); legacy /leaderboard kept
+    path('llm-leaderboard', llm_leaderboard_page, name='llm_leaderboard_page'),
     path('ping', ping_view, name='ping_view'),
     path('health', health_view, name='health_view'),
     path('healthz', health_view, name='healthz_view'),
