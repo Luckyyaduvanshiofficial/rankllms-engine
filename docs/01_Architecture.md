@@ -90,7 +90,7 @@ Analytics tracking real-world application usage:
 
 ## ⚙️ Data Pipeline Synchronization (`sync_all`)
 
-The `run_master_sync()` pipeline executes in four fault-tolerant bulk steps:
+The `run_master_sync()` pipeline executes in six fault-tolerant bulk steps:
 
 1. **Step 1: OpenRouter Sync (`openrouter_sync.py`)**
    - Fetches 410+ models from OpenRouter catalog.
@@ -107,9 +107,18 @@ The `run_master_sync()` pipeline executes in four fault-tolerant bulk steps:
    - Fetches media ratings for text-to-image, image-editing, text-to-video, and text-to-speech endpoints.
    - Bulk enriches matched database models with exact `intelligence_index`, `coding_index`, and `tokens_per_second` metrics.
 
-4. **Step 4: Intelligent Null Backfill (`fill_nulls.py`)**
+4. **Step 4: Dedicated Raw Tables (`sync_dedicated_tables.py`)**
+   - Ingests as-is source rows into `ormodels`, `orbench`, `aamodels`, and `aabanch`.
+   - These four tables are the raw inputs for the merge and are browsable at `/ormodels`, `/orbench`, `/aamodels`, `/aabanch`.
+
+5. **Step 5: Intelligent Null Backfill (`fill_nulls.py`)**
    - Scans all database models for any missing specifications, pricing, or benchmarks.
    - Uses context length heuristics, modality tags, and intelligence score interpolation to ensure **100% of models are fully populated**.
+
+6. **Step 6: Merge into `rankindex` (`merge_rankindex.py`)**
+   - Normalizes and joins the four source tables into the unified `rankindex` table.
+   - Computes the composite **RankLLMs Index** plus overall/coding/reasoning/value ranks.
+   - Serves the product-facing source-of-truth page at `/rankllms` (alias `/rankindex`) and `GET /api/v1/rankindex`.
 
 ---
 
