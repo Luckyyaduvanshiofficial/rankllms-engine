@@ -2,7 +2,8 @@ FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PORT=8000
 
 WORKDIR /app
 
@@ -21,11 +22,10 @@ COPY . .
 
 RUN chmod +x entrypoint.sh
 
-# No EXPOSE: Dokku injects $PORT (default 5000) and proxies 80/443 → $PORT.
-# If you prefer a fixed port, EXPOSE it and run:
-#   dokku ports:set <app> http:80:8000 https:443:8000
+# Dokploy Traefik must target this same port (app setting: Port = 8000).
+EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f "http://localhost:${PORT:-5000}/" || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f "http://127.0.0.1:${PORT:-8000}/ping" || exit 1
 
 CMD ["./entrypoint.sh"]

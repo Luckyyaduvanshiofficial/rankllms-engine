@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e
 
-# Dokku sets PORT (default 5000). Bind 0.0.0.0 so the proxy can reach us.
-PORT="${PORT:-5000}"
+# Dokploy proxies to the port set in the app UI (this project: 8000).
+# Honor $PORT if Dokploy injects it; otherwise bind 8000.
+PORT="${PORT:-8000}"
 
 echo ">>> PORT=${PORT}"
 
