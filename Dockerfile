@@ -21,9 +21,11 @@ COPY . .
 
 RUN chmod +x entrypoint.sh
 
-EXPOSE 8000
+# No EXPOSE: Dokku injects $PORT (default 5000) and proxies 80/443 → $PORT.
+# If you prefer a fixed port, EXPOSE it and run:
+#   dokku ports:set <app> http:80:8000 https:443:8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:8000/ || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f "http://localhost:${PORT:-5000}/" || exit 1
 
 CMD ["./entrypoint.sh"]
