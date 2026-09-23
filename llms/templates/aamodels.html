@@ -321,10 +321,6 @@
         } else if (currentSortField === 'completion_price') {
           valA = parseFloat(a.completion_price_per_1m || 0);
           valB = parseFloat(b.completion_price_per_1m || 0);
-        } else if (currentSortField === 'release_date') {
-          valA = a.release_date || '';
-          valB = b.release_date || '';
-          return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else {
           valA = parseInt(a.context_window || 0);
           valB = parseInt(b.context_window || 0);

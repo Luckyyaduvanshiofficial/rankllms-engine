@@ -1247,6 +1247,7 @@ def list_rankindex(
         'speed': 'tokens_per_second',
         'latency': 'time_to_first_token',
         'name': 'name',
+        'release_date': 'release_date',
     }
     field = order_fields.get(sort_by, 'release_date')
     prefix = '-' if sort_dir.lower() == 'desc' else ''
