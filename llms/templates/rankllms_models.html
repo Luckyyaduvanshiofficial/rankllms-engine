@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All AI Models — Full Catalog with Rankings, Pricing &amp; Specs | RankLLMs</title>
+  <meta name="description" content="Browse every AI model in the RankLLMs source of truth: ranks, intelligence/coding scores, context, pricing, speed, and open-weight flags — all in one sortable catalog.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://api.rankllms.com/rankllms/models">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="All AI Models | RankLLMs">
+  <meta property="og:description" content="Full catalog of AI models with rankings, pricing, benchmarks, and open-weight flags.">
+  <meta property="og:url" content="https://api.rankllms.com/rankllms/models">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="All AI Models | RankLLMs">
+  <meta name="twitter:description" content="Full catalog of AI models with rankings, pricing, benchmarks, and open-weight flags.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            canvas: { DEFAULT: '#faf9f5', dark: '#141413' },
+            surface: {
+              card: '#ffffff',
+              soft: '#f3f1eb',
+              cream: '#fbfaf7',
+              'cream-strong': '#eeebe2',
+              dark: '#181715',
+            },
+            primary: { DEFAULT: '#cc785c', hover: '#b8664b' },
+            ink: { DEFAULT: '#181715', dark: '#f2f0e8' },
+            body: { DEFAULT: '#3d3c38', dark: '#c5c2ba' },
+            muted: { DEFAULT: '#6e6c64', dark: '#8d8a80', soft: '#a6a397' },
+            hairline: { DEFAULT: '#e8e5dc', dark: '#302f2c' },
+            accent: { teal: '#3b7a57', amber: '#d97706', red: '#dc2626' }
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          letterSpacing: { 'tight-serif': '-0.02em' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-canvas text-body font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
+
+  <header class="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur-md px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2 group">
+          <span class="font-serif text-2xl font-normal tracking-tight-serif text-ink group-hover:text-primary transition-colors">RankLLMs</span>
+          <span class="text-[11px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-bold">All Models</span>
+        </a>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
+        <a href="/rankllms" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">👑 rankllms</a>
+        <a href="/rankllms/models" class="px-3 py-1.5 rounded-md text-ink bg-surface-card border border-hairline shadow-sm font-semibold">📚 models</a>
+        <a href="/llm-leaderboard" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🏆 leaderboard</a>
+        <a href="/ormodels" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📦 or</a>
+        <a href="/orbench" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📊 orbench</a>
+        <a href="/aamodels" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🔬 aa</a>
+        <a href="/aabanch" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📈 aabanch</a>
+        <a href="/modelsdev" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🧩 models.dev</a>
+        <a href="/" class="px-3 py-1.5 rounded-md text-primary font-medium hover:bg-surface-soft transition-all">⚡ API Studio</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href="/api/v1/rankindex" target="_blank" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium text-ink bg-surface-card border border-hairline hover:bg-surface-soft transition-colors">
+          GET /api/v1/rankindex ➔
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="border-b border-hairline pb-6">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/30 font-semibold">Source of Truth: rankindex</span>
+        <span class="text-xs font-mono text-muted">&bull; Full catalog — ranks, scores, pricing, specs</span>
+      </div>
+      <h1 class="font-serif text-3xl sm:text-4xl font-normal tracking-tight-serif text-ink">All AI Models</h1>
+      <p class="text-sm text-muted mt-1 max-w-2xl">Every model in the merged RankLLMs source of truth, with full ranking, benchmark, pricing, and capability data. Sort by any column.</p>
+      <div class="mt-3 flex flex-wrap gap-3 font-mono text-xs text-muted">
+        <span>Total: <strong id="models-total" class="text-ink">—</strong></span>
+        <span>Showing: <strong id="models-showing" class="text-ink">—</strong></span>
+        <span>Source: <a href="/rankllms" class="text-primary hover:underline">merged rankindex</a></span>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-surface-card border border-hairline rounded-xl p-4 space-y-3">
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+        <div class="sm:col-span-5">
+          <input type="text" id="models-search" onkeyup="applyFilters()" placeholder="Search name, provider, or slug…" class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-sm text-ink placeholder:text-muted-soft focus:outline-none focus:border-primary font-sans">
+        </div>
+        <div class="sm:col-span-4">
+          <select id="models-sort" onchange="onSortChange()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
+            <option value="rank">Sort: Overall Rank</option>
+            <option value="rankllms_index">Sort: RankLLMs Index</option>
+            <option value="intelligence">Sort: Intelligence</option>
+            <option value="coding">Sort: Coding</option>
+            <option value="name">Sort: Name A–Z</option>
+            <option value="provider">Sort: Provider</option>
+            <option value="context_length">Sort: Context Length</option>
+            <option value="prompt_price">Sort: Input $/1M</option>
+            <option value="completion_price">Sort: Output $/1M</option>
+            <option value="speed">Sort: Speed (tok/s)</option>
+            <option value="release_date">Sort: Release Date</option>
+          </select>
+        </div>
+        <div class="sm:col-span-3 flex items-center gap-2">
+          <button onclick="toggleSortDir()" class="flex-1 py-2 px-3 rounded-md text-xs font-mono font-medium text-ink bg-canvas border border-hairline hover:bg-surface-card transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+            <span id="sort-dir-icon">↑</span>
+            <span id="sort-dir-label">Low to High</span>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2 pt-1" role="group" aria-label="Model filters">
+        <button onclick="setFlag('all')" id="flag-all" class="px-2.5 py-1 rounded text-[11px] font-mono border border-primary bg-primary/10 text-primary font-semibold">All</button>
+        <button onclick="setFlag('open')" id="flag-open" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Open weights</button>
+        <button onclick="setFlag('closed')" id="flag-closed" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Proprietary</button>
+        <button onclick="setFlag('free')" id="flag-free" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Free</button>
+        <button onclick="setFlag('paid')" id="flag-paid" class="px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors">Paid</button>
+      </div>
+    </div>
+
+    <!-- Full data table -->
+    <div class="bg-canvas border border-hairline rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+          <thead class="bg-surface-soft text-muted font-mono text-xs uppercase tracking-wider border-b border-hairline select-none">
+            <tr>
+              <th class="py-3 px-4 w-14 text-center">#</th>
+              <th class="py-3 px-4">Model</th>
+              <th class="py-3 px-4">Provider</th>
+              <th class="py-3 px-4 text-center">Index</th>
+              <th class="py-3 px-4 text-center">Intel</th>
+              <th class="py-3 px-4 text-center">Code</th>
+              <th class="py-3 px-4 text-center">GPQA</th>
+              <th class="py-3 px-4 text-center">Context</th>
+              <th class="py-3 px-4 text-center">Max out</th>
+              <th class="py-3 px-4 text-right">In $/1M</th>
+              <th class="py-3 px-4 text-right">Out $/1M</th>
+              <th class="py-3 px-4 text-center">Tok/s</th>
+              <th class="py-3 px-4 text-center">Released</th>
+              <th class="py-3 px-4 text-center">Flags</th>
+            </tr>
+          </thead>
+          <tbody id="models-table-body" class="divide-y divide-hairline text-body">
+            <tr><td colspan="14" class="py-12 text-center text-muted font-mono text-xs">Loading full model catalog…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- API callout -->
+    <div class="bg-surface-card border border-hairline rounded-xl p-4 font-mono text-xs text-muted">
+      Want this data? <span class="text-ink">GET /api/v1/rankindex?limit=1000&amp;sort_by=rank</span> —
+      <a href="/api/v1/rankindex" target="_blank" class="text-primary hover:underline">try it</a>
+      · Source of truth: <a href="/rankllms" class="text-primary hover:underline">/rankllms</a>
+    </div>
+  </main>
+
+  <footer class="border-t border-hairline bg-surface-card text-xs mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-hairline">
+        <div class="space-y-3">
+          <div class="font-serif text-2xl tracking-tight-serif text-ink">RankLLMs</div>
+          <p class="text-muted leading-relaxed">The independent benchmark engine and intelligent model router powering production AI infrastructure.</p>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Core Views</div>
+          <ul class="space-y-2">
+            <li><a href="/rankllms" class="text-body hover:text-primary">👑 rankllms (source of truth)</a></li>
+            <li><a href="/rankllms/models" class="text-primary font-semibold">📚 All Models</a></li>
+            <li><a href="/llm-leaderboard" class="text-body hover:text-primary">🏆 LLM Leaderboard</a></li>
+            <li><a href="/benchmarks" class="text-body hover:text-primary">🔬 Unified Benchmarks</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Raw Tables</div>
+          <ul class="space-y-2">
+            <li><a href="/ormodels" class="text-body hover:text-primary">📦 ormodels</a></li>
+            <li><a href="/orbench" class="text-body hover:text-primary">📊 orbench</a></li>
+            <li><a href="/aamodels" class="text-body hover:text-primary">🔬 aamodels</a></li>
+            <li><a href="/aabanch" class="text-body hover:text-primary">📈 aabanch</a></li>
+            <li><a href="/modelsdev" class="text-body hover:text-primary">🧩 modelsdev</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3 font-mono">
+          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Developers</div>
+          <ul class="space-y-2">
+            <li><a href="/" class="text-body hover:text-primary">⚡ API Studio & Docs</a></li>
+            <li><a href="/api/v1/docs" target="_blank" class="text-body hover:text-primary">📖 OpenAPI /docs</a></li>
+            <li><a href="/llms.txt" target="_blank" class="text-body hover:text-primary">📄 llms.txt</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-muted text-[11px]">
+        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" class="hover:text-ink" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" class="hover:text-ink" rel="noopener">CodaiPro</a></div>
+        <div>Data: <a href="https://openrouter.ai" class="hover:text-ink" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" class="hover:text-ink" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" class="hover:text-ink" rel="noopener">models.dev</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let rawModels = [];
+    let sortField = 'rank';
+    let sortDir = 'asc';
+    let flagFilter = 'all';
+
+    const orderFields = {
+      rank: 'rank',
+      rankllms_index: 'rankllms_index',
+      intelligence: 'intelligence',
+      coding: 'coding',
+      name: 'name',
+      provider: 'name',
+      context_length: 'context_length',
+      prompt_price: 'prompt_price',
+      completion_price: 'completion_price',
+      speed: 'speed',
+      release_date: 'name'
+    };
+
+    const numericSort = {
+      rank: m => parseInt(m.rank_overall || 9999),
+      rankllms_index: m => parseFloat(m.rankllms_index || 0),
+      intelligence: m => parseFloat(m.intelligence_index || 0),
+      coding: m => parseFloat(m.coding_index || 0),
+      context_length: m => parseInt(m.context_length || 0),
+      prompt_price: m => parseFloat(m.prompt_price_per_1m || 0),
+      completion_price: m => parseFloat(m.completion_price_per_1m || 0),
+      speed: m => parseFloat(m.tokens_per_second || 0),
+    };
+
+    async function loadModels() {
+      const tbody = document.getElementById('models-table-body');
+      tbody.innerHTML = `<tr><td colspan="14" class="py-12 text-center text-muted font-mono text-xs">Loading full model catalog…</td></tr>`;
+      try {
+        const res = await fetch('/api/v1/rankindex?limit=1000&sort_by=rank&sort_dir=asc');
+        const data = await res.json();
+        rawModels = data.items || [];
+        document.getElementById('models-total').textContent = (data.total ?? rawModels.length).toLocaleString();
+        applyFilters();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="14" class="py-8 text-center text-red-600 font-mono text-xs">Error loading models: ${err.message}</td></tr>`;
+      }
+    }
+
+    function setFlag(flag) {
+      flagFilter = flag;
+      ['all','open','closed','free','paid'].forEach(f => {
+        const btn = document.getElementById('flag-' + f);
+        if (!btn) return;
+        if (f === flagFilter) {
+          btn.className = 'px-2.5 py-1 rounded text-[11px] font-mono border border-primary bg-primary/10 text-primary font-semibold';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded text-[11px] font-mono border border-hairline text-muted hover:text-ink hover:bg-surface-soft transition-colors';
+        }
+      });
+      applyFilters();
+    }
+
+    function onSortChange() {
+      sortField = document.getElementById('models-sort').value;
+      sortDir = (sortField === 'name' || sortField === 'rank' || sortField === 'provider') ? 'asc' : 'desc';
+      updateSortUI();
+      applyFilters();
+    }
+
+    function toggleSortDir() {
+      sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+      updateSortUI();
+      applyFilters();
+    }
+
+    function updateSortUI() {
+      const icon = document.getElementById('sort-dir-icon');
+      const label = document.getElementById('sort-dir-label');
+      if (icon && label) {
+        icon.innerText = sortDir === 'desc' ? '↓' : '↑';
+        label.innerText = sortDir === 'desc' ? 'High to Low' : 'Low to High';
+      }
+    }
+
+    function applyFilters() {
+      const query = (document.getElementById('models-search')?.value || '').toLowerCase();
+      let items = rawModels.filter(m => {
+        if (flagFilter === 'open' && !m.is_open_weight) return false;
+        if (flagFilter === 'closed' && m.is_open_weight) return false;
+        if (flagFilter === 'free' && !m.is_free) return false;
+        if (flagFilter === 'paid' && m.is_free) return false;
+        if (query) {
+          const hay = [m.name, m.provider, m.canonical_slug, m.openrouter_id, m.aa_slug]
+            .map(x => (x || '').toLowerCase()).join(' ');
+          if (!hay.includes(query)) return false;
+        }
+        return true;
+      });
+
+      items.sort((a, b) => {
+        if (sortField === 'name' || sortField === 'provider') {
+          const key = sortField === 'provider' ? 'provider' : 'name';
+          const va = (a[key] || '').toLowerCase();
+          const vb = (b[key] || '').toLowerCase();
+          return sortDir === 'desc' ? vb.localeCompare(va) : va.localeCompare(vb);
+        }
+        const fn = numericSort[sortField];
+        if (!fn) return 0;
+        const va = fn(a);
+        const vb = fn(b);
+        return sortDir === 'desc' ? (vb - va) : (va - vb);
+      });
+
+      document.getElementById('models-showing').textContent = items.length.toLocaleString();
+      renderTable(items);
+    }
+
+    function formatCtx(n) {
+      if (!n) return '—';
+      return n >= 1000000 ? (n / 1000000).toFixed(1) + 'M' : Math.round(n / 1000) + 'k';
+    }
+
+    function formatPct(v) {
+      if (v === null || v === undefined || isNaN(v) || parseFloat(v) === 0) return '—';
+      const num = parseFloat(v);
+      return (num <= 1.0 ? (num * 100).toFixed(1) : num.toFixed(1)) + '%';
+    }
+
+    function renderTable(items) {
+      const tbody = document.getElementById('models-table-body');
+      if (!items.length) {
+        tbody.innerHTML = `<tr><td colspan="14" class="py-12 text-center text-muted font-mono text-xs">No models match your filters.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = items.map((m, idx) => {
+        const pIn = m.is_free ? '0.00' : parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
+        const pOut = m.is_free ? '0.00' : parseFloat(m.completion_price_per_1m || 0).toFixed(2);
+        const speed = m.tokens_per_second ? parseFloat(m.tokens_per_second).toFixed(0) : '—';
+        const released = m.release_date ? String(m.release_date).slice(0, 10) : '—';
+        const flags = [
+          m.is_open_weight ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">Open</span>' : '',
+          m.is_free ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-500/10 text-sky-700 border border-sky-500/30">Free</span>' : '',
+          m.has_openrouter ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-blue-500/10 text-blue-600 border border-blue-500/30">OR</span>' : '',
+          m.has_artificial_analysis ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-accent-teal/10 text-accent-teal border border-accent-teal/30">AA</span>' : '',
+          m.has_design_arena ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-600 border border-purple-500/30">Arena</span>' : '',
+        ].filter(Boolean).join(' ');
+
+        return `
+          <tr class="hover:bg-surface-soft/60 transition-colors text-xs font-mono">
+            <td class="py-3 px-4 font-semibold text-muted text-center">#${m.rank_overall || idx + 1}</td>
+            <td class="py-3 px-4 font-sans">
+              <div class="font-medium text-ink text-sm">${m.name || '—'}</div>
+              <div class="font-mono text-[11px] text-muted-soft mt-0.5">${m.canonical_slug || m.openrouter_id || m.aa_slug || ''}</div>
+            </td>
+            <td class="py-3 px-4 text-body">${m.provider || '—'}</td>
+            <td class="py-3 px-4 text-center font-bold text-sm text-primary">${m.rankllms_index ? parseFloat(m.rankllms_index).toFixed(1) : '0.0'}</td>
+            <td class="py-3 px-4 text-center text-ink font-semibold">${m.intelligence_index ? parseFloat(m.intelligence_index).toFixed(1) : '—'}</td>
+            <td class="py-3 px-4 text-center text-accent-teal font-semibold">${m.coding_index ? parseFloat(m.coding_index).toFixed(1) : '—'}</td>
+            <td class="py-3 px-4 text-center text-ink font-semibold">${formatPct(m.gpqa_diamond)}</td>
+            <td class="py-3 px-4 text-center text-muted">${formatCtx(m.context_length)}</td>
+            <td class="py-3 px-4 text-center text-muted">${m.max_output_tokens ? Math.round(m.max_output_tokens / 1000) + 'k' : '—'}</td>
+            <td class="py-3 px-4 text-right text-body">${m.is_free ? '<span class="text-emerald-600 font-semibold">Free</span>' : '$' + pIn}</td>
+            <td class="py-3 px-4 text-right text-body">${m.is_free ? '<span class="text-emerald-600 font-semibold">Free</span>' : '$' + pOut}</td>
+            <td class="py-3 px-4 text-center text-body">${speed}</td>
+            <td class="py-3 px-4 text-center text-muted">${released}</td>
+            <td class="py-3 px-4"><div class="flex gap-1 flex-wrap">${flags || '<span class="text-muted-soft">—</span>'}</div></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadModels);
+  </script>
+</body>
+</html>

@@ -41,6 +41,10 @@ def rankllms_page(request):
     return render(request, 'rankindex.html')
 
 
+def rankllms_models_page(request):
+    return render(request, 'rankllms_models.html')
+
+
 def ping_view(request):
     return HttpResponse("pong", content_type="text/plain", status=200)
 
@@ -66,6 +70,8 @@ urlpatterns = [
     # Merged source of truth (rankindex) — /rankllms is the product-facing path
     path('rankllms', rankllms_page, name='rankllms_page'),
     path('rankindex', rankllms_page, name='rankindex_page'),
+    # Full model catalog from rankindex
+    path('rankllms/models', rankllms_models_page, name='rankllms_models_page'),
     path('ping', ping_view, name='ping_view'),
     path('health', health_view, name='health_view'),
     path('healthz', health_view, name='healthz_view'),
