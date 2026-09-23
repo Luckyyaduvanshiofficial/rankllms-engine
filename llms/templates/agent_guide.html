@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="wa-theme-default wa-palette-default wa-light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include "_wa_head.html" %}
   <title>Autonomous AI Agent &amp; LLM Router Guide | RankLLMs</title>
   <meta name="description" content="Integration guide for autonomous AI agents, multi-agent frameworks, and LLM routers to query RankLLMs benchmark matrices programmatically.">
   <meta name="keywords" content="AI agent API, LLM router, model selection API, RankLLMs agent guide">
@@ -14,179 +14,251 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="AI Agent &amp; LLM Router Guide | RankLLMs">
   <meta name="twitter:description" content="How autonomous agents and LLM routers can query RankLLMs leaderboard and benchmark APIs.">
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            canvas: { DEFAULT: '#faf9f5', dark: '#141413' },
-            surface: {
-              card: '#ffffff',
-              soft: '#f3f1eb',
-              cream: '#fbfaf7',
-              'cream-strong': '#eeebe2',
-              dark: '#181715',
-            },
-            primary: { DEFAULT: '#cc785c', hover: '#b8664b' },
-            ink: { DEFAULT: '#181715', dark: '#f2f0e8' },
-            body: { DEFAULT: '#3d3c38', dark: '#c5c2ba' },
-            muted: { DEFAULT: '#6e6c64', dark: '#8d8a80', soft: '#a6a397' },
-            hairline: { DEFAULT: '#e8e5dc', dark: '#302f2c' },
-            accent: { teal: '#3b7a57', amber: '#d97706', red: '#dc2626' }
-          },
-          fontFamily: {
-            serif: ['Newsreader', 'Georgia', 'serif'],
-            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace']
-          },
-          letterSpacing: { 'tight-serif': '-0.02em' }
-        }
-      }
+  <style>
+    .guide-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--wa-space-s);
+      margin-bottom: var(--wa-space-2xs);
     }
-  </script>
+
+    .guide-proto {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      font-weight: 600;
+      color: #3b7a57;
+      background: rgba(59, 122, 87, 0.1);
+      border: 1px solid rgba(59, 122, 87, 0.3);
+      padding: 0.1rem 0.45rem;
+      border-radius: var(--wa-border-radius-s);
+    }
+
+    .wa-dark .guide-proto {
+      color: #6ee7a0;
+      background: rgba(59, 122, 87, 0.15);
+      border-color: rgba(110, 231, 160, 0.3);
+    }
+
+    .guide-proto-list {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      color: var(--wa-color-text-quiet);
+    }
+
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--wa-space-m);
+    }
+
+    @media (min-width: 48rem) {
+      .recipe-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .recipe-card {
+      background: var(--wa-color-surface-default);
+      border: 1px solid var(--wa-color-surface-border);
+      border-radius: var(--wa-border-radius-m);
+      padding: var(--wa-space-m);
+      display: flex;
+      flex-direction: column;
+      gap: var(--wa-space-2xs);
+    }
+
+    .recipe-card .recipe-title {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      font-weight: 700;
+      color: var(--wa-color-brand-fill-normal);
+    }
+
+    .recipe-card .recipe-title.title-teal { color: #3b7a57; }
+    .wa-dark .recipe-card .recipe-title.title-teal { color: #6ee7a0; }
+    .recipe-card .recipe-title.title-ink { color: var(--wa-color-text-normal); }
+    .recipe-card .recipe-title.title-muted { color: var(--wa-color-text-quiet); }
+
+    .recipe-card p {
+      margin: 0;
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-2xs);
+      font-family: var(--wa-font-family-mono);
+    }
+
+    .recipe-card code {
+      display: block;
+      background: var(--wa-color-surface-lowered);
+      border: 1px solid var(--wa-color-surface-border);
+      padding: var(--wa-space-2xs);
+      border-radius: var(--wa-border-radius-s);
+      color: var(--wa-color-text-normal);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      word-break: break-all;
+    }
+
+    .code-panel {
+      background: var(--wa-color-surface-lowered);
+      border: 1px solid var(--wa-color-surface-border);
+      border-radius: var(--wa-border-radius-l);
+      overflow: hidden;
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+    }
+
+    .code-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--wa-space-s);
+      padding: var(--wa-space-s) var(--wa-space-m);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-3xs);
+    }
+
+    .code-panel pre {
+      margin: 0;
+      padding: var(--wa-space-m);
+      overflow-x: auto;
+      color: #3b7a57;
+      line-height: 1.6;
+    }
+
+    .wa-dark .code-panel pre {
+      color: #6ee7a0;
+    }
+
+    .code-panel code {
+      font-family: inherit;
+      background: none;
+      border: none;
+      padding: 0;
+      color: inherit;
+    }
+  </style>
 </head>
-<body class="bg-canvas text-body font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
-
-  <!-- TOP NAV -->
-  <header class="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur-md px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2 group">
-          <span class="font-serif text-2xl font-normal tracking-tight-serif text-ink group-hover:text-primary transition-colors">RankLLMs</span>
-          <span class="text-[11px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-surface-soft text-muted border border-hairline">Agent Guide</span>
-        </a>
+<body>
+  <wa-page>
+    <header slot="header" class="site-header section">
+      <div class="wa-cluster wa-gap-xs">
+        <a class="brand-wordmark" href="/">RankLLMs</a>
+        <wa-badge variant="neutral" appearance="outlined" pill class="brand-badge">Agent Guide</wa-badge>
       </div>
-
-      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
-        <a href="/leaderboard" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🏆 Leaderboard</a>
-        <a href="/benchmarks" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🔬 OpenRouter Benchmarks</a>
-        <a href="/cards" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🎴 Model Cards</a>
-        <a href="/compare" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">⚔️ Compare</a>
-        <a href="/agent-guide" class="px-3 py-1.5 rounded-md text-ink bg-surface-card border border-hairline shadow-sm font-semibold">🤖 Agent Guide</a>
-        <a href="/" class="px-3 py-1.5 rounded-md text-primary font-medium hover:bg-surface-soft transition-all">⚡ API Studio & Docs</a>
-      </nav>
-
-      <div class="flex items-center gap-2">
-        <a href="/llms.txt" target="_blank" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium text-ink bg-surface-card border border-hairline hover:bg-surface-soft transition-colors">
+      {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+      <div class="header-actions">
+        <wa-button href="/llms.txt" appearance="outlined" size="s" class="api-link-btn" target="_blank" rel="noopener">
           View llms.txt ➔
-        </a>
+        </wa-button>
+        <wa-button data-toggle-nav appearance="plain" class="toggle-nav" aria-label="Open menu">
+          <wa-icon name="bars"></wa-icon>
+        </wa-button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- MAIN -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-    <div class="border-b border-hairline pb-6">
-      <div class="flex items-center gap-2 mb-2">
-        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-accent-teal/10 text-accent-teal border border-accent-teal/30 font-semibold">Native Agent Protocols</span>
-        <span class="text-xs font-mono text-muted">&bull; LangChain &bull; AutoGen &bull; CrewAI &bull; Claude Code &bull; OpenAI Swarm</span>
-      </div>
-      <h1 class="font-serif text-3xl sm:text-4xl font-normal tracking-tight-serif text-ink">Autonomous AI Agent & Router Guide</h1>
-      <p class="text-sm text-muted mt-2">Empower autonomous agents to select the optimal model dynamically based on intelligence, coding bench, context window, and price.</p>
-    </div>
+    {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
 
-    <!-- Agent Decision Matrix -->
-    <div class="bg-surface-card border border-hairline rounded-xl p-6 space-y-4">
-      <h2 class="font-serif text-2xl text-ink font-normal">Deterministic Routing Recipes</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-        <div class="bg-canvas border border-hairline rounded-lg p-4 space-y-2">
-          <div class="text-primary font-bold">1. Best Autonomous Coder</div>
-          <p class="text-muted">High SWE-Bench & LiveCodeBench:</p>
-          <code class="block bg-surface-soft p-2 rounded text-ink">GET /api/v1/benchmarks?sort_by=coding_index&limit=5</code>
-        </div>
-        <div class="bg-canvas border border-hairline rounded-lg p-4 space-y-2">
-          <div class="text-accent-teal font-bold">2. Budget Open-Weights Router</div>
-          <p class="text-muted">Self-hosted & local open-weights:</p>
-          <code class="block bg-surface-soft p-2 rounded text-ink">GET /api/v1/leaderboard/open-weights?sort_by=intelligence</code>
-        </div>
-        <div class="bg-canvas border border-hairline rounded-lg p-4 space-y-2">
-          <div class="text-ink font-bold">3. Head-to-Head Arbiter</div>
-          <p class="text-muted">Side-by-side spec comparison:</p>
-          <code class="block bg-surface-soft p-2 rounded text-ink">GET /api/v1/compare?model_a=claude-3-7-sonnet&model_b=gpt-4o</code>
-        </div>
-        <div class="bg-canvas border border-hairline rounded-lg p-4 space-y-2">
-          <div class="text-muted font-bold">4. Top 200 Model Cards</div>
-          <p class="text-muted">Static card profiles for router cache:</p>
-          <code class="block bg-surface-soft p-2 rounded text-ink">GET /api/v1/models/cards</code>
+    <main class="wa-stack wa-gap-xl section content-wrap" style="max-width: 56rem;">
+      <div class="page-header">
+        <div>
+          <div class="guide-badge-row">
+            <span class="guide-proto">Native Agent Protocols</span>
+            <span class="guide-proto-list">&bull; LangChain &bull; AutoGen &bull; CrewAI &bull; Claude Code &bull; OpenAI Swarm</span>
+          </div>
+          <h1>Autonomous AI Agent &amp; Router Guide</h1>
+          <p class="page-lede">Empower autonomous agents to select the optimal model dynamically based on intelligence, coding bench, context window, and price.</p>
         </div>
       </div>
-    </div>
 
-    <!-- Python SDK Client Snippet -->
-    <div class="bg-surface-dark text-on-dark rounded-xl p-6 space-y-3 font-mono text-xs overflow-hidden border border-surface-soft-dark">
-      <div class="flex items-center justify-between text-muted text-[11px] pb-2 border-b border-hairline/20">
-        <span>Python Agent Tool Definition</span>
-        <span>RankLLMsClient.py</span>
-      </div>
-      <pre class="overflow-x-auto text-emerald-400"><code>import requests
+      <wa-card class="controls-card">
+        <div class="wa-stack wa-gap-m">
+          <h2 style="margin:0; font-family: var(--wa-font-family-display); font-weight:500; font-size: var(--wa-font-size-l);">Deterministic Routing Recipes</h2>
+          <div class="recipe-grid">
+            <div class="recipe-card">
+              <div class="recipe-title">1. Best Autonomous Coder</div>
+              <p>High SWE-Bench &amp; LiveCodeBench:</p>
+              <code>GET /api/v1/benchmarks?sort_by=coding_index&amp;limit=5</code>
+            </div>
+            <div class="recipe-card">
+              <div class="recipe-title title-teal">2. Budget Open-Weights Router</div>
+              <p>Self-hosted &amp; local open-weights:</p>
+              <code>GET /api/v1/leaderboard/open-weights?sort_by=intelligence</code>
+            </div>
+            <div class="recipe-card">
+              <div class="recipe-title title-ink">3. Head-to-Head Arbiter</div>
+              <p>Side-by-side spec comparison:</p>
+              <code>GET /api/v1/compare?model_a=claude-3-7-sonnet&amp;model_b=gpt-4o</code>
+            </div>
+            <div class="recipe-card">
+              <div class="recipe-title title-muted">4. Top 200 Model Cards</div>
+              <p>Static card profiles for router cache:</p>
+              <code>GET /api/v1/models/cards</code>
+            </div>
+          </div>
+        </div>
+      </wa-card>
+
+      <div class="code-panel">
+        <div class="code-panel-header">
+          <span>Python Agent Tool Definition</span>
+          <span>RankLLMsClient.py</span>
+        </div>
+        <pre><code>import requests
 
 class RankLLMsClient:
     def __init__(self, base_url="https://rankllms-engine.onrender.com"):
         self.base_url = base_url
 
     def get_best_coding_model(self, min_context=128000):
-        res = requests.get(f"{self.base_url}/api/v1/benchmarks?sort_by=coding_index&limit=20").json()
+        res = requests.get(f"{self.base_url}/api/v1/benchmarks?sort_by=coding_index&amp;limit=20").json()
         for m in res.get("items", []):
-            if m.get("context_length", 0) >= min_context:
+            if m.get("context_length", 0) &gt;= min_context:
                 return m["slug"] # e.g. "anthropic/claude-opus-5"
         return "anthropic/claude-3.7-sonnet"
 
     def compare(self, model_a, model_b):
-        return requests.get(f"{self.base_url}/api/v1/compare?model_a={model_a}&model_b={model_b}").json()</code></pre>
-    </div>
+        return requests.get(f"{self.base_url}/api/v1/compare?model_a={model_a}&amp;model_b={model_b}").json()</code></pre>
+      </div>
+    </main>
 
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="border-t border-hairline bg-surface-card text-xs mt-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-hairline">
-        <div class="space-y-3">
-          <div class="font-serif text-2xl tracking-tight-serif text-ink">RankLLMs</div>
-          <p class="text-muted leading-relaxed">
-            The independent benchmark engine and intelligent model router powering production AI infrastructure.
-          </p>
+    <footer slot="footer" class="section site-footer content-wrap">
+      <div class="footer-cols">
+        <div>
+          <div class="brand-wordmark" style="font-size: var(--wa-font-size-xl);">RankLLMs</div>
+          <p class="col-blurb">The independent benchmark engine and intelligent model router powering production AI infrastructure.</p>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Catalog</div>
-          <ul class="space-y-2">
-            <li><a href="/leaderboard" class="text-body hover:text-primary">🏆 AI Models Leaderboard</a></li>
-            <li><a href="/benchmarks" class="text-body hover:text-primary">🔬 OpenRouter Benchmarks</a></li>
-            <li><a href="/cards" class="text-body hover:text-primary">🎴 Top 200 Model Cards</a></li>
-            <li><a href="/compare" class="text-body hover:text-primary">⚔️ Model Comparison</a></li>
+        <div>
+          <div class="col-title">Catalog</div>
+          <ul>
+            <li><a href="/leaderboard">🏆 AI Models Leaderboard</a></li>
+            <li><a href="/benchmarks">🔬 OpenRouter Benchmarks</a></li>
+            <li><a href="/cards">🎴 Top 200 Model Cards</a></li>
+            <li><a href="/compare">⚔️ Model Comparison</a></li>
           </ul>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Telemetry</div>
-          <ul class="space-y-2">
-            <li><a href="/api/v1/benchmarks/openrouter" target="_blank" class="text-body hover:text-primary">OpenRouter Benchmarks API</a></li>
-            <li><a href="/api/v1/leaderboard" target="_blank" class="text-body hover:text-primary">Leaderboard API</a></li>
-            <li><a href="/api/v1/models/cards" target="_blank" class="text-body hover:text-primary">Model Cards API</a></li>
+        <div>
+          <div class="col-title">Telemetry</div>
+          <ul>
+            <li><a href="/api/v1/benchmarks/openrouter" target="_blank" rel="noopener">OpenRouter Benchmarks API</a></li>
+            <li><a href="/api/v1/leaderboard" target="_blank" rel="noopener">Leaderboard API</a></li>
+            <li><a href="/api/v1/models/cards" target="_blank" rel="noopener">Model Cards API</a></li>
           </ul>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Developers</div>
-          <ul class="space-y-2">
-            <li><a href="/agent-guide" class="text-primary font-semibold">🤖 AI Agent Guide</a></li>
-            <li><a href="/" class="text-body hover:text-primary">⚡ API Studio & Docs</a></li>
-            <li><a href="/docs" target="_blank" class="text-body hover:text-primary">📖 OpenAPI /docs</a></li>
-            <li><a href="/llms.txt" target="_blank" class="text-body hover:text-primary">📄 llms.txt</a></li>
+        <div>
+          <div class="col-title">Developers</div>
+          <ul>
+            <li><a href="/agent-guide" class="is-active">🤖 AI Agent Guide</a></li>
+            <li><a href="/">⚡ API Studio &amp; Docs</a></li>
+            <li><a href="/api/v1/docs" target="_blank" rel="noopener">📖 OpenAPI /docs</a></li>
+            <li><a href="/llms.txt" target="_blank" rel="noopener">📄 llms.txt</a></li>
           </ul>
         </div>
       </div>
-      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-muted text-[11px]">
-        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" class="hover:text-ink" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" class="hover:text-ink" rel="noopener">CodaiPro</a></div>
-        <div>Data: <a href="https://openrouter.ai" class="hover:text-ink" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" class="hover:text-ink" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" class="hover:text-ink" rel="noopener">models.dev</a></div>
+      <div class="footer-bar">
+        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" rel="noopener">CodaiPro</a></div>
+        <div>Data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></div>
       </div>
-    </div>
-  </footer>
+    </footer>
+  </wa-page>
 </body>
 </html>

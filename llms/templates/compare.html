@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="wa-theme-default wa-palette-default wa-light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include "_wa_head.html" %}
   <title>Compare AI Models Side-by-Side — Specs, Pricing, Benchmarks | RankLLMs</title>
   <meta name="description" content="Compare AI models head-to-head across intelligence, coding indices, context length, SWE-bench score, throughput TPS, and token pricing.">
   <meta name="keywords" content="compare AI models, LLM comparison, model pricing, intelligence index, free API">
@@ -14,176 +14,356 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Compare AI Models | RankLLMs">
   <meta name="twitter:description" content="Side-by-side AI model comparison: specs, pricing, benchmarks, and winner callouts.">
+  <style>
+    .cmp-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--wa-space-l);
+    }
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            canvas: { DEFAULT: '#faf9f5', dark: '#141413' },
-            surface: {
-              card: '#ffffff',
-              soft: '#f3f1eb',
-              cream: '#fbfaf7',
-              'cream-strong': '#eeebe2',
-              dark: '#181715',
-            },
-            primary: { DEFAULT: '#cc785c', hover: '#b8664b' },
-            ink: { DEFAULT: '#181715', dark: '#f2f0e8' },
-            body: { DEFAULT: '#3d3c38', dark: '#c5c2ba' },
-            muted: { DEFAULT: '#6e6c64', dark: '#8d8a80', soft: '#a6a397' },
-            hairline: { DEFAULT: '#e8e5dc', dark: '#302f2c' },
-            accent: { teal: '#3b7a57', amber: '#d97706', red: '#dc2626' }
-          },
-          fontFamily: {
-            serif: ['Newsreader', 'Georgia', 'serif'],
-            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace']
-          },
-          letterSpacing: { 'tight-serif': '-0.02em' }
-        }
+    @media (min-width: 48rem) {
+      .cmp-grid {
+        grid-template-columns: 1fr 1fr;
       }
     }
-  </script>
+
+    .cmp-panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--wa-space-s);
+    }
+
+    .cmp-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--wa-space-s);
+    }
+
+    .cmp-label-row label {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--wa-color-text-quiet);
+    }
+
+    .cmp-hint {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      font-weight: 600;
+    }
+
+    .cmp-hint.hint-a { color: var(--wa-color-brand-fill-normal); }
+    .cmp-hint.hint-b { color: #3b7a57; }
+    .wa-dark .cmp-hint.hint-b { color: #6ee7a0; }
+
+    .cmp-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: var(--wa-space-m);
+      border-top: 1px solid var(--wa-color-surface-border);
+    }
+
+    .cmp-empty,
+    .cmp-error {
+      text-align: center;
+      padding: var(--wa-space-2xl) var(--wa-space-m);
+      color: var(--wa-color-text-quiet);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      background: var(--wa-color-surface-raised);
+      border: 1px solid var(--wa-color-surface-border);
+      border-radius: var(--wa-border-radius-l);
+    }
+
+    .cmp-error {
+      color: var(--wa-color-danger-fill-normal, #dc2626);
+    }
+
+    .cmp-side-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--wa-space-l);
+    }
+
+    @media (min-width: 48rem) {
+      .cmp-side-cards {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .cmp-side-card {
+      background: var(--wa-color-surface-raised);
+      border: 1px solid var(--wa-color-surface-border);
+      border-radius: var(--wa-border-radius-l);
+      padding: var(--wa-space-l);
+      display: flex;
+      flex-direction: column;
+      gap: var(--wa-space-xs);
+    }
+
+    .cmp-side-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--wa-space-s);
+    }
+
+    .cmp-provider {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--wa-color-brand-fill-normal);
+    }
+
+    .cmp-provider.provider-b {
+      color: #3b7a57;
+    }
+
+    .wa-dark .cmp-provider.provider-b {
+      color: #6ee7a0;
+    }
+
+    .cmp-side-card h3 {
+      margin: 0;
+      font-family: var(--wa-font-family-display);
+      font-weight: 500;
+      font-size: var(--wa-font-size-xl);
+      color: var(--wa-color-text-normal);
+    }
+
+    .cmp-side-card p {
+      margin: 0;
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-s);
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .cmp-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--wa-color-surface-border);
+      border-radius: var(--wa-border-radius-l);
+      background: var(--wa-color-surface-raised);
+    }
+
+    .cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--wa-font-size-s);
+      text-align: left;
+    }
+
+    .cmp-table th {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--wa-color-text-quiet);
+      background: var(--wa-color-surface-lowered);
+      padding: var(--wa-space-s) var(--wa-space-m);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+    }
+
+    .cmp-table th:not(:first-child) { text-align: center; }
+    .cmp-table th:last-child { text-align: right; }
+
+    .cmp-table td {
+      padding: var(--wa-space-s) var(--wa-space-m);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+      color: var(--wa-color-text-normal);
+    }
+
+    .cmp-table tbody tr:last-child td { border-bottom: none; }
+    .cmp-table tbody tr:hover td { background: var(--wa-color-surface-lowered); }
+
+    .cmp-table .metric {
+      font-weight: 500;
+      color: var(--wa-color-text-normal);
+    }
+
+    .cmp-table .val {
+      text-align: center;
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+    }
+
+    .cmp-table .val.val-lead {
+      font-weight: 700;
+      font-size: var(--wa-font-size-xs);
+      color: var(--wa-color-brand-fill-normal);
+    }
+
+    .cmp-table .val.val-lead-b {
+      font-weight: 700;
+      font-size: var(--wa-font-size-xs);
+      color: #3b7a57;
+    }
+
+    .wa-dark .cmp-table .val.val-lead-b { color: #6ee7a0; }
+
+    .cmp-table .advantage {
+      text-align: right;
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+      font-weight: 600;
+      color: var(--wa-color-text-normal);
+    }
+
+    .cmp-results {
+      display: flex;
+      flex-direction: column;
+      gap: var(--wa-space-l);
+    }
+  </style>
 </head>
-<body class="bg-canvas text-body font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
-
-  <!-- TOP NAV -->
-  <header class="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur-md px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2 group">
-          <span class="font-serif text-2xl font-normal tracking-tight-serif text-ink group-hover:text-primary transition-colors">RankLLMs</span>
-          <span class="text-[11px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-surface-soft text-muted border border-hairline">Compare</span>
-        </a>
+<body>
+  <wa-page>
+    <header slot="header" class="site-header section">
+      <div class="wa-cluster wa-gap-xs">
+        <a class="brand-wordmark" href="/">RankLLMs</a>
+        <wa-badge variant="neutral" appearance="outlined" pill class="brand-badge">Compare</wa-badge>
       </div>
-
-      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
-        <a href="/leaderboard" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🏆 Leaderboard</a>
-        <a href="/benchmarks" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🔬 OpenRouter Benchmarks</a>
-        <a href="/cards" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🎴 Model Cards</a>
-        <a href="/compare" class="px-3 py-1.5 rounded-md text-ink bg-surface-card border border-hairline shadow-sm font-semibold">⚔️ Compare</a>
-        <a href="/agent-guide" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🤖 Agent Guide</a>
-        <a href="/" class="px-3 py-1.5 rounded-md text-primary font-medium hover:bg-surface-soft transition-all">⚡ API Studio & Docs</a>
-      </nav>
-
-      <div class="flex items-center gap-2">
-        <a href="/api/v1/compare?ids=claude-3-7-sonnet,gpt-4o" target="_blank" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium text-ink bg-surface-card border border-hairline hover:bg-surface-soft transition-colors">
+      {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+      <div class="header-actions">
+        <wa-button href="/api/v1/compare?ids=claude-3-7-sonnet,gpt-4o" appearance="outlined" size="s" class="api-link-btn" target="_blank" rel="noopener">
           GET /api/v1/compare ➔
-        </a>
+        </wa-button>
+        <wa-button data-toggle-nav appearance="plain" class="toggle-nav" aria-label="Open menu">
+          <wa-icon name="bars"></wa-icon>
+        </wa-button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- MAIN -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-    <div class="border-b border-hairline pb-6">
-      <h1 class="font-serif text-3xl sm:text-4xl font-normal tracking-tight-serif text-ink">Side-by-Side Model Comparison</h1>
-      <p class="text-sm text-muted mt-1">Direct head-to-head comparison across empirical intelligence, coding benchmark, context window, and pricing.</p>
-    </div>
+    {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
 
-    <!-- Comparison Selector Card -->
-    <div class="bg-surface-card border border-hairline rounded-xl p-6 shadow-sm space-y-5">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Model A Selector -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="block text-xs font-mono font-semibold uppercase tracking-wider text-muted">Model A (Primary)</label>
-            <span class="text-[11px] font-mono text-primary font-semibold">Select or Type</span>
+    <main class="wa-stack wa-gap-xl section content-wrap">
+      <div class="page-header">
+        <div>
+          <div class="page-meta">
+            <wa-badge variant="brand" appearance="outlined" pill>Head-to-Head</wa-badge>
+            <span>&bull; Specs · Pricing · Benchmarks · Winner callouts</span>
           </div>
-          <select id="cmp-select-a" onchange="onModelSelectChange('a')" class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-sm text-ink focus:outline-none focus:border-primary font-mono">
-            <option value="anthropic/claude-3.7-sonnet" selected>Claude 3.7 Sonnet (Anthropic)</option>
-            <option value="openai/gpt-4o">GPT-4o (OpenAI)</option>
-            <option value="deepseek/deepseek-r1">DeepSeek R1 (DeepSeek)</option>
-            <option value="x-ai/grok-4.6">Grok 4.6 (SpaceXAI)</option>
-            <option value="google/gemini-2.0-flash">Gemini 2.0 Flash (Google)</option>
-            <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B (Meta)</option>
-          </select>
-          <input type="text" id="cmp-model-a" value="anthropic/claude-3.7-sonnet" placeholder="Or type slug e.g. claude-3-7-sonnet..." class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-xs font-mono text-ink placeholder:text-muted-soft focus:outline-none focus:border-primary">
+          <h1>Side-by-Side Model Comparison</h1>
+          <p class="page-lede">Direct head-to-head comparison across empirical intelligence, coding benchmark, context window, and pricing.</p>
         </div>
+      </div>
 
-        <!-- Model B Selector -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="block text-xs font-mono font-semibold uppercase tracking-wider text-muted">Model B (Challenger)</label>
-            <span class="text-[11px] font-mono text-accent-teal font-semibold">Select or Type</span>
+      <wa-card class="controls-card">
+        <div class="wa-stack wa-gap-l">
+          <div class="cmp-grid">
+            <div class="cmp-panel">
+              <div class="cmp-label-row">
+                <label for="cmp-select-a">Model A (Primary)</label>
+                <span class="cmp-hint hint-a">Select or Type</span>
+              </div>
+              <wa-select label="Model A" size="s" id="cmp-select-a" onchange="onModelSelectChange('a')">
+                <wa-option value="anthropic/claude-3.7-sonnet" selected>Claude 3.7 Sonnet (Anthropic)</wa-option>
+                <wa-option value="openai/gpt-4o">GPT-4o (OpenAI)</wa-option>
+                <wa-option value="deepseek/deepseek-r1">DeepSeek R1 (DeepSeek)</wa-option>
+                <wa-option value="x-ai/grok-4.6">Grok 4.6 (SpaceXAI)</wa-option>
+                <wa-option value="google/gemini-2.0-flash">Gemini 2.0 Flash (Google)</wa-option>
+                <wa-option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B (Meta)</wa-option>
+              </wa-select>
+              <wa-input
+                type="text"
+                label="Or type slug"
+                placeholder="claude-3-7-sonnet…"
+                size="s"
+                id="cmp-model-a"
+                value="anthropic/claude-3.7-sonnet"
+              >
+                <wa-icon slot="start" name="pen"></wa-icon>
+              </wa-input>
+            </div>
+
+            <div class="cmp-panel">
+              <div class="cmp-label-row">
+                <label for="cmp-select-b">Model B (Challenger)</label>
+                <span class="cmp-hint hint-b">Select or Type</span>
+              </div>
+              <wa-select label="Model B" size="s" id="cmp-select-b" onchange="onModelSelectChange('b')">
+                <wa-option value="openai/gpt-4o" selected>GPT-4o (OpenAI)</wa-option>
+                <wa-option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet (Anthropic)</wa-option>
+                <wa-option value="deepseek/deepseek-r1">DeepSeek R1 (DeepSeek)</wa-option>
+                <wa-option value="x-ai/grok-4.6">Grok 4.6 (SpaceXAI)</wa-option>
+                <wa-option value="google/gemini-2.0-flash">Gemini 2.0 Flash (Google)</wa-option>
+                <wa-option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B (Meta)</wa-option>
+              </wa-select>
+              <wa-input
+                type="text"
+                label="Or type slug"
+                placeholder="gpt-4o…"
+                size="s"
+                id="cmp-model-b"
+                value="openai/gpt-4o"
+              >
+                <wa-icon slot="start" name="pen"></wa-icon>
+              </wa-input>
+            </div>
           </div>
-          <select id="cmp-select-b" onchange="onModelSelectChange('b')" class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-sm text-ink focus:outline-none focus:border-primary font-mono">
-            <option value="openai/gpt-4o" selected>GPT-4o (OpenAI)</option>
-            <option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet (Anthropic)</option>
-            <option value="deepseek/deepseek-r1">DeepSeek R1 (DeepSeek)</option>
-            <option value="x-ai/grok-4.6">Grok 4.6 (SpaceXAI)</option>
-            <option value="google/gemini-2.0-flash">Gemini 2.0 Flash (Google)</option>
-            <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B (Meta)</option>
-          </select>
-          <input type="text" id="cmp-model-b" value="openai/gpt-4o" placeholder="Or type slug e.g. gpt-4o..." class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-xs font-mono text-ink placeholder:text-muted-soft focus:outline-none focus:border-primary">
+
+          <div class="cmp-actions">
+            <wa-button variant="brand" onclick="executeComparison()">
+              Compare Models
+              <wa-icon slot="end" name="arrow-right"></wa-icon>
+            </wa-button>
+          </div>
         </div>
+      </wa-card>
+
+      <div id="cmp-results-container" class="cmp-results">
+        <div class="cmp-empty">Click 'Compare Models' above to generate side-by-side spec and benchmark breakdown.</div>
       </div>
+    </main>
 
-      <div class="flex items-center justify-end pt-2 border-t border-hairline">
-        <button onclick="executeComparison()" class="px-6 py-2.5 rounded-md text-sm font-medium text-white bg-primary hover:bg-primary-hover shadow-sm transition-all flex items-center gap-2">
-          <span>Compare Models</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Comparison Results Container -->
-    <div id="cmp-results-container" class="space-y-6">
-      <div class="py-12 text-center text-muted font-mono text-xs bg-surface-card border border-hairline rounded-xl">Click 'Compare Models' above to generate side-by-side spec and benchmark breakdown.</div>
-    </div>
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="border-t border-hairline bg-surface-card text-xs mt-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-hairline">
-        <div class="space-y-3">
-          <div class="font-serif text-2xl tracking-tight-serif text-ink">RankLLMs</div>
-          <p class="text-muted leading-relaxed">
-            The independent benchmark engine and intelligent model router powering production AI infrastructure.
-          </p>
+    <footer slot="footer" class="section site-footer content-wrap">
+      <div class="footer-cols">
+        <div>
+          <div class="brand-wordmark" style="font-size: var(--wa-font-size-xl);">RankLLMs</div>
+          <p class="col-blurb">The independent benchmark engine and intelligent model router powering production AI infrastructure.</p>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Catalog</div>
-          <ul class="space-y-2">
-            <li><a href="/leaderboard" class="text-body hover:text-primary">🏆 AI Models Leaderboard</a></li>
-            <li><a href="/benchmarks" class="text-body hover:text-primary">🔬 OpenRouter Benchmarks</a></li>
-            <li><a href="/cards" class="text-body hover:text-primary">🎴 Top 200 Model Cards</a></li>
-            <li><a href="/compare" class="text-primary font-semibold">⚔️ Model Comparison</a></li>
+        <div>
+          <div class="col-title">Catalog</div>
+          <ul>
+            <li><a href="/leaderboard">🏆 AI Models Leaderboard</a></li>
+            <li><a href="/benchmarks">🔬 OpenRouter Benchmarks</a></li>
+            <li><a href="/cards">🎴 Top 200 Model Cards</a></li>
+            <li><a href="/compare" class="is-active">⚔️ Model Comparison</a></li>
           </ul>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Telemetry</div>
-          <ul class="space-y-2">
-            <li><a href="/api/v1/compare?ids=claude-3-7-sonnet,gpt-4o" target="_blank" class="text-body hover:text-primary">Compare API</a></li>
-            <li><a href="/api/v1/benchmarks/openrouter" target="_blank" class="text-body hover:text-primary">OpenRouter Benchmarks</a></li>
-            <li><a href="/api/v1/models" target="_blank" class="text-body hover:text-primary">Catalog Models API</a></li>
+        <div>
+          <div class="col-title">Telemetry</div>
+          <ul>
+            <li><a href="/api/v1/compare?ids=claude-3-7-sonnet,gpt-4o" target="_blank" rel="noopener">Compare API</a></li>
+            <li><a href="/api/v1/benchmarks/openrouter" target="_blank" rel="noopener">OpenRouter Benchmarks</a></li>
+            <li><a href="/api/v1/models" target="_blank" rel="noopener">Catalog Models API</a></li>
           </ul>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Developers</div>
-          <ul class="space-y-2">
-            <li><a href="/agent-guide" class="text-body hover:text-primary">🤖 AI Agent Guide</a></li>
-            <li><a href="/" class="text-body hover:text-primary">⚡ API Studio & Docs</a></li>
-            <li><a href="/docs" target="_blank" class="text-body hover:text-primary">📖 OpenAPI /docs</a></li>
-            <li><a href="/llms.txt" target="_blank" class="text-body hover:text-primary">📄 llms.txt</a></li>
+        <div>
+          <div class="col-title">Developers</div>
+          <ul>
+            <li><a href="/agent-guide">🤖 AI Agent Guide</a></li>
+            <li><a href="/">⚡ API Studio &amp; Docs</a></li>
+            <li><a href="/api/v1/docs" target="_blank" rel="noopener">📖 OpenAPI /docs</a></li>
+            <li><a href="/llms.txt" target="_blank" rel="noopener">📄 llms.txt</a></li>
           </ul>
         </div>
       </div>
-      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-muted text-[11px]">
-        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" class="hover:text-ink" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" class="hover:text-ink" rel="noopener">CodaiPro</a></div>
-        <div>Data: <a href="https://openrouter.ai" class="hover:text-ink" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" class="hover:text-ink" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" class="hover:text-ink" rel="noopener">models.dev</a></div>
+      <div class="footer-bar">
+        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" rel="noopener">CodaiPro</a></div>
+        <div>Data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></div>
       </div>
-    </div>
-  </footer>
+    </footer>
+  </wa-page>
 
   <script>
     function onModelSelectChange(side) {
@@ -206,7 +386,7 @@
           if (!select) return;
           const currentVal = select.value;
           select.innerHTML = models.map(m => `
-            <option value="${m.slug}" ${m.slug === currentVal ? 'selected' : ''}>${m.name} (${m.provider_name})</option>
+            <wa-option value="${m.slug}" ${m.slug === currentVal ? 'selected' : ''}>${m.name} (${m.provider_name})</wa-option>
           `).join('');
         });
       } catch (e) {
@@ -224,7 +404,7 @@
         return;
       }
 
-      container.innerHTML = `<div class="py-12 text-center text-muted font-mono text-xs bg-surface-card border border-hairline rounded-xl">Comparing ${modelA} vs ${modelB}...</div>`;
+      container.innerHTML = `<div class="cmp-empty">Comparing ${modelA} vs ${modelB}…</div>`;
 
       try {
         const res = await fetch(`/api/v1/compare?model_a=${encodeURIComponent(modelA)}&model_b=${encodeURIComponent(modelB)}`);
@@ -232,90 +412,85 @@
         const models = data.models || [];
 
         if (models.length < 2) {
-          container.innerHTML = `<div class="p-8 text-center text-error font-mono text-xs bg-surface-card border border-hairline rounded-xl">Could not find both models in Neon DB. Try standard slugs like 'claude-3-7-sonnet', 'gpt-4o', 'deepseek-r1'.</div>`;
+          container.innerHTML = `<div class="cmp-error">Could not find both models in Neon DB. Try standard slugs like 'claude-3-7-sonnet', 'gpt-4o', 'deepseek-r1'.</div>`;
           return;
         }
 
         const mA = models[0];
         const mB = models[1];
-        const winner = data.winner || {};
 
         container.innerHTML = `
-          <!-- Side by Side Header Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-surface-card border border-hairline rounded-xl p-6 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-mono text-primary font-bold uppercase tracking-wider">${mA.provider}</span>
-                ${mA.is_open_weight ? '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-soft text-ink border border-hairline">Open-Weight</span>' : ''}
+          <div class="cmp-side-cards">
+            <div class="cmp-side-card">
+              <div class="cmp-side-top">
+                <span class="cmp-provider">${mA.provider}</span>
+                ${mA.is_open_weight ? '<wa-badge appearance="outlined" pill>Open-Weight</wa-badge>' : ''}
               </div>
-              <h3 class="font-serif text-2xl font-normal text-ink">${mA.name}</h3>
-              <p class="text-xs text-muted line-clamp-2">${mA.description || 'Flagship frontier foundation model.'}</p>
+              <h3>${mA.name}</h3>
+              <p>${mA.description || 'Flagship frontier foundation model.'}</p>
             </div>
-
-            <div class="bg-surface-card border border-hairline rounded-xl p-6 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-mono text-accent-teal font-bold uppercase tracking-wider">${mB.provider}</span>
-                ${mB.is_open_weight ? '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-soft text-ink border border-hairline">Open-Weight</span>' : ''}
+            <div class="cmp-side-card">
+              <div class="cmp-side-top">
+                <span class="cmp-provider provider-b">${mB.provider}</span>
+                ${mB.is_open_weight ? '<wa-badge appearance="outlined" pill>Open-Weight</wa-badge>' : ''}
               </div>
-              <h3 class="font-serif text-2xl font-normal text-ink">${mB.name}</h3>
-              <p class="text-xs text-muted line-clamp-2">${mB.description || 'Flagship frontier foundation model.'}</p>
+              <h3>${mB.name}</h3>
+              <p>${mB.description || 'Flagship frontier foundation model.'}</p>
             </div>
           </div>
 
-          <!-- Comparison Table -->
-          <div class="bg-canvas border border-hairline rounded-xl overflow-hidden shadow-sm">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-surface-soft text-muted font-mono text-xs uppercase tracking-wider border-b border-hairline">
+          <div class="cmp-table-wrap">
+            <table class="cmp-table">
+              <thead>
                 <tr>
-                  <th class="py-3.5 px-6">Evaluation Metric</th>
-                  <th class="py-3.5 px-6 text-center">${mA.name}</th>
-                  <th class="py-3.5 px-6 text-center">${mB.name}</th>
-                  <th class="py-3.5 px-6 text-right">Advantage</th>
+                  <th>Evaluation Metric</th>
+                  <th>${mA.name}</th>
+                  <th>${mB.name}</th>
+                  <th>Advantage</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-hairline font-sans text-body">
-                <tr class="hover:bg-surface-soft/60">
-                  <td class="py-3.5 px-6 font-medium text-ink">Intelligence Index (RankLLMs)</td>
-                  <td class="py-3.5 px-6 text-center font-mono font-bold text-base text-primary">${mA.benchmarks.intelligence_index.toFixed(1)}</td>
-                  <td class="py-3.5 px-6 text-center font-mono font-bold text-base text-accent-teal">${mB.benchmarks.intelligence_index.toFixed(1)}</td>
-                  <td class="py-3.5 px-6 text-right font-mono text-xs text-ink font-semibold">${mA.benchmarks.intelligence_index >= mB.benchmarks.intelligence_index ? mA.name : mB.name}</td>
+              <tbody>
+                <tr>
+                  <td class="metric">Intelligence Index (RankLLMs)</td>
+                  <td class="val val-lead">${mA.benchmarks.intelligence_index.toFixed(1)}</td>
+                  <td class="val val-lead-b">${mB.benchmarks.intelligence_index.toFixed(1)}</td>
+                  <td class="advantage">${mA.benchmarks.intelligence_index >= mB.benchmarks.intelligence_index ? mA.name : mB.name}</td>
                 </tr>
-                <tr class="hover:bg-surface-soft/60">
-                  <td class="py-3.5 px-6 font-medium text-ink">Coding Index (LiveCodeBench)</td>
-                  <td class="py-3.5 px-6 text-center font-mono">${mA.benchmarks.coding_index.toFixed(1)}</td>
-                  <td class="py-3.5 px-6 text-center font-mono">${mB.benchmarks.coding_index.toFixed(1)}</td>
-                  <td class="py-3.5 px-6 text-right font-mono text-xs text-ink font-semibold">${mA.benchmarks.coding_index >= mB.benchmarks.coding_index ? mA.name : mB.name}</td>
+                <tr>
+                  <td class="metric">Coding Index (LiveCodeBench)</td>
+                  <td class="val">${mA.benchmarks.coding_index.toFixed(1)}</td>
+                  <td class="val">${mB.benchmarks.coding_index.toFixed(1)}</td>
+                  <td class="advantage">${mA.benchmarks.coding_index >= mB.benchmarks.coding_index ? mA.name : mB.name}</td>
                 </tr>
-                <tr class="hover:bg-surface-soft/60">
-                  <td class="py-3.5 px-6 font-medium text-ink">Context Length (Tokens)</td>
-                  <td class="py-3.5 px-6 text-center font-mono">${mA.specs.context_length.toLocaleString()}</td>
-                  <td class="py-3.5 px-6 text-center font-mono">${mB.specs.context_length.toLocaleString()}</td>
-                  <td class="py-3.5 px-6 text-right font-mono text-xs text-ink font-semibold">${mA.specs.context_length >= mB.specs.context_length ? mA.name : mB.name}</td>
+                <tr>
+                  <td class="metric">Context Length (Tokens)</td>
+                  <td class="val">${mA.specs.context_length.toLocaleString()}</td>
+                  <td class="val">${mB.specs.context_length.toLocaleString()}</td>
+                  <td class="advantage">${mA.specs.context_length >= mB.specs.context_length ? mA.name : mB.name}</td>
                 </tr>
-                <tr class="hover:bg-surface-soft/60">
-                  <td class="py-3.5 px-6 font-medium text-ink">Prompt Price / 1M Tokens</td>
-                  <td class="py-3.5 px-6 text-center font-mono">$${parseFloat(mA.pricing.prompt_price_per_1m).toFixed(2)}</td>
-                  <td class="py-3.5 px-6 text-center font-mono">$${parseFloat(mB.pricing.prompt_price_per_1m).toFixed(2)}</td>
-                  <td class="py-3.5 px-6 text-right font-mono text-xs text-ink font-semibold">${parseFloat(mA.pricing.prompt_price_per_1m) <= parseFloat(mB.pricing.prompt_price_per_1m) ? mA.name : mB.name}</td>
+                <tr>
+                  <td class="metric">Prompt Price / 1M Tokens</td>
+                  <td class="val">$${parseFloat(mA.pricing.prompt_price_per_1m).toFixed(2)}</td>
+                  <td class="val">$${parseFloat(mB.pricing.prompt_price_per_1m).toFixed(2)}</td>
+                  <td class="advantage">${parseFloat(mA.pricing.prompt_price_per_1m) <= parseFloat(mB.pricing.prompt_price_per_1m) ? mA.name : mB.name}</td>
                 </tr>
-                <tr class="hover:bg-surface-soft/60">
-                  <td class="py-3.5 px-6 font-medium text-ink">Completion Price / 1M Tokens</td>
-                  <td class="py-3.5 px-6 text-center font-mono">$${parseFloat(mA.pricing.completion_price_per_1m).toFixed(2)}</td>
-                  <td class="py-3.5 px-6 text-center font-mono">$${parseFloat(mB.pricing.completion_price_per_1m).toFixed(2)}</td>
-                  <td class="py-3.5 px-6 text-right font-mono text-xs text-ink font-semibold">${parseFloat(mA.pricing.completion_price_per_1m) <= parseFloat(mB.pricing.completion_price_per_1m) ? mA.name : mB.name}</td>
+                <tr>
+                  <td class="metric">Completion Price / 1M Tokens</td>
+                  <td class="val">$${parseFloat(mA.pricing.completion_price_per_1m).toFixed(2)}</td>
+                  <td class="val">$${parseFloat(mB.pricing.completion_price_per_1m).toFixed(2)}</td>
+                  <td class="advantage">${parseFloat(mA.pricing.completion_price_per_1m) <= parseFloat(mB.pricing.completion_price_per_1m) ? mA.name : mB.name}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         `;
       } catch (err) {
-        container.innerHTML = `<div class="p-8 text-center text-error font-mono text-xs bg-surface-card border border-hairline rounded-xl">Error executing comparison: ${err.message}</div>`;
+        container.innerHTML = `<div class="cmp-error">Error executing comparison: ${err.message}</div>`;
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       populateSelectors();
-      // Check query param
       const urlParams = new URLSearchParams(window.location.search);
       const mA = urlParams.get('model_a');
       const mB = urlParams.get('model_b');
