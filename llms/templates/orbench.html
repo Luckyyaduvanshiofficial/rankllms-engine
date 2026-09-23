@@ -91,19 +91,19 @@
         <table class="lb-table">
           <thead>
             <tr>
-              <th style="width: 56px; text-align: center;">#</th>
-              <th class="sortable" onclick="sortByHeader('name')">
+              <th scope="col" style="width: 56px; text-align: center;">#</th>
+              <th scope="col" class="sortable" onclick="sortByHeader('name')">
                 <span class="th-inner">Model &amp; Slug <span id="hdr-sort-name" class="sort-ind">↕</span></span>
               </th>
-              <th style="text-align: center;">Source</th>
-              <th class="sortable" onclick="sortByHeader('score')" style="text-align: center;">
+              <th scope="col" style="text-align: center;">Source</th>
+              <th scope="col" class="sortable" onclick="sortByHeader('score')" style="text-align: center;">
                 <span class="th-inner center">Score / ELO / Accuracy <span id="hdr-sort-score" class="sort-ind is-active">↓</span></span>
               </th>
-              <th style="text-align: center;">Benchmark / Category</th>
-              <th class="sortable" onclick="sortByHeader('win_rate')" style="text-align: center;">
+              <th scope="col" style="text-align: center;">Benchmark / Category</th>
+              <th scope="col" class="sortable" onclick="sortByHeader('win_rate')" style="text-align: center;">
                 <span class="th-inner center">Win Rate / Coding <span id="hdr-sort-win_rate" class="sort-ind">↕</span></span>
               </th>
-              <th style="text-align: right;">Cost / Tasks</th>
+              <th scope="col" style="text-align: right;">Cost / Tasks</th>
             </tr>
           </thead>
           <tbody id="orbench-table-body">

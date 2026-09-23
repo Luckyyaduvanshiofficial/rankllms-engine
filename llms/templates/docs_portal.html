@@ -45,12 +45,13 @@
 
     <main class="wa-stack wa-gap-2xl">
       <section class="section hero wa-stack wa-gap-xs">
+        <p class="hero-eyebrow">RankLLMs · Free · Open source · MIT</p>
         <h1>AI Model Rankings &amp; Benchmark Data</h1>
         <p>Free, open-source rankings for LLMs, benchmarks, and model comparisons. Intelligence, coding, and agentic indices for 8000+ models — merged from three independent sources into one source of truth.</p>
         <div class="wa-cluster wa-gap-s hero-actions">
           <wa-button href="/llm-leaderboard" variant="brand" size="l">View Leaderboard</wa-button>
           <wa-button href="/rankllms" appearance="outlined" size="l">Source of Truth</wa-button>
-          <wa-button href="/api/v1/leaderboard/rankindex" appearance="outlined" size="l" target="_blank">API</wa-button>
+          <wa-button href="/api/v1/leaderboard/rankindex" appearance="outlined" size="l" target="_blank" rel="noopener">API</wa-button>
         </div>
       </section>
 
@@ -60,28 +61,32 @@
         <div class="wa-grid wa-gap-m" style="--min-column-size: 15rem;">
           <wa-card class="feature-card">
             <div class="wa-stack wa-gap-2xs">
-              <h3>🏆 Leaderboard</h3>
+              <span class="feature-icon" aria-hidden="true"><wa-icon name="trophy"></wa-icon></span>
+              <h3>Leaderboard</h3>
               <p>Ranked by Intelligence Index, then Advanced Coding capability. Models without verified scores excluded.</p>
               <a class="card-link" href="/llm-leaderboard">Open LLM Leaderboard →</a>
             </div>
           </wa-card>
           <wa-card class="feature-card">
             <div class="wa-stack wa-gap-2xs">
-              <h3>🔬 Benchmarks</h3>
+              <span class="feature-icon" aria-hidden="true"><wa-icon name="flask"></wa-icon></span>
+              <h3>Benchmarks</h3>
               <p>OpenRouter unified benchmarks including GPQA, Tau-bench, Design Arena, and Artificial Analysis.</p>
               <a class="card-link" href="/benchmarks">Browse benchmarks →</a>
             </div>
           </wa-card>
           <wa-card class="feature-card">
             <div class="wa-stack wa-gap-2xs">
-              <h3>⚔️ Compare</h3>
+              <span class="feature-icon" aria-hidden="true"><wa-icon name="arrows-left-right"></wa-icon></span>
+              <h3>Compare</h3>
               <p>Side-by-side comparison of model specs, pricing, and benchmark scores.</p>
               <a class="card-link" href="/compare">Compare models →</a>
             </div>
           </wa-card>
           <wa-card class="feature-card">
             <div class="wa-stack wa-gap-2xs">
-              <h3>📦 All Models</h3>
+              <span class="feature-icon" aria-hidden="true"><wa-icon name="box"></wa-icon></span>
+              <h3>All Models</h3>
               <p>Every model under RankLLMs, sorted and filterable with full pricing, context, and score data.</p>
               <a class="card-link" href="/rankllms/models">Browse all models →</a>
             </div>
@@ -188,10 +193,10 @@
       </section>
 
       <section class="section section-block content-wrap" aria-labelledby="credits-heading">
-        <wa-card>
+        <wa-card class="credits-card">
           <div class="wa-stack wa-gap-s">
-            <h2 id="credits-heading" style="margin: 0; font-family: var(--wa-font-family-display); font-weight: 500; font-size: var(--wa-font-size-l);">Credits &amp; Acknowledgments</h2>
-            <p style="margin: 0; color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-s); line-height: 1.6;">RankLLMs Engine is free and open source (MIT). The rankings, benchmarks, and catalog data on this site would not exist without these projects:</p>
+            <h2 id="credits-heading">Credits &amp; Acknowledgments</h2>
+            <p>RankLLMs Engine is free and open source (MIT). The rankings, benchmarks, and catalog data on this site would not exist without these projects:</p>
             <ul class="credits-list">
               <li><a href="https://openrouter.ai" rel="noopener">OpenRouter</a> — model catalog, unified benchmarks, and routing intelligence</li>
               <li><a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> — independent intelligence, coding, and speed evaluations (attribution required)</li>
@@ -199,14 +204,14 @@
               <li><a href="https://rankllms.com" rel="noopener">rankllms.com</a> — the product this engine powers (structured, merged rankings)</li>
               <li><a href="https://codaipro.com" rel="noopener">CodaiPro</a> — built and maintains this engine</li>
             </ul>
-            <p style="margin: 0; color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-s);">See the free <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine/blob/main/USER_GUIDE.md">User Guide</a> and <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" rel="noopener">source on GitHub</a>.</p>
+            <p>See the free <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine/blob/main/USER_GUIDE.md">User Guide</a> and <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" rel="noopener">source on GitHub</a>.</p>
           </div>
         </wa-card>
       </section>
     </main>
 
     <footer slot="footer" class="section site-footer content-wrap">
-      <p>RankLLMs Engine &copy; 2026 &middot; <a href="/api/v1/docs" target="_blank">API Documentation</a> &middot; <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" rel="noopener">GitHub</a></p>
+      <p>RankLLMs Engine &copy; 2026 &middot; <a href="/api/v1/docs" target="_blank" rel="noopener">API Documentation</a> &middot; <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" rel="noopener">GitHub</a></p>
       <p>Data sources: <a href="/ormodels">OpenRouter</a> &middot; <a href="/aamodels">Artificial Analysis</a> &middot; <a href="/modelsdev">models.dev</a></p>
       <p>Merged source of truth: <a href="/rankllms">rankllms</a> &middot; Models: <a href="/rankllms/models">/rankllms/models</a> &middot; Leaderboard: <a href="/llm-leaderboard">/llm-leaderboard</a></p>
       <p>Product: <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; Built by <a href="https://codaipro.com" rel="noopener">CodaiPro</a></p>

@@ -82,20 +82,20 @@
         <table class="lb-table">
           <thead>
             <tr>
-              <th style="width: 56px; text-align: center;">#</th>
-              <th class="sortable" onclick="sortByHeader('name')">
+              <th scope="col" style="width: 56px; text-align: center;">#</th>
+              <th scope="col" class="sortable" onclick="sortByHeader('name')">
                 <span class="th-inner">Model &amp; OpenRouter ID <span id="hdr-sort-name" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('author')">
+              <th scope="col" class="sortable" onclick="sortByHeader('author')">
                 <span class="th-inner">Author <span id="hdr-sort-author" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('context_length')" style="text-align: center;">
+              <th scope="col" class="sortable" onclick="sortByHeader('context_length')" style="text-align: center;">
                 <span class="th-inner center">Context Window <span id="hdr-sort-context_length" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('prompt_price')" style="text-align: right;">
+              <th scope="col" class="sortable" onclick="sortByHeader('prompt_price')" style="text-align: right;">
                 <span class="th-inner end">Prompt / 1M <span id="hdr-sort-prompt_price" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('completion_price')" style="text-align: right;">
+              <th scope="col" class="sortable" onclick="sortByHeader('completion_price')" style="text-align: right;">
                 <span class="th-inner end">Output / 1M <span id="hdr-sort-completion_price" class="sort-ind">↕</span></span>
               </th>
             </tr>

@@ -99,31 +99,31 @@
         <table class="lb-table">
           <thead>
             <tr>
-              <th class="sortable" onclick="sortByHeader('rank')" style="width: 56px; text-align: center;">
+              <th scope="col" class="sortable" onclick="sortByHeader('rank')" style="width: 56px; text-align: center;">
                 <span class="th-inner center">Rank <span id="hdr-sort-rank" class="sort-ind is-active">↓</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('name')">
+              <th scope="col" class="sortable" onclick="sortByHeader('name')">
                 <span class="th-inner">Model &amp; Provider <span id="hdr-sort-name" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('rankllms_index')" style="text-align: center;">
+              <th scope="col" class="sortable" onclick="sortByHeader('rankllms_index')" style="text-align: center;">
                 <span class="th-inner center">RankLLMs Index <span id="hdr-sort-rankllms_index" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('intelligence')" style="text-align: center;">
+              <th scope="col" class="sortable" onclick="sortByHeader('intelligence')" style="text-align: center;">
                 <span class="th-inner center">Intelligence <span id="hdr-sort-intelligence" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('coding')" style="text-align: center;">
+              <th scope="col" class="sortable" onclick="sortByHeader('coding')" style="text-align: center;">
                 <span class="th-inner center">Coding / TB <span id="hdr-sort-coding" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('gpqa')" style="text-align: center;">
+              <th scope="col" class="sortable" onclick="sortByHeader('gpqa')" style="text-align: center;">
                 <span class="th-inner center">GPQA <span id="hdr-sort-gpqa" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('context_length')" style="text-align: center;">
+              <th scope="col" class="sortable" onclick="sortByHeader('context_length')" style="text-align: center;">
                 <span class="th-inner center">Context <span id="hdr-sort-context_length" class="sort-ind">↕</span></span>
               </th>
-              <th class="sortable" onclick="sortByHeader('prompt_price')" style="text-align: right;">
+              <th scope="col" class="sortable" onclick="sortByHeader('prompt_price')" style="text-align: right;">
                 <span class="th-inner end">In / Out ($/1M) <span id="hdr-sort-prompt_price" class="sort-ind">↕</span></span>
               </th>
-              <th style="text-align: center;">Sources</th>
+              <th scope="col" style="text-align: center;">Sources</th>
             </tr>
           </thead>
           <tbody id="rankindex-table-body">
