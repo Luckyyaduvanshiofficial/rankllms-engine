@@ -1,0 +1,120 @@
+{# Web Awesome CDN + RankLLMs brand tokens. Include early in <head> (after charset). #}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- RankLLMs fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Web Awesome 3.13.0 CDN: theme + loader + utilities + native reset -->
+  <link rel="stylesheet" href="https://ka-f.webawesome.com/webawesome@3.13.0/styles/webawesome.css">
+  <script type="module" src="https://ka-f.webawesome.com/webawesome@3.13.0/webawesome.loader.js"></script>
+
+  <script>
+    /* FOUCE: apply saved color scheme before first paint */
+    (function () {
+      try {
+        var s = localStorage.getItem('rankllms-scheme');
+        var dark = s === 'dark' || (!s && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle('wa-dark', dark);
+        document.documentElement.classList.toggle('wa-light', !dark);
+      } catch (e) {
+        document.documentElement.classList.add('wa-light');
+      }
+    })();
+  </script>
+
+  <style>
+    html,
+    body {
+      min-height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    :root {
+      /* RankLLMs brand → WA semantic brand tokens */
+      --wa-color-brand-fill-loud: #cc785c;
+      --wa-color-brand-fill-normal: #cc785c;
+      --wa-color-brand-fill-quiet: #f6e7e1;
+      --wa-color-brand-on-loud: #ffffff;
+      --wa-color-brand-on-normal: #181715;
+      --wa-color-brand-on-quiet: #9a4a32;
+      --wa-color-brand-border-normal: #cc785c;
+      --wa-color-brand-border-quiet: #e8b8a8;
+
+      /* RankLLMs canvas / ink / muted */
+      --wa-color-surface-default: #faf9f5;
+      --wa-color-surface-raised: #ffffff;
+      --wa-color-surface-lowered: #f3f1eb;
+      --wa-color-surface-border: #e8e5dc;
+      --wa-color-text-normal: #181715;
+      --wa-color-text-quiet: #6e6c64;
+      --wa-color-text-link: #b8664b;
+
+      --wa-font-family-display: "Newsreader", Georgia, serif;
+      --wa-font-family-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --wa-font-family-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .wa-dark {
+      --wa-color-surface-default: #141413;
+      --wa-color-surface-raised: #181715;
+      --wa-color-surface-lowered: #100f0e;
+      --wa-color-surface-border: #302f2c;
+      --wa-color-text-normal: #f2f0e8;
+      --wa-color-text-quiet: #8d8a80;
+      --wa-color-text-link: #e8b8a8;
+      --wa-color-brand-on-quiet: #e8b8a8;
+      --wa-color-brand-fill-quiet: #2a221e;
+    }
+
+    body {
+      font-family: var(--wa-font-family-body);
+      background: var(--wa-color-surface-default);
+      color: var(--wa-color-text-normal);
+    }
+
+    main {
+      padding: 0;
+    }
+
+    .section {
+      padding-inline: var(--wa-space-xl);
+    }
+
+    .brand-wordmark {
+      font-family: var(--wa-font-family-display);
+      font-size: var(--wa-font-size-2xl);
+      letter-spacing: -0.02em;
+      color: var(--wa-color-text-normal);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .brand-wordmark:hover {
+      color: var(--wa-color-brand-fill-normal);
+    }
+
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--wa-space-m);
+      padding-block: var(--wa-space-m);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+    }
+
+    .header-nav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--wa-space-2xs);
+    }
+
+    .header-nav wa-button.is-active {
+      --wa-button-background-color: var(--wa-color-brand-fill-quiet);
+      --wa-button-color: var(--wa-color-brand-on-quiet);
+    }
+  </style>

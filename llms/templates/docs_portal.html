@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="wa-theme-default wa-palette-default wa-light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include "_wa_head.html" %}
   <title>RankLLMs Engine — Free AI Model Leaderboard &amp; Benchmark API</title>
   <meta name="description" content="Free open-source LLM leaderboard API: rankings, pricing, and benchmarks for 8000+ AI models across 120+ providers. Powers rankllms.com.">
   <meta name="keywords" content="AI leaderboard API, LLM rankings, model comparison, free benchmark API, RankLLMs, OpenRouter, Artificial Analysis, models.dev">
@@ -101,18 +101,9 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <div class="logo">RankLLMs</div>
-      <nav>
-        <a href="/" class="active">Home</a>
-        <a href="/leaderboard">Leaderboard</a>
-        <a href="/llm-leaderboard">LLM Leaderboard</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/rankllms">Source of Truth</a>
-        <a href="/rankllms/models">Models</a>
-        <a href="/compare">Compare</a>
-        <a href="/api/v1/docs" target="_blank">API Docs</a>
-      </nav>
+    <header class="site-header">
+      <a class="brand-wordmark" href="/">RankLLMs</a>
+      {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
     </header>
 
     <section class="hero">

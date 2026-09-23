@@ -1,0 +1,19 @@
+{# Shared RankLLMs primary nav.
+   Header-only today; dual-include (header + drawer) lands with the wa-page shell.
+   {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+   Pass active_path=request.path to highlight the current page. #}
+{% if nav_class == "header-nav" %}
+<nav class="header-nav" aria-label="Primary">
+{% else %}
+<nav class="wa-stack wa-gap-2xs" slot="navigation" aria-label="Primary">
+{% endif %}
+  <wa-button href="/" appearance="text" size="s" data-drawer="close"{% if active_path == "/" %} class="is-active"{% endif %}>API</wa-button>
+  <wa-button href="/rankllms" appearance="text" size="s" data-drawer="close"{% if active_path == "/rankllms" or active_path == "/rankindex" %} class="is-active"{% endif %}>👑 rankllms</wa-button>
+  <wa-button href="/rankllms/models" appearance="text" size="s" data-drawer="close"{% if active_path == "/rankllms/models" %} class="is-active"{% endif %}>📚 models</wa-button>
+  <wa-button href="/llm-leaderboard" appearance="text" size="s" data-drawer="close"{% if active_path == "/llm-leaderboard" %} class="is-active"{% endif %}>🏆 leaderboard</wa-button>
+  <wa-button href="/ormodels" appearance="text" size="s" data-drawer="close"{% if active_path == "/ormodels" %} class="is-active"{% endif %}>📦 or</wa-button>
+  <wa-button href="/orbench" appearance="text" size="s" data-drawer="close"{% if active_path == "/orbench" %} class="is-active"{% endif %}>📊 orbench</wa-button>
+  <wa-button href="/aamodels" appearance="text" size="s" data-drawer="close"{% if active_path == "/aamodels" %} class="is-active"{% endif %}>🔬 aa</wa-button>
+  <wa-button href="/aabanch" appearance="text" size="s" data-drawer="close"{% if active_path == "/aabanch" %} class="is-active"{% endif %}>📈 aabanch</wa-button>
+  <wa-button href="/modelsdev" appearance="text" size="s" data-drawer="close"{% if active_path == "/modelsdev" %} class="is-active"{% endif %}>🧩 models.dev</wa-button>
+</nav>
