@@ -625,4 +625,153 @@
       color: var(--wa-color-text-link);
       font-weight: 600;
     }
+
+    /* Catalog page header actions (refresh + API link) */
+    .page-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--wa-space-s);
+      align-items: center;
+    }
+
+    .api-link-btn {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-2xs);
+    }
+
+    .brand-badge {
+      margin-inline-start: var(--wa-space-xs);
+    }
+
+    /* Sortable table headers */
+    .lb-table th.sortable {
+      cursor: pointer;
+    }
+
+    .lb-table th.sortable:hover {
+      color: var(--wa-color-text-normal);
+    }
+
+    .lb-table th .sort-ind {
+      display: inline-block;
+      margin-inline-start: 0.25rem;
+      color: var(--wa-color-text-quiet);
+      font-weight: 400;
+    }
+
+    .lb-table th .sort-ind.is-active {
+      color: var(--wa-color-brand-fill-normal);
+      font-weight: 700;
+    }
+
+    .th-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .th-inner.center {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .th-inner.end {
+      justify-content: flex-end;
+      width: 100%;
+    }
+
+    /* Filter / preset pills row */
+    .filter-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--wa-space-2xs);
+    }
+
+    /* Sort direction toggle */
+    .sort-dir-btn {
+      min-width: 9rem;
+      justify-content: center;
+    }
+
+    /* Compact footer columns (site-footer multi-col) */
+    .footer-cols {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+      gap: var(--wa-space-l);
+      text-align: start;
+      width: 100%;
+      padding-bottom: var(--wa-space-l);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+      margin-bottom: var(--wa-space-m);
+    }
+
+    .footer-cols .col-title {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--wa-color-text-quiet);
+      font-weight: 600;
+      margin: 0 0 var(--wa-space-s);
+    }
+
+    .footer-cols ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: var(--wa-space-2xs);
+    }
+
+    .footer-cols a {
+      color: var(--wa-color-text-normal);
+      text-decoration: none;
+      font-size: var(--wa-font-size-s);
+    }
+
+    .footer-cols a:hover {
+      color: var(--wa-color-text-link);
+    }
+
+    .footer-cols a.is-active {
+      color: var(--wa-color-brand-fill-normal);
+      font-weight: 600;
+    }
+
+    .footer-cols .col-blurb {
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-s);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--wa-space-s);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+      width: 100%;
+      text-align: start;
+    }
+
+    .footer-bar a {
+      color: var(--wa-color-text-quiet);
+      text-decoration: none;
+    }
+
+    .footer-bar a:hover {
+      color: var(--wa-color-text-normal);
+    }
+
+    .site-footer {
+      align-items: stretch;
+      text-align: start;
+    }
+
+    .site-footer > p {
+      text-align: center;
+    }
   </style>

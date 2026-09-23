@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="wa-theme-default wa-palette-default wa-light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include "_wa_head.html" %}
   <title>Artificial Analysis Models Catalog (aamodels) | RankLLMs</title>
   <meta name="description" content="Visual explorer for Artificial Analysis models table (aamodels): 600+ AI foundation models with creators, release dates, context windows, and token pricing.">
   <link rel="canonical" href="https://api.rankllms.com/aamodels">
@@ -13,224 +13,146 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Artificial Analysis Models Catalog | RankLLMs">
   <meta name="twitter:description" content="Browse AI foundation models with creators, context windows, and token pricing.">
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            canvas: { DEFAULT: '#faf9f5', dark: '#141413' },
-            surface: {
-              card: '#ffffff',
-              soft: '#f3f1eb',
-              cream: '#fbfaf7',
-              'cream-strong': '#eeebe2',
-              dark: '#181715',
-            },
-            primary: { DEFAULT: '#cc785c', hover: '#b8664b' },
-            ink: { DEFAULT: '#181715', dark: '#f2f0e8' },
-            body: { DEFAULT: '#3d3c38', dark: '#c5c2ba' },
-            muted: { DEFAULT: '#6e6c64', dark: '#8d8a80', soft: '#a6a397' },
-            hairline: { DEFAULT: '#e8e5dc', dark: '#302f2c' },
-            accent: { teal: '#3b7a57', amber: '#d97706', red: '#dc2626' }
-          },
-          fontFamily: {
-            serif: ['Newsreader', 'Georgia', 'serif'],
-            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace']
-          },
-          letterSpacing: { 'tight-serif': '-0.02em' }
-        }
-      }
-    }
-  </script>
 </head>
-<body class="bg-canvas text-body font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
-
-  <!-- TOP NAV -->
-  <header class="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur-md px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto flex h-16 items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2 group">
-          <span class="font-serif text-2xl font-normal tracking-tight-serif text-ink group-hover:text-primary transition-colors">RankLLMs</span>
-          <span class="text-[11px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-surface-soft text-muted border border-hairline">Table: aamodels</span>
-        </a>
+<body>
+  <wa-page>
+    <header slot="header" class="site-header section">
+      <div class="wa-cluster wa-gap-xs">
+        <a class="brand-wordmark" href="/">RankLLMs</a>
+        <wa-badge variant="neutral" appearance="outlined" pill class="brand-badge">Table: aamodels</wa-badge>
       </div>
-
-      <!-- Quick Nav Links -->
-      <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
-        <a href="/rankllms" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">👑 rankllms</a>
-        <a href="/rankllms/models" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📚 models</a>
-        <a href="/llm-leaderboard" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🏆 leaderboard</a>
-        <a href="/ormodels" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📦 or</a>
-        <a href="/orbench" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📊 orbench</a>
-        <a href="/aamodels" class="px-3 py-1.5 rounded-md text-ink bg-surface-card border border-hairline shadow-sm font-semibold">🔬 aa</a>
-        <a href="/aabanch" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">📈 aabanch</a>
-        <a href="/modelsdev" class="px-3 py-1.5 rounded-md text-muted hover:text-ink hover:bg-surface-soft transition-all">🧩 models.dev</a>
-        <a href="/" class="px-3 py-1.5 rounded-md text-primary font-medium hover:bg-surface-soft transition-all">⚡ API</a>
-      </nav>
-
-      <div class="flex items-center gap-2">
-        <a href="/api/v1/aamodels" target="_blank" class="px-3 py-1.5 rounded-md text-xs font-mono font-medium text-ink bg-surface-card border border-hairline hover:bg-surface-soft transition-colors">
+      {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+      <div class="header-actions">
+        <wa-button href="/api/v1/aamodels" appearance="outlined" size="s" class="api-link-btn" target="_blank" rel="noopener">
           GET /api/v1/aamodels ➔
-        </a>
+        </wa-button>
+        <wa-button data-toggle-nav appearance="plain" class="toggle-nav" aria-label="Open menu">
+          <wa-icon name="bars"></wa-icon>
+        </wa-button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- MAIN -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-hairline pb-6">
-      <div>
-        <div class="flex items-center gap-2 mb-1">
-          <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-accent-teal/10 text-accent-teal border border-accent-teal/30 font-semibold">PostgreSQL Table: aamodels</span>
-          <span class="text-xs font-mono text-muted">&bull; Source: Artificial Analysis API v2 /data/llms/models</span>
+    {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
+
+    <main class="wa-stack wa-gap-xl section content-wrap">
+      <div class="page-header">
+        <div>
+          <div class="page-meta">
+            <wa-badge variant="success" appearance="outlined" pill>PostgreSQL Table: aamodels</wa-badge>
+            <span>&bull; Source: Artificial Analysis API v2 /data/llms/models</span>
+          </div>
+          <h1>Artificial Analysis Models Catalog (aamodels)</h1>
+          <p class="page-lede">Direct database table view of 600+ frontier AI models cataloged by Artificial Analysis with release dates, creators, and context.</p>
         </div>
-        <h1 class="font-serif text-3xl sm:text-4xl font-normal tracking-tight-serif text-ink">Artificial Analysis Models Catalog (aamodels)</h1>
-        <p class="text-sm text-muted mt-1">Direct database table view of 600+ frontier AI models cataloged by Artificial Analysis with release dates, creators, and context.</p>
-      </div>
-      <div>
-        <button onclick="loadAAModels()" class="px-3.5 py-2 rounded-md text-xs font-mono font-medium text-ink bg-canvas border border-hairline hover:bg-surface-soft transition-colors flex items-center gap-1.5 shadow-sm">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          <span>Refresh Table</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Toolbar Filters -->
-    <div class="bg-surface-card border border-hairline rounded-xl p-4 space-y-3">
-      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-        <!-- Search Input -->
-        <div class="sm:col-span-5 relative">
-          <input type="text" id="aa-search-input" onkeyup="filterAAModels()" placeholder="Search by model name, slug (e.g. claude, gpt, deepseek), or creator..." class="w-full bg-canvas border border-hairline rounded-md px-3.5 py-2 text-sm text-ink placeholder:text-muted-soft focus:outline-none focus:border-primary font-sans">
-        </div>
-
-        <!-- Sort Select -->
-        <div class="sm:col-span-4">
-          <select id="aa-sort-select" onchange="onSortSelectChange()" class="w-full bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-primary">
-            <option value="release_date">Sort: Release Date (Newest First)</option>
-            <option value="name">Sort: Model Name Alphabetical</option>
-            <option value="creator">Sort: Creator / Company</option>
-            <option value="context_window">Sort: Context Window</option>
-            <option value="prompt_price">Sort: Prompt Price ($/1M)</option>
-            <option value="completion_price">Sort: Output Price ($/1M)</option>
-          </select>
-        </div>
-
-        <!-- High-to-Low Direction Toggle -->
-        <div class="sm:col-span-3 flex items-center gap-2">
-          <button id="aa-sort-dir-btn" onclick="toggleSortDir()" class="flex-1 py-2 px-3 rounded-md text-xs font-mono font-medium text-ink bg-canvas border border-hairline hover:bg-surface-card transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-            <span id="aa-sort-dir-icon">↓</span>
-            <span id="aa-sort-dir-label">High to Low</span>
-          </button>
+        <div class="page-actions">
+          <wa-button appearance="outlined" size="s" onclick="loadAAModels()">
+            <wa-icon slot="start" name="arrows-rotate"></wa-icon>
+            Refresh Table
+          </wa-button>
         </div>
       </div>
-    </div>
 
-    <!-- Table Container -->
-    <div class="bg-canvas border border-hairline rounded-xl overflow-hidden shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm whitespace-nowrap">
-          <thead class="bg-surface-soft text-muted font-mono text-xs uppercase tracking-wider border-b border-hairline select-none">
+      <wa-card class="controls-card">
+        <div class="page-controls">
+          <wa-input
+            type="search"
+            label="Search"
+            placeholder="Search model name, slug (e.g. claude, gpt), or creator…"
+            size="s"
+            id="aa-search-input"
+            onkeyup="filterAAModels()"
+          >
+            <wa-icon slot="start" name="magnifying-glass"></wa-icon>
+          </wa-input>
+          <wa-select label="Sort by" size="s" id="aa-sort-select" onchange="onSortSelectChange()">
+            <wa-option value="release_date" selected>Release Date (Newest First)</wa-option>
+            <wa-option value="name">Model Name Alphabetical</wa-option>
+            <wa-option value="creator">Creator / Company</wa-option>
+            <wa-option value="context_window">Context Window</wa-option>
+            <wa-option value="prompt_price">Prompt Price ($/1M)</wa-option>
+            <wa-option value="completion_price">Output Price ($/1M)</wa-option>
+          </wa-select>
+          <wa-button id="aa-sort-dir-btn" appearance="outlined" size="s" class="sort-dir-btn" onclick="toggleSortDir()">
+            <span id="aa-sort-dir-icon">↓</span>&nbsp;<span id="aa-sort-dir-label">High to Low</span>
+          </wa-button>
+        </div>
+      </wa-card>
+
+      <div class="lb-table-wrap">
+        <table class="lb-table">
+          <thead>
             <tr>
-              <th class="py-3 px-4 w-16 text-center">#</th>
-              <th onclick="sortByHeader('name')" class="py-3 px-4 cursor-pointer hover:text-ink transition-colors group">
-                <div class="flex items-center gap-1.5">
-                  <span>Model & Slug</span>
-                  <span id="hdr-sort-name" class="text-muted-soft group-hover:text-primary">↕</span>
-                </div>
+              <th style="width: 56px; text-align: center;">#</th>
+              <th class="sortable" onclick="sortByHeader('name')">
+                <span class="th-inner">Model &amp; Slug <span id="hdr-sort-name" class="sort-ind">↕</span></span>
               </th>
-              <th onclick="sortByHeader('creator')" class="py-3 px-4 cursor-pointer hover:text-ink transition-colors group">
-                <div class="flex items-center gap-1.5">
-                  <span>Creator</span>
-                  <span id="hdr-sort-creator" class="text-muted-soft group-hover:text-primary">↕</span>
-                </div>
+              <th class="sortable" onclick="sortByHeader('creator')">
+                <span class="th-inner">Creator <span id="hdr-sort-creator" class="sort-ind">↕</span></span>
               </th>
-              <th onclick="sortByHeader('release_date')" class="py-3 px-4 text-center cursor-pointer hover:text-ink transition-colors group">
-                <div class="flex items-center justify-center gap-1.5">
-                  <span>Release Date</span>
-                  <span id="hdr-sort-release_date" class="text-muted-soft group-hover:text-primary">↕</span>
-                </div>
+              <th class="sortable" onclick="sortByHeader('release_date')" style="text-align: center;">
+                <span class="th-inner center">Release Date <span id="hdr-sort-release_date" class="sort-ind">↕</span></span>
               </th>
-              <th onclick="sortByHeader('context_window')" class="py-3 px-4 text-center cursor-pointer hover:text-ink transition-colors group">
-                <div class="flex items-center justify-center gap-1.5">
-                  <span>Context Window</span>
-                  <span id="hdr-sort-context_window" class="text-muted-soft group-hover:text-primary">↕</span>
-                </div>
+              <th class="sortable" onclick="sortByHeader('context_window')" style="text-align: center;">
+                <span class="th-inner center">Context Window <span id="hdr-sort-context_window" class="sort-ind">↕</span></span>
               </th>
-              <th onclick="sortByHeader('prompt_price')" class="py-3 px-4 text-right cursor-pointer hover:text-ink transition-colors group">
-                <div class="flex items-center justify-end gap-1.5">
-                  <span>Prompt / 1M</span>
-                  <span id="hdr-sort-prompt_price" class="text-muted-soft group-hover:text-primary">↕</span>
-                </div>
+              <th class="sortable" onclick="sortByHeader('prompt_price')" style="text-align: right;">
+                <span class="th-inner end">Prompt / 1M <span id="hdr-sort-prompt_price" class="sort-ind">↕</span></span>
               </th>
-              <th onclick="sortByHeader('completion_price')" class="py-3 px-4 text-right cursor-pointer hover:text-ink transition-colors group">
-                <div class="flex items-center justify-end gap-1.5">
-                  <span>Output / 1M</span>
-                  <span id="hdr-sort-completion_price" class="text-muted-soft group-hover:text-primary">↕</span>
-                </div>
+              <th class="sortable" onclick="sortByHeader('completion_price')" style="text-align: right;">
+                <span class="th-inner end">Output / 1M <span id="hdr-sort-completion_price" class="sort-ind">↕</span></span>
               </th>
             </tr>
           </thead>
-          <tbody id="aamodels-table-body" class="divide-y divide-hairline text-body">
-            <tr><td colspan="7" class="py-12 text-center text-muted font-mono text-xs">Loading Artificial Analysis models from table 'aamodels'...</td></tr>
+          <tbody id="aamodels-table-body">
+            <tr><td colspan="7" class="loading-row">Loading Artificial Analysis models from table 'aamodels'…</td></tr>
           </tbody>
         </table>
       </div>
-    </div>
-  </main>
+    </main>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-hairline bg-surface-card text-xs mt-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-hairline">
-        <div class="space-y-3">
-          <div class="font-serif text-2xl tracking-tight-serif text-ink">RankLLMs</div>
-          <p class="text-muted leading-relaxed">
-            The independent benchmark engine and intelligent model router powering production AI infrastructure.
-          </p>
+    <footer slot="footer" class="section site-footer content-wrap">
+      <div class="footer-cols">
+        <div>
+          <div class="brand-wordmark" style="font-size: var(--wa-font-size-xl);">RankLLMs</div>
+          <p class="col-blurb">The independent benchmark engine and intelligent model router powering production AI infrastructure.</p>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Raw Tables</div>
-          <ul class="space-y-2">
-            <li><a href="/ormodels" class="text-body hover:text-primary">📦 ormodels (OpenRouter Catalog)</a></li>
-            <li><a href="/orbench" class="text-body hover:text-primary">📊 orbench (OpenRouter Benchmarks)</a></li>
-            <li><a href="/aamodels" class="text-primary font-semibold">🔬 aamodels (AA Catalog)</a></li>
-            <li><a href="/aabanch" class="text-body hover:text-primary">📈 aabanch (AA Benchmarks)</a></li>
+        <div>
+          <div class="col-title">Raw Tables</div>
+          <ul>
+            <li><a href="/ormodels">📦 ormodels (OpenRouter Catalog)</a></li>
+            <li><a href="/orbench">📊 orbench (OpenRouter Benchmarks)</a></li>
+            <li><a href="/aamodels" class="is-active">🔬 aamodels (AA Catalog)</a></li>
+            <li><a href="/aabanch">📈 aabanch (AA Benchmarks)</a></li>
+            <li><a href="/modelsdev">🧩 modelsdev</a></li>
           </ul>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Core Views</div>
-          <ul class="space-y-2">
-            <li><a href="/leaderboard" class="text-body hover:text-primary">🏆 AI Leaderboard</a></li>
-            <li><a href="/benchmarks" class="text-body hover:text-primary">🔬 Unified Benchmarks</a></li>
-            <li><a href="/cards" class="text-body hover:text-primary">🎴 Top 200 Cards</a></li>
-            <li><a href="/compare" class="text-body hover:text-primary">⚔️ Model Comparison</a></li>
+        <div>
+          <div class="col-title">Core Views</div>
+          <ul>
+            <li><a href="/llm-leaderboard">🏆 LLM Leaderboard</a></li>
+            <li><a href="/rankllms">👑 rankllms (source of truth)</a></li>
+            <li><a href="/rankllms/models">📚 All Models</a></li>
+            <li><a href="/benchmarks">🔬 Unified Benchmarks</a></li>
+            <li><a href="/cards">🎴 Top 200 Cards</a></li>
+            <li><a href="/compare">⚔️ Model Comparison</a></li>
           </ul>
         </div>
-        <div class="space-y-3 font-mono">
-          <div class="text-[11px] uppercase tracking-wider text-muted font-semibold">Developers</div>
-          <ul class="space-y-2">
-            <li><a href="/agent-guide" class="text-body hover:text-primary">🤖 AI Agent Guide</a></li>
-            <li><a href="/" class="text-body hover:text-primary">⚡ API Studio & Docs</a></li>
-            <li><a href="/docs" target="_blank" class="text-body hover:text-primary">📖 OpenAPI /docs</a></li>
-            <li><a href="/llms.txt" target="_blank" class="text-body hover:text-primary">📄 llms.txt</a></li>
+        <div>
+          <div class="col-title">Developers</div>
+          <ul>
+            <li><a href="/agent-guide">🤖 AI Agent Guide</a></li>
+            <li><a href="/">⚡ API Studio &amp; Docs</a></li>
+            <li><a href="/api/v1/docs" target="_blank" rel="noopener">📖 OpenAPI /docs</a></li>
+            <li><a href="/llms.txt" target="_blank" rel="noopener">📄 llms.txt</a></li>
           </ul>
         </div>
       </div>
-      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-muted text-[11px]">
-        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" class="hover:text-ink" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" class="hover:text-ink" rel="noopener">CodaiPro</a></div>
-        <div>Data: <a href="https://openrouter.ai" class="hover:text-ink" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" class="hover:text-ink" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" class="hover:text-ink" rel="noopener">models.dev</a></div>
+      <div class="footer-bar">
+        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" rel="noopener">CodaiPro</a></div>
+        <div>Data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></div>
       </div>
-    </div>
-  </footer>
+    </footer>
+  </wa-page>
 
   <script>
     let rawAAModels = [];
@@ -239,7 +161,7 @@
 
     async function loadAAModels() {
       const tbody = document.getElementById('aamodels-table-body');
-      tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-muted font-mono text-xs">Loading models from table 'aamodels'...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Loading models from table 'aamodels'…</td></tr>`;
 
       try {
         const res = await fetch(`/api/v1/aamodels?limit=1000`);
@@ -247,7 +169,7 @@
         rawAAModels = data.items || [];
         applySorting();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-error font-mono text-xs">Error loading aamodels: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="loading-row is-error">Error loading aamodels: ${err.message}</td></tr>`;
       }
     }
 
@@ -288,10 +210,10 @@
         if (el) {
           if (f === currentSortField) {
             el.innerText = currentSortDir === 'desc' ? '↓' : '↑';
-            el.className = 'text-primary font-bold';
+            el.classList.add('is-active');
           } else {
             el.innerText = '↕';
-            el.className = 'text-muted-soft group-hover:text-primary';
+            el.classList.remove('is-active');
           }
         }
       });
@@ -347,7 +269,7 @@
     function renderTable(items) {
       const tbody = document.getElementById('aamodels-table-body');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-muted font-mono text-xs">No matching models found in table 'aamodels'.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="table-empty">No matching models found in table 'aamodels'.</td></tr>`;
         return;
       }
 
@@ -355,20 +277,17 @@
         const ctx = m.context_window ? (m.context_window >= 1000000 ? (m.context_window / 1000000).toFixed(1) + 'M' : Math.round(m.context_window / 1000) + 'k') : '0';
         const pIn = parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
         const pOut = parseFloat(m.completion_price_per_1m || 0).toFixed(2);
-        const rel = m.release_date || '-';
+        const rel = m.release_date || '—';
 
         return `
-          <tr class="hover:bg-surface-soft/60 transition-colors">
-            <td class="py-3 px-4 font-mono text-xs font-semibold text-muted text-center">#${idx + 1}</td>
-            <td class="py-3 px-4">
-              <div class="font-medium text-ink">${m.name}</div>
-              <div class="font-mono text-[11px] text-muted-soft mt-0.5">${m.slug}</div>
-            </td>
-            <td class="py-3 px-4 font-mono text-xs text-body">${m.creator_name || 'Independent'}</td>
-            <td class="py-3 px-4 text-center font-mono text-xs text-muted">${rel}</td>
-            <td class="py-3 px-4 text-center font-mono text-xs text-ink font-semibold">${ctx}</td>
-            <td class="py-3 px-4 text-right font-mono text-xs text-body">$${pIn}</td>
-            <td class="py-3 px-4 text-right font-mono text-xs text-body">$${pOut}</td>
+          <tr>
+            <td class="num">#${idx + 1}</td>
+            <td class="model-cell">${m.name}<span class="slug">${m.slug}</span></td>
+            <td class="provider">${m.creator_name || 'Independent'}</td>
+            <td class="num">${rel}</td>
+            <td class="score">${ctx}</td>
+            <td class="num" style="text-align: right;">$${pIn}</td>
+            <td class="num" style="text-align: right;">$${pOut}</td>
           </tr>
         `;
       }).join('');
