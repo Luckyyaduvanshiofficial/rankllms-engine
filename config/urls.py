@@ -49,6 +49,18 @@ def rankllms_models_page(request):
     return render(request, 'rankllms_models.html')
 
 
+def compare_page(request):
+    return render(request, 'compare.html')
+
+
+def cards_page(request):
+    return render(request, 'cards.html')
+
+
+def agent_guide_page(request):
+    return render(request, 'agent_guide.html')
+
+
 def ping_view(request):
     return HttpResponse("pong", content_type="text/plain", status=200)
 
@@ -78,6 +90,10 @@ urlpatterns = [
     path('rankllms/models', rankllms_models_page, name='rankllms_models_page'),
     # Leaderboard from merged rankindex (product path); legacy /leaderboard kept
     path('llm-leaderboard', llm_leaderboard_page, name='llm_leaderboard_page'),
+    # Utility pages linked from footers/home
+    path('compare', compare_page, name='compare_page'),
+    path('cards', cards_page, name='cards_page'),
+    path('agent-guide', agent_guide_page, name='agent_guide_page'),
     path('ping', ping_view, name='ping_view'),
     path('health', health_view, name='health_view'),
     path('healthz', health_view, name='healthz_view'),
