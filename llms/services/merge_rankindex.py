@@ -309,31 +309,35 @@ def merge_and_build_rankindex():
         aime = float(item['aime_25'] * 100 if item['aime_25'] else (item['math_index'] or 0.0))
         elo = float(item['design_arena_elo'] or 0.0)
 
-        # Composite formula:
-        # Base from AA Intelligence Index (normalized), GPQA, Coding/TerminalBench, Math/AIME, and Design Arena
-        score_components = []
+        # Coding-weighted composite: newer models win on coding focus.
+        # code 40%, intel 30%, tb 10%, gpqa 10%, aime 5%, elo 5% (renormalized over present scores)
+        score_parts = 0.0
+        weight_sum = 0.0
         if intel > 0:
-            score_components.append(intel * 1.4) # AA intelligence is 0-70 scale
-        if gpqa > 0:
-            score_components.append(gpqa)
+            score_parts += (intel * 1.4) * 0.30  # AA intelligence is 0-70 scale
+            weight_sum += 0.30
         if code > 0:
-            score_components.append(code)
+            score_parts += code * 0.40
+            weight_sum += 0.40
+        if gpqa > 0:
+            score_parts += gpqa * 0.10
+            weight_sum += 0.10
         if tb > 0:
-            score_components.append(tb)
+            score_parts += tb * 0.10
+            weight_sum += 0.10
         if aime > 0:
-            score_components.append(aime)
+            score_parts += aime * 0.05
+            weight_sum += 0.05
         if elo > 0:
-            score_components.append((elo - 1000) / 5.0) # Map 1400 ELO to ~80 score
+            score_parts += ((elo - 1000) / 5.0) * 0.05  # Map 1400 ELO to ~80 score
+            weight_sum += 0.05
 
-        if score_components:
-            calc_index = sum(score_components) / len(score_components)
-        else:
-            calc_index = 0.0
+        calc_index = (score_parts / weight_sum) if weight_sum > 0 else 0.0
 
         item['rankllms_index'] = round(min(100.0, max(0.0, calc_index)), 1)
 
-    # Sort and assign ranks
-    items_list.sort(key=lambda x: (x['rankllms_index'], x['intelligence_index'], x['coding_index']), reverse=True)
+    # Sort and assign ranks (coding as first tiebreak so coding-strong models rise)
+    items_list.sort(key=lambda x: (x['rankllms_index'], x['coding_index'], x['intelligence_index']), reverse=True)
     for idx, item in enumerate(items_list):
         item['rank_overall'] = idx + 1
 
