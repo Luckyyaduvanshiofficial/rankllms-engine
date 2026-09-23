@@ -9,7 +9,7 @@ from .models import (
     Provider, LLMModel, ModelSpecification, ModelPricing,
     ModelBenchmark, WeeklyTop10Ranking, PricingHistory,
     DailyModelRanking, AppRanking, TaskClassification, APIKey,
-    ORModel, ORBench, AAModel, AABench, RankIndex
+    ORModel, ORBench, AAModel, AABench, RankIndex, ModelsDevModel
 )
 
 from .services.openrouter_sync import sync_openrouter_models
@@ -1263,6 +1263,84 @@ def list_rankindex(
 
     return {
         "table": "rankindex",
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "sort_by": sort_by,
+        "sort_dir": sort_dir,
+        "items": items
+    }
+
+
+# ================= models.dev SOURCE TABLE =================
+
+@api.get("/modelsdev", response=dict, tags=["Dedicated Raw Tables"])
+def list_modelsdev(
+    request,
+    search: str = "",
+    provider: str = "",
+    open_weights: Optional[bool] = None,
+    reasoning: Optional[bool] = None,
+    tool_call: Optional[bool] = None,
+    sort_by: str = "name",
+    sort_dir: str = "asc",
+    limit: int = Field(100, ge=1, le=1000),
+    offset: int = 0
+):
+    """
+    Direct endpoint for 'modelsdev' table (models.dev provider/model catalog as-is).
+    """
+    qs = ModelsDevModel.objects.all()
+
+    if search:
+        s = search.strip()
+        qs = qs.filter(
+            Q(name__icontains=s)
+            | Q(modelsdev_id__icontains=s)
+            | Q(provider_name__icontains=s)
+            | Q(family__icontains=s)
+            | Q(description__icontains=s)
+        )
+
+    if provider:
+        qs = qs.filter(provider_name__icontains=provider.strip())
+
+    if open_weights is not None:
+        qs = qs.filter(open_weights=open_weights)
+
+    if reasoning is not None:
+        qs = qs.filter(reasoning=reasoning)
+
+    if tool_call is not None:
+        qs = qs.filter(tool_call=tool_call)
+
+    order_fields = {
+        'name': 'name',
+        'provider': 'provider_name',
+        'family': 'family',
+        'context': 'context_length',
+        'prompt_price': 'prompt_price_per_1m',
+        'completion_price': 'completion_price_per_1m',
+        'release_date': 'release_date',
+        'modelsdev_id': 'modelsdev_id',
+    }
+    field = order_fields.get(sort_by, 'name')
+    prefix = '-' if sort_dir.lower() == 'desc' else ''
+    qs = qs.order_by(f"{prefix}{field}")
+
+    total = qs.count()
+    items = list(qs[offset:offset + limit].values(
+        'id', 'modelsdev_id', 'provider_slug', 'provider_name', 'name',
+        'description', 'family', 'reasoning', 'tool_call', 'structured_output',
+        'temperature', 'open_weights', 'release_date', 'last_updated',
+        'modalities', 'context_length', 'max_output_tokens',
+        'prompt_price_per_1m', 'completion_price_per_1m', 'cache_read_price_per_1m',
+        'status', 'updated_at'
+    ))
+
+    return {
+        "table": "modelsdev",
+        "source": "https://models.dev/api.json",
         "total": total,
         "limit": limit,
         "offset": offset,
