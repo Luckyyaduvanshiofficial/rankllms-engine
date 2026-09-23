@@ -25,6 +25,14 @@ def orbench_page(request):
     return render(request, 'orbench.html')
 
 
+def aamodels_page(request):
+    return render(request, 'aamodels.html')
+
+
+def aabanch_page(request):
+    return render(request, 'aabanch.html')
+
+
 def ping_view(request):
     return HttpResponse("pong", content_type="text/plain", status=200)
 
@@ -44,6 +52,8 @@ urlpatterns = [
     # Source pages — data shown as-is from each provider
     path('ormodels', ormodels_page, name='ormodels_page'),
     path('orbench', orbench_page, name='orbench_page'),
+    path('aamodels', aamodels_page, name='aamodels_page'),
+    path('aabanch', aabanch_page, name='aabanch_page'),
     path('ping', ping_view, name='ping_view'),
     path('health', health_view, name='health_view'),
     path('healthz', health_view, name='healthz_view'),
