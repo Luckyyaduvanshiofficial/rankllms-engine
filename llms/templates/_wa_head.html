@@ -1,5 +1,6 @@
 {# Web Awesome CDN + RankLLMs brand tokens. Include early in <head> (after charset). #}
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
 
   <!-- RankLLMs fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,6 +23,40 @@
         document.documentElement.classList.add('wa-light');
       }
     })();
+  </script>
+
+  <script>
+    /* Theme toggle: inject into every page header, persist to localStorage */
+    document.addEventListener('DOMContentLoaded', function () {
+      var isDark = document.documentElement.classList.contains('wa-dark');
+      var btn = document.createElement('wa-button');
+      btn.setAttribute('appearance', 'plain');
+      btn.setAttribute('size', 's');
+      btn.setAttribute('class', 'theme-toggle');
+      btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+      btn.setAttribute('title', isDark ? 'Light mode' : 'Dark mode');
+      btn.innerHTML = '<wa-icon name="' + (isDark ? 'sun' : 'moon') + '"></wa-icon>';
+      btn.addEventListener('click', function () {
+        var dark = !document.documentElement.classList.contains('wa-dark');
+        document.documentElement.classList.toggle('wa-dark', dark);
+        document.documentElement.classList.toggle('wa-light', !dark);
+        try { localStorage.setItem('rankllms-scheme', dark ? 'dark' : 'light'); } catch (e) {}
+        btn.querySelector('wa-icon').setAttribute('name', dark ? 'sun' : 'moon');
+        btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+        btn.setAttribute('title', dark ? 'Light mode' : 'Dark mode');
+      });
+      var actions = document.querySelector('.header-actions');
+      if (actions) {
+        actions.insertBefore(btn, actions.firstChild);
+      } else {
+        var header = document.querySelector('header.site-header, .site-header');
+        if (header) {
+          var menu = header.querySelector('.toggle-nav');
+          if (menu) header.insertBefore(btn, menu);
+          else header.appendChild(btn);
+        }
+      }
+    });
   </script>
 
   <style>
@@ -647,6 +682,14 @@
       display: flex;
       align-items: center;
       gap: var(--wa-space-s);
+    }
+
+    .theme-toggle wa-icon {
+      font-size: var(--wa-font-size-m);
+    }
+
+    .wa-dark .site-header {
+      background: transparent;
     }
 
     /* Sortable table headers */
