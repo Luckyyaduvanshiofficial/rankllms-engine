@@ -423,7 +423,7 @@ def get_main_leaderboard(
     sort_by: str = "intelligence",
     dedup: bool = True,
     exclude_nulls: bool = True,
-    limit: int = Field(200, ge=1, le=1000)
+    limit: int = 200
 ):
     """
     Main LLM Leaderboard API.
@@ -494,7 +494,7 @@ def get_main_leaderboard(
 
 
 @api.get("/benchmarks", response=dict, tags=["Benchmarks API"])
-def get_benchmarks_catalog(request, sort_by: str = "rankllms_index", dedup: bool = True, limit: int = Field(50, ge=1, le=1000), offset: int = 0):
+def get_benchmarks_catalog(request, sort_by: str = "rankllms_index", dedup: bool = True, limit: int = 50, offset: int = 0):
     """
     Dedicated Benchmarks API endpoint.
     Returns model benchmark evaluation matrix sorted by rankllms_index (default), coding_index, agentic_index, swe_bench, arena_elo, or speed.
@@ -581,7 +581,7 @@ def get_openrouter_benchmarks(
     sort_by: str = "score",
     sort_dir: str = "desc",
     search: str = "",
-    limit: int = Field(100, ge=1, le=1500),
+    limit: int = 100,
     offset: int = 0
 ):
     """
@@ -941,7 +941,7 @@ def list_ormodels(
     is_free: Optional[bool] = None,
     sort_by: str = "created_at",
     sort_dir: str = "desc",
-    limit: int = Field(100, ge=1, le=1000),
+    limit: int = 100,
     offset: int = 0
 ):
     """
@@ -999,7 +999,7 @@ def list_orbench(
     search: str = "",
     sort_by: str = "score",
     sort_dir: str = "desc",
-    limit: int = Field(100, ge=1, le=1500),
+    limit: int = 100,
     offset: int = 0
 ):
     """
@@ -1075,7 +1075,7 @@ def list_aamodels(
     creator: str = "",
     sort_by: str = "release_date",
     sort_dir: str = "desc",
-    limit: int = Field(100, ge=1, le=1000),
+    limit: int = 100,
     offset: int = 0
 ):
     """
@@ -1131,7 +1131,7 @@ def list_aabanch(
     creator: str = "",
     sort_by: str = "intelligence",
     sort_dir: str = "desc",
-    limit: int = Field(100, ge=1, le=1000),
+    limit: int = 100,
     offset: int = 0
 ):
     """
@@ -1203,7 +1203,7 @@ def list_rankindex(
     is_free: Optional[bool] = None,
     sort_by: str = "release_date",
     sort_dir: str = "desc",
-    limit: int = Field(100, ge=1, le=1000),
+    limit: int = 100,
     offset: int = 0
 ):
     """
@@ -1295,7 +1295,7 @@ def list_modelsdev(
     tool_call: Optional[bool] = None,
     sort_by: str = "release_date",
     sort_dir: str = "desc",
-    limit: int = Field(100, ge=1, le=1000),
+    limit: int = 100,
     offset: int = 0
 ):
     """
@@ -1376,7 +1376,7 @@ def get_rankindex_leaderboard(
     search: str = "",
     is_open_weight: Optional[bool] = None,
     is_free: Optional[bool] = None,
-    limit: int = Field(50, ge=1, le=500),
+    limit: int = 50,
     offset: int = 0
 ):
     """
