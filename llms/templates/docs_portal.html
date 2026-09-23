@@ -50,6 +50,28 @@
     .feature { padding: 1.5rem; background: white; border-radius: 8px; border: 1px solid #eee; }
     .feature h3 { margin-bottom: 0.5rem; }
     .feature p { color: #666; font-size: 0.9rem; }
+    .feature a { color: #1a1a1a; font-weight: 600; text-decoration: none; }
+    .feature a:hover { text-decoration: underline; }
+    .sources { padding: 2rem 0; }
+    .sources h2 { margin-bottom: 0.5rem; }
+    .sources > p { color: #666; margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .source-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+    .source-card { padding: 1.5rem; background: white; border-radius: 8px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 0.75rem; }
+    .source-card .tag { display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2rem 0.5rem; border-radius: 4px; width: fit-content; }
+    .tag-or { background: #eef2ff; color: #3730a3; }
+    .tag-aa { background: #fef3c7; color: #92400e; }
+    .tag-md { background: #ecfdf5; color: #065f46; }
+    .source-card h3 { font-size: 1.05rem; }
+    .source-card p { color: #666; font-size: 0.85rem; flex: 1; }
+    .source-card .links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .source-card .links a { font-size: 0.8rem; padding: 0.35rem 0.7rem; border: 1px solid #ddd; border-radius: 5px; color: #333; text-decoration: none; background: #fafafa; }
+    .source-card .links a:hover { border-color: #1a1a1a; background: white; }
+    .flow { background: white; border: 1px solid #eee; border-radius: 8px; padding: 1.5rem 2rem; margin: 2rem 0; text-align: center; }
+    .flow h2 { margin-bottom: 1rem; font-size: 1.15rem; }
+    .flow-steps { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 0.75rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; }
+    .flow-step { padding: 0.4rem 0.75rem; background: #f9f9f9; border: 1px solid #eee; border-radius: 6px; color: #333; }
+    .flow-arrow { color: #999; font-weight: 700; }
+    .flow-final { background: #1a1a1a; color: white; border-color: #1a1a1a; }
     .api-section { background: white; border-radius: 8px; padding: 2rem; margin: 2rem 0; border: 1px solid #eee; }
     .api-section h2 { margin-bottom: 1rem; }
     .endpoint { display: flex; align-items: center; gap: 1rem; margin: 1rem 0; padding: 0.75rem; background: #f9f9f9; border-radius: 4px; }
@@ -57,7 +79,24 @@
     .method.get { background: #22c55e; color: white; }
     .method.post { background: #3b82f6; color: white; }
     code { background: #f3f3f3; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
+    .credits { background: white; border: 1px solid #eee; border-radius: 8px; padding: 2rem; margin: 2rem 0; }
+    .credits h2 { margin-bottom: 0.75rem; }
+    .credits p { color: #666; font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .credits ul { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: 0.5rem; }
+    .credits li { font-size: 0.9rem; color: #444; padding-left: 1rem; position: relative; }
+    .credits li::before { content: "→"; position: absolute; left: 0; color: #999; }
+    .credits a { color: #1a1a1a; font-weight: 600; }
     footer { text-align: center; padding: 2rem 0; color: #999; font-size: 0.85rem; border-top: 1px solid #eee; margin-top: 3rem; }
+    footer p { margin: 0.35rem 0; }
+    footer a { color: #666; }
+    footer a:hover { color: #1a1a1a; }
+    @media (max-width: 640px) {
+      header { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+      nav { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+      nav a { margin-left: 0; }
+      .hero h1 { font-size: 1.75rem; }
+      .endpoint { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    }
   </style>
 </head>
 <body>
@@ -68,14 +107,17 @@
         <a href="/" class="active">Home</a>
         <a href="/leaderboard">Leaderboard</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/rankllms">Source of Truth</a>
+        <a href="/rankllms/models">Models</a>
         <a href="/api/v1/docs" target="_blank">API Docs</a>
       </nav>
     </header>
 
     <section class="hero">
       <h1>AI Model Rankings & Benchmark Data</h1>
-      <p>Comprehensive rankings for LLMs, benchmarks, and model comparisons. Access intelligence, coding, and agentic indices for 1000+ models.</p>
+      <p>Free, open-source rankings for LLMs, benchmarks, and model comparisons. Intelligence, coding, and agentic indices for 8000+ models — merged from three independent sources into one source of truth.</p>
       <a href="/leaderboard" class="btn">View Leaderboard</a>
+      <a href="/rankllms" class="btn btn-outline">Source of Truth</a>
       <a href="/api/v1/leaderboard" class="btn btn-outline" target="_blank">API</a>
     </section>
 
@@ -83,14 +125,75 @@
       <div class="feature">
         <h3>🏆 Leaderboard</h3>
         <p>Ranked by Intelligence Index, then Advanced Coding capability. Models without verified scores excluded.</p>
+        <p><a href="/llm-leaderboard">Open LLM Leaderboard →</a></p>
       </div>
       <div class="feature">
         <h3>🔬 Benchmarks</h3>
         <p>OpenRouter unified benchmarks including GPQA, Tau-bench, Design Arena, and Artificial Analysis.</p>
+        <p><a href="/benchmarks">Browse benchmarks →</a></p>
       </div>
       <div class="feature">
         <h3>⚔️ Compare</h3>
         <p>Side-by-side comparison of model specs, pricing, and benchmark scores.</p>
+        <p><a href="/compare">Compare models →</a></p>
+      </div>
+      <div class="feature">
+        <h3>📦 All Models</h3>
+        <p>Every model under RankLLMs, sorted and filterable with full pricing, context, and score data.</p>
+        <p><a href="/rankllms/models">Browse all models →</a></p>
+      </div>
+    </section>
+
+    <section class="sources">
+      <h2>Data Sources</h2>
+      <p>We ingest raw catalogs from three independent providers, show each as-is, then merge them into one structured source of truth. Each source page displays the data exactly as fetched.</p>
+      <div class="source-grid">
+        <div class="source-card">
+          <span class="tag tag-or">Source 01</span>
+          <h3>OpenRouter</h3>
+          <p>Live model catalog: pricing per token, context windows, supported parameters, architecture, and mirrored Artificial Analysis scores.</p>
+          <div class="links">
+            <a href="/ormodels">Models (as-is)</a>
+            <a href="/orbench">Benchmarks</a>
+            <a href="https://openrouter.ai" rel="noopener">openrouter.ai ↗</a>
+          </div>
+        </div>
+        <div class="source-card">
+          <span class="tag tag-aa">Source 02</span>
+          <h3>Artificial Analysis</h3>
+          <p>Independent intelligence, coding, and math indices with speed, latency, and blended cost-per-task measurements.</p>
+          <div class="links">
+            <a href="/aamodels">Models (as-is)</a>
+            <a href="/aabanch">Benchmarks</a>
+            <a href="https://artificialanalysis.ai" rel="noopener">artificialanalysis.ai ↗</a>
+          </div>
+        </div>
+        <div class="source-card">
+          <span class="tag tag-md">Source 03</span>
+          <h3>models.dev</h3>
+          <p>Free provider + model metadata: modalities, open-weights flags, reasoning/tool-call support, context limits, and $/M pricing.</p>
+          <div class="links">
+            <a href="/modelsdev">Models (as-is)</a>
+            <a href="https://models.dev" rel="noopener">models.dev ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="flow">
+      <h2>How the data is structured</h2>
+      <div class="flow-steps">
+        <span class="flow-step">OpenRouter</span>
+        <span class="flow-step">Artificial Analysis</span>
+        <span class="flow-step">models.dev</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Raw source pages (as-is)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Merge + normalize</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step flow-final">rankllms source of truth</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Leaderboard API</span>
       </div>
     </section>
 
@@ -100,6 +203,11 @@
         <span class="method get">GET</span>
         <code>/api/v1/leaderboard</code>
         <span>Main leaderboard ranked by intelligence</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/v1/rankindex</code>
+        <span>Merged source-of-truth master table</span>
       </div>
       <div class="endpoint">
         <span class="method get">GET</span>
@@ -123,9 +231,23 @@
       </div>
     </section>
 
+    <section class="credits">
+      <h2>Credits & Acknowledgments</h2>
+      <p>RankLLMs Engine is free and open source (MIT). The rankings, benchmarks, and catalog data on this site would not exist without these projects:</p>
+      <ul>
+        <li><a href="https://openrouter.ai" rel="noopener">OpenRouter</a> — model catalog, unified benchmarks, and routing intelligence</li>
+        <li><a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> — independent intelligence, coding, and speed evaluations (attribution required)</li>
+        <li><a href="https://models.dev" rel="noopener">models.dev</a> — free provider &amp; model metadata catalog (open-weights, modalities, pricing)</li>
+        <li><a href="https://rankllms.com" rel="noopener">rankllms.com</a> — the product this engine powers (structured, merged rankings)</li>
+        <li><a href="https://codaipro.com" rel="noopener">CodaiPro</a> — built and maintains this engine</li>
+      </ul>
+      <p>See the free <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine/blob/main/USER_GUIDE.md">User Guide</a> and <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" rel="noopener">source on GitHub</a>.</p>
+    </section>
+
     <footer>
-      <p>RankLLMs Engine &copy; 2026 &middot; <a href="/api/v1/docs" target="_blank">API Documentation</a></p>
-      <p>Data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></p>
+      <p>RankLLMs Engine &copy; 2026 &middot; <a href="/api/v1/docs" target="_blank">API Documentation</a> &middot; <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" rel="noopener">GitHub</a></p>
+      <p>Data sources: <a href="/ormodels">OpenRouter</a> &middot; <a href="/aamodels">Artificial Analysis</a> &middot; <a href="/modelsdev">models.dev</a></p>
+      <p>Merged source of truth: <a href="/rankllms">rankllms</a> &middot; Models: <a href="/rankllms/models">/rankllms/models</a> &middot; Leaderboard: <a href="/llm-leaderboard">/llm-leaderboard</a></p>
       <p>Product: <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; Built by <a href="https://codaipro.com" rel="noopener">CodaiPro</a></p>
     </footer>
   </div>
