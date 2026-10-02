@@ -366,7 +366,13 @@
   </wa-page>
 
   <script>
+    // While the page boots, the two wa-selects upgrade and fire change, which
+    // would stomp on any slug seeded from the URL. Suppress that until the
+    // real values are in place.
+    let cmpBooting = true;
+
     function onModelSelectChange(side) {
+      if (cmpBooting) return;
       const select = document.getElementById(`cmp-select-${side}`);
       const input = document.getElementById(`cmp-model-${side}`);
       if (select && input) {
@@ -395,8 +401,10 @@
     }
 
     async function executeComparison() {
-      const modelA = document.getElementById('cmp-model-a').value.trim();
-      const modelB = document.getElementById('cmp-model-b').value.trim();
+      const elA = document.getElementById('cmp-model-a');
+      const elB = document.getElementById('cmp-model-b');
+      const modelA = (elA && elA.value || '').trim();
+      const modelB = (elB && elB.value || '').trim();
       const container = document.getElementById('cmp-results-container');
 
       if (!modelA || !modelB) {
@@ -489,13 +497,49 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      populateSelectors();
+    /* Waits for a Web Awesome custom element to upgrade. `updateComplete` does
+       not exist until the element upgrades, so poll the `value` property
+       instead of awaiting a property that may not be there yet. */
+    function cmpWaitFor(el, attempts = 60) {
+      return new Promise(resolve => {
+        let n = 0;
+        const tick = () => {
+          if (!el || el.value !== undefined || n++ >= attempts) return resolve(el);
+          requestAnimationFrame(tick);
+        };
+        tick();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const mA = urlParams.get('model_a');
       const mB = urlParams.get('model_b');
-      if (mA) document.getElementById('cmp-model-a').value = mA;
-      if (mB) document.getElementById('cmp-model-b').value = mB;
+
+      const elA = document.getElementById('cmp-model-a');
+      const elB = document.getElementById('cmp-model-b');
+      const selA = document.getElementById('cmp-select-a');
+      const selB = document.getElementById('cmp-select-b');
+
+      // waitFor: wa-input exposes .value only after it upgrades.
+      await Promise.all([cmpWaitFor(elA), cmpWaitFor(elB)]);
+      // If the custom elements never upgrade, bail instead of throwing.
+      if (!elA || !elB || elA.value === undefined || elB.value === undefined) {
+        cmpBooting = false;
+        return;
+      }
+
+      await populateSelectors();
+      await Promise.all([cmpWaitFor(selA), cmpWaitFor(selB)]);
+
+      if (mA) elA.value = mA;
+      if (mB) elB.value = mB;
+
+      // Let any in-flight select upgrade finish before the user can change them.
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      cmpBooting = false;
+
+      if (!mA || !mB) return;
       executeComparison();
     });
   </script>

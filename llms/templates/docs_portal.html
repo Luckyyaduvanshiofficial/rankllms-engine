@@ -4,18 +4,18 @@
   <meta charset="UTF-8">
   {% include "_wa_head.html" %}
   <title>RankLLMs Engine — Free AI Model Leaderboard &amp; Benchmark API</title>
-  <meta name="description" content="Free open-source LLM leaderboard API: rankings, pricing, and benchmarks for 8000+ AI models across 120+ providers. Powers rankllms.com.">
+  <meta name="description" content="Free open-source LLM leaderboard API: rankings, pricing, and benchmarks for 800+ AI models across 160+ providers. Powers rankllms.com.">
   <meta name="keywords" content="AI leaderboard API, LLM rankings, model comparison, free benchmark API, RankLLMs, OpenRouter, Artificial Analysis, models.dev">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://api.rankllms.com/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="RankLLMs Engine — Free AI Model Leaderboard API">
-  <meta property="og:description" content="Free LLM leaderboard data API: intelligence, coding, pricing, and open-weight rankings for 8000+ AI models.">
+  <meta property="og:description" content="Free LLM leaderboard data API: intelligence, coding, pricing, and open-weight rankings for 800+ AI models.">
   <meta property="og:url" content="https://api.rankllms.com/">
   <meta property="og:site_name" content="RankLLMs">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="RankLLMs Engine — Free AI Model Leaderboard API">
-  <meta name="twitter:description" content="Free LLM leaderboard data API: intelligence, coding, pricing, and open-weight rankings for 8000+ AI models.">
+  <meta name="twitter:description" content="Free LLM leaderboard data API: intelligence, coding, pricing, and open-weight rankings for 800+ AI models.">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -43,179 +43,1271 @@
 
     {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
 
-    <main class="wa-stack wa-gap-2xl">
-      <section class="section hero wa-stack wa-gap-xs">
-        <p class="hero-eyebrow">RankLLMs · Free · Open source · MIT</p>
-        <h1>AI Model Rankings &amp; Benchmark Data</h1>
-        <p>Free, open-source rankings for LLMs, benchmarks, and model comparisons. Intelligence, coding, and agentic indices for 8000+ models — merged from three independent sources into one source of truth.</p>
-        <div class="wa-cluster wa-gap-s hero-actions">
-          <wa-button href="/llm-leaderboard" variant="brand" size="l">View Leaderboard</wa-button>
-          <wa-button href="/rankllms" appearance="outlined" size="l">Source of Truth</wa-button>
-          <wa-button href="/api/v1/leaderboard/rankindex" appearance="outlined" size="l" target="_blank" rel="noopener">API</wa-button>
-        </div>
-      </section>
-
-      <section class="section section-block content-wrap" aria-labelledby="features-heading">
-        <h2 id="features-heading">What you get</h2>
-        <p class="lede">Open leaderboards, raw source catalogs, and a free API — all under one engine.</p>
-        <div class="wa-grid wa-gap-m" style="--min-column-size: 15rem;">
-          <wa-card class="feature-card">
-            <div class="wa-stack wa-gap-2xs">
-              <span class="feature-icon" aria-hidden="true"><wa-icon name="trophy"></wa-icon></span>
-              <h3>Leaderboard</h3>
-              <p>Ranked by Intelligence Index, then Advanced Coding capability. Models without verified scores excluded.</p>
-              <a class="card-link" href="/llm-leaderboard">Open LLM Leaderboard →</a>
-            </div>
-          </wa-card>
-          <wa-card class="feature-card">
-            <div class="wa-stack wa-gap-2xs">
-              <span class="feature-icon" aria-hidden="true"><wa-icon name="flask"></wa-icon></span>
-              <h3>Benchmarks</h3>
-              <p>OpenRouter unified benchmarks including GPQA, Tau-bench, Design Arena, and Artificial Analysis.</p>
-              <a class="card-link" href="/benchmarks">Browse benchmarks →</a>
-            </div>
-          </wa-card>
-          <wa-card class="feature-card">
-            <div class="wa-stack wa-gap-2xs">
-              <span class="feature-icon" aria-hidden="true"><wa-icon name="arrows-left-right"></wa-icon></span>
-              <h3>Compare</h3>
-              <p>Side-by-side comparison of model specs, pricing, and benchmark scores.</p>
-              <a class="card-link" href="/compare">Compare models →</a>
-            </div>
-          </wa-card>
-          <wa-card class="feature-card">
-            <div class="wa-stack wa-gap-2xs">
-              <span class="feature-icon" aria-hidden="true"><wa-icon name="box"></wa-icon></span>
-              <h3>All Models</h3>
-              <p>Every model under RankLLMs, sorted and filterable with full pricing, context, and score data.</p>
-              <a class="card-link" href="/rankllms/models">Browse all models →</a>
-            </div>
-          </wa-card>
-        </div>
-      </section>
-
-      <section class="section section-block content-wrap" aria-labelledby="sources-heading">
-        <h2 id="sources-heading">Data Sources</h2>
-        <p class="lede">We ingest raw catalogs from three independent providers, show each as-is, then merge them into one structured source of truth. Each source page displays the data exactly as fetched.</p>
-        <div class="wa-grid wa-gap-m" style="--min-column-size: 16rem;">
-          <wa-card class="source-card">
-            <div class="wa-stack wa-gap-s" style="height: 100%;">
-              <wa-badge variant="neutral" appearance="outlined" pill>Source 01</wa-badge>
-              <h3>OpenRouter</h3>
-              <p>Live model catalog: pricing per token, context windows, supported parameters, architecture, and mirrored Artificial Analysis scores.</p>
-              <div class="card-links">
-                <wa-button href="/ormodels" appearance="outlined" size="s">Models (as-is)</wa-button>
-                <wa-button href="/orbench" appearance="outlined" size="s">Benchmarks</wa-button>
-                <wa-button href="https://openrouter.ai" appearance="plain" size="s" target="_blank" rel="noopener">openrouter.ai ↗</wa-button>
-              </div>
-            </div>
-          </wa-card>
-          <wa-card class="source-card">
-            <div class="wa-stack wa-gap-s" style="height: 100%;">
-              <wa-badge variant="warning" appearance="outlined" pill>Source 02</wa-badge>
-              <h3>Artificial Analysis</h3>
-              <p>Independent intelligence, coding, and math indices with speed, latency, and blended cost-per-task measurements.</p>
-              <div class="card-links">
-                <wa-button href="/aamodels" appearance="outlined" size="s">Models (as-is)</wa-button>
-                <wa-button href="/aabanch" appearance="outlined" size="s">Benchmarks</wa-button>
-                <wa-button href="https://artificialanalysis.ai" appearance="plain" size="s" target="_blank" rel="noopener">artificialanalysis.ai ↗</wa-button>
-              </div>
-            </div>
-          </wa-card>
-          <wa-card class="source-card">
-            <div class="wa-stack wa-gap-s" style="height: 100%;">
-              <wa-badge variant="success" appearance="outlined" pill>Source 03</wa-badge>
-              <h3>models.dev</h3>
-              <p>Free provider + model metadata: modalities, open-weights flags, reasoning/tool-call support, context limits, and $/M pricing.</p>
-              <div class="card-links">
-                <wa-button href="/modelsdev" appearance="outlined" size="s">Models (as-is)</wa-button>
-                <wa-button href="https://models.dev" appearance="plain" size="s" target="_blank" rel="noopener">models.dev ↗</wa-button>
-              </div>
-            </div>
-          </wa-card>
-        </div>
-      </section>
-
-      <section class="section section-block content-wrap">
-        <wa-card class="flow-card">
-          <h2>How the data is structured</h2>
-          <div class="flow-steps">
-            <span class="flow-step">OpenRouter</span>
-            <span class="flow-step">Artificial Analysis</span>
-            <span class="flow-step">models.dev</span>
-            <span class="flow-arrow" aria-hidden="true">→</span>
-            <span class="flow-step">Raw source pages (as-is)</span>
-            <span class="flow-arrow" aria-hidden="true">→</span>
-            <span class="flow-step">Merge + normalize</span>
-            <span class="flow-arrow" aria-hidden="true">→</span>
-            <span class="flow-step flow-final">rankllms source of truth</span>
-            <span class="flow-arrow" aria-hidden="true">→</span>
-            <span class="flow-step">Leaderboard API</span>
+    <main class="home">
+      <!-- ============ HERO: decide pattern — pitch left, live proof artifact right ============ -->
+      <section class="section home-hero content-wrap" aria-labelledby="hero-heading">
+        <div class="home-hero-copy rlx-rise">
+          <p class="hero-eyebrow">
+            <span class="live-dot" aria-hidden="true"></span>
+            Free · Open source · MIT
+          </p>
+          <h1 id="hero-heading">Every AI model, ranked on <em>evidence</em>.</h1>
+          <p class="home-hero-lede">
+            Three independent benchmark feeds ingested, normalized, and merged into one
+            source of truth. Intelligence, coding, pricing, and context for every model —
+            over a free JSON API. No key, no signup.
+          </p>
+          <div class="wa-cluster wa-gap-s home-hero-actions">
+            <wa-button href="/llm-leaderboard" variant="brand" size="l">Open the leaderboard</wa-button>
+            <wa-button href="/api/v1/leaderboard/rankindex?limit=5" appearance="outlined" size="l" target="_blank" rel="noopener">
+              Call the API
+            </wa-button>
           </div>
-        </wa-card>
+          <p class="home-hero-foot">
+            <span class="stat-inline"><strong data-stat="models">&mdash;</strong> models ranked</span>
+            <span class="stat-sep" aria-hidden="true">/</span>
+            <span class="stat-inline"><strong data-stat="providers">&mdash;</strong> providers</span>
+            <span class="stat-sep" aria-hidden="true">/</span>
+            <span class="stat-inline"><strong data-stat="open">&mdash;</strong> open-weight</span>
+          </p>
+        </div>
+
+        <!-- Artifact window: the actual leaderboard, fetched live from the API -->
+        <aside class="hero-panel rlx-rise" style="--d: 120ms;" aria-label="Live top models">
+          <div class="hero-panel-bar">
+            <span class="hero-panel-dot" aria-hidden="true"></span>
+            <span class="hero-panel-title">rankllms_index · top 8</span>
+            <button type="button" class="hero-panel-refresh" data-refresh-panel>
+              <wa-icon name="arrows-rotate" aria-hidden="true"></wa-icon>
+              <span>Refresh</span>
+            </button>
+          </div>
+          <ol class="hero-rank" data-rank-list>
+            <li class="hero-rank-skeleton" aria-hidden="true"></li>
+            <li class="hero-rank-skeleton" aria-hidden="true"></li>
+            <li class="hero-rank-skeleton" aria-hidden="true"></li>
+            <li class="hero-rank-skeleton" aria-hidden="true"></li>
+          </ol>
+          <p class="hero-panel-status" data-rank-status role="status">Loading live rankings&hellip;</p>
+          <a class="hero-panel-foot" href="/rankllms">
+            Open the full matrix <wa-icon name="arrow-right" aria-hidden="true"></wa-icon>
+          </a>
+        </aside>
       </section>
 
-      <section class="section section-block content-wrap" aria-labelledby="api-heading">
-        <h2 id="api-heading">API Endpoints</h2>
-        <p class="lede">Free JSON endpoints — no key required for the public leaderboard routes.</p>
-        <ul class="endpoint-list">
-          <li class="endpoint">
-            <wa-badge variant="success" appearance="filled" pill>GET</wa-badge>
-            <code>/api/v1/leaderboard</code>
-            <span>Main leaderboard ranked by intelligence</span>
+      <!-- ============ PRODUCT SURFACES: explore pattern — destinations, not card grid ============ -->
+      <section class="section section-block content-wrap" aria-labelledby="surfaces-heading">
+        <div class="section-head">
+          <h2 id="surfaces-heading">Four ways in</h2>
+          <p class="lede">Browse the data or wire it into your product. Every surface reads from the same merged table.</p>
+        </div>
+        <ul class="surface-list">
+          <li class="surface-row">
+            <span class="surface-idx" aria-hidden="true">01</span>
+            <div class="surface-body">
+              <h3>Leaderboard</h3>
+              <p>Ranked by Intelligence Index, then advanced coding. Models without verified scores are excluded rather than ranked at zero.</p>
+            </div>
+            <div class="surface-actions">
+              <a class="surface-link" href="/llm-leaderboard">Open leaderboard <wa-icon name="arrow-right" aria-hidden="true"></wa-icon></a>
+              <code>/api/v1/leaderboard</code>
+            </div>
           </li>
-          <li class="endpoint">
-            <wa-badge variant="success" appearance="filled" pill>GET</wa-badge>
-            <code>/api/v1/rankindex</code>
-            <span>Merged source-of-truth master table</span>
+          <li class="surface-row">
+            <span class="surface-idx" aria-hidden="true">02</span>
+            <div class="surface-body">
+              <h3>Benchmarks</h3>
+              <p>GPQA, Tau-bench, LiveCodeBench, TerminalBench, and Design Arena scores, kept per source so you can trace any number back to its origin.</p>
+            </div>
+            <div class="surface-actions">
+              <a class="surface-link" href="/benchmarks">Open benchmarks <wa-icon name="arrow-right" aria-hidden="true"></wa-icon></a>
+              <code>/api/v1/benchmarks</code>
+            </div>
           </li>
-          <li class="endpoint">
-            <wa-badge variant="success" appearance="filled" pill>GET</wa-badge>
-            <code>/api/v1/benchmarks</code>
-            <span>Benchmark evaluation matrix</span>
+          <li class="surface-row">
+            <span class="surface-idx" aria-hidden="true">03</span>
+            <div class="surface-body">
+              <h3>Compare</h3>
+              <p>Put any two models side by side on specs, pricing, and benchmark scores, then read the difference without switching tabs.</p>
+            </div>
+            <div class="surface-actions">
+              <a class="surface-link" href="/compare">Open compare <wa-icon name="arrow-right" aria-hidden="true"></wa-icon></a>
+              <code>/api/v1/compare</code>
+            </div>
           </li>
-          <li class="endpoint">
-            <wa-badge variant="success" appearance="filled" pill>GET</wa-badge>
-            <code>/api/v1/models</code>
-            <span>Query and filter all models</span>
-          </li>
-          <li class="endpoint">
-            <wa-badge variant="success" appearance="filled" pill>GET</wa-badge>
-            <code>/api/v1/providers</code>
-            <span>List of AI providers</span>
-          </li>
-          <li class="endpoint">
-            <wa-badge variant="success" appearance="filled" pill>GET</wa-badge>
-            <code>/api/v1/health</code>
-            <span>System health check</span>
+          <li class="surface-row">
+            <span class="surface-idx" aria-hidden="true">04</span>
+            <div class="surface-body">
+              <h3>All models</h3>
+              <p>The full catalog with pricing per million tokens, context windows, and open-weight flags. Filter by provider, price, or context.</p>
+            </div>
+            <div class="surface-actions">
+              <a class="surface-link" href="/rankllms/models">Browse all models <wa-icon name="arrow-right" aria-hidden="true"></wa-icon></a>
+              <code>/api/v1/models</code>
+            </div>
           </li>
         </ul>
       </section>
 
-      <section class="section section-block content-wrap" aria-labelledby="credits-heading">
-        <wa-card class="credits-card">
-          <div class="wa-stack wa-gap-s">
-            <h2 id="credits-heading">Credits &amp; Acknowledgments</h2>
-            <p>RankLLMs Engine is free and open source (MIT). The rankings, benchmarks, and catalog data on this site would not exist without these projects:</p>
-            <ul class="credits-list">
-              <li><a href="https://openrouter.ai" rel="noopener">OpenRouter</a> — model catalog, unified benchmarks, and routing intelligence</li>
-              <li><a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> — independent intelligence, coding, and speed evaluations (attribution required)</li>
-              <li><a href="https://models.dev" rel="noopener">models.dev</a> — free provider &amp; model metadata catalog (open-weights, modalities, pricing)</li>
-              <li><a href="https://rankllms.com" rel="noopener">rankllms.com</a> — the product this engine powers (structured, merged rankings)</li>
-              <li><a href="https://codaipro.com" rel="noopener">CodaiPro</a> — built and maintains this engine</li>
+      <!-- ============ PIPELINE: how the data is actually built ============ -->
+      <section class="section section-block content-wrap" aria-labelledby="pipeline-heading">
+        <div class="section-head">
+          <h2 id="pipeline-heading">Where the numbers come from</h2>
+          <p class="lede">Each source is ingested raw and shown unmodified on its own page. Only then is anything merged, so you can audit the join.</p>
+        </div>
+
+        <ol class="pipeline" role="list">
+          <li class="pipe-stage">
+            <p class="pipe-label">Ingested</p>
+            <ul class="pipe-sources" role="list">
+              <li>
+                <a href="/ormodels">OpenRouter</a>
+                <span class="pipe-count" data-count="ormodels">&mdash;</span>
+                <span class="pipe-note">catalog + benchmarks</span>
+              </li>
+              <li>
+                <a href="/aamodels">Artificial Analysis</a>
+                <span class="pipe-count" data-count="aamodels">&mdash;</span>
+                <span class="pipe-note">independent indices</span>
+              </li>
+              <li>
+                <a href="/modelsdev">models.dev</a>
+                <span class="pipe-count" data-count="modelsdev">0</span>
+                <span class="pipe-note">provider metadata</span>
+              </li>
             </ul>
-            <p>See the free <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine/blob/main/USER_GUIDE.md">User Guide</a> and <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" rel="noopener">source on GitHub</a>.</p>
+          </li>
+          <li class="pipe-stage">
+            <p class="pipe-label">Normalized</p>
+            <p class="pipe-text">Slugs, providers, and benchmark fields are reconciled across feeds into one schema.</p>
+          </li>
+          <li class="pipe-stage pipe-stage-final">
+            <p class="pipe-label">Source of truth</p>
+            <p class="pipe-text pipe-strong">rankindex &mdash; one row per model, every score traceable to its source.</p>
+            <a class="surface-link" href="/rankllms">View the matrix <wa-icon name="arrow-right" aria-hidden="true"></wa-icon></a>
+          </li>
+          <li class="pipe-stage">
+            <p class="pipe-label">Served</p>
+            <p class="pipe-text">Free JSON API. No key required on public routes.</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- ============ API CONSOLE: run a real request, show a real response ============ -->
+      <section class="section section-block content-wrap" aria-labelledby="console-heading">
+        <div class="section-head">
+          <h2 id="console-heading">The API is the product</h2>
+          <p class="lede">Pick an endpoint and run it. This sends a real request to this server &mdash; the response below is what came back.</p>
+        </div>
+
+        <div class="console">
+          <div class="console-rail" role="group" aria-label="API endpoints">
+            <button type="button" class="console-endpoint is-selected" data-endpoint="/api/v1/leaderboard/rankindex?limit=2" data-label="Leaderboard">
+              <span class="console-verb">GET</span>
+              <span class="console-name">/leaderboard</span>
+            </button>
+            <button type="button" class="console-endpoint" data-endpoint="/api/v1/models?limit=3" data-label="Models catalog">
+              <span class="console-verb">GET</span>
+              <span class="console-name">/models</span>
+            </button>
+            <button type="button" class="console-endpoint" data-endpoint="/api/v1/benchmarks?limit=3" data-label="Benchmarks">
+              <span class="console-verb">GET</span>
+              <span class="console-name">/benchmarks</span>
+            </button>
+            <button type="button" class="console-endpoint" data-endpoint="/api/v1/providers" data-label="Providers">
+              <span class="console-verb">GET</span>
+              <span class="console-name">/providers</span>
+            </button>
+            <button type="button" class="console-endpoint" data-endpoint="/api/v1/health" data-label="Health check">
+              <span class="console-verb">GET</span>
+              <span class="console-name">/health</span>
+            </button>
+            <a class="console-docs" href="/docs" target="_blank" rel="noopener">
+              Full API reference <wa-icon name="arrow-up-right" aria-hidden="true"></wa-icon>
+            </a>
           </div>
-        </wa-card>
+
+          <div class="console-main">
+            <div class="console-bar">
+              <code class="console-url" data-console-url>/api/v1/leaderboard/rankindex?limit=2</code>
+              <button type="button" class="console-run" data-console-run>
+                <wa-icon name="play" aria-hidden="true"></wa-icon>
+                <span>Run</span>
+              </button>
+            </div>
+            <p class="console-meta" data-console-meta aria-live="polite">Ready.</p>
+            <pre class="console-out" data-console-out tabindex="0"><code>Select an endpoint and press Run.</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CREDITS ============ -->
+      <section class="section section-block content-wrap" aria-labelledby="credits-heading">
+        <div class="credits">
+          <h2 id="credits-heading">Credits &amp; acknowledgments</h2>
+          <p class="credits-lede">
+            RankLLMs Engine is free and open source (MIT). None of this data would exist without these projects:
+          </p>
+          <ul class="credits-list">
+            <li><a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &mdash; model catalog, unified benchmarks, and routing intelligence</li>
+            <li><a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &mdash; independent intelligence, coding, and speed evaluations (attribution required)</li>
+            <li><a href="https://models.dev" rel="noopener">models.dev</a> &mdash; free provider &amp; model metadata catalog</li>
+            <li><a href="https://rankllms.com" rel="noopener">rankllms.com</a> &mdash; the product this engine powers</li>
+            <li><a href="https://codaipro.com" rel="noopener">CodaiPro</a> &mdash; builds and maintains this engine</li>
+          </ul>
+          <p class="credits-foot">
+            <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" rel="noopener">Source on GitHub</a>
+            <span aria-hidden="true">·</span>
+            <a href="/llms.txt" target="_blank" rel="noopener">llms.txt</a>
+          </p>
+        </div>
       </section>
     </main>
 
     <footer slot="footer" class="section site-footer content-wrap">
       <p>RankLLMs Engine &copy; 2026 &middot; <a href="/api/v1/docs" target="_blank" rel="noopener">API Documentation</a> &middot; <a href="https://github.com/Luckyyaduvanshiofficial/rankllms-engine" rel="noopener">GitHub</a></p>
       <p>Data sources: <a href="/ormodels">OpenRouter</a> &middot; <a href="/aamodels">Artificial Analysis</a> &middot; <a href="/modelsdev">models.dev</a></p>
-      <p>Merged source of truth: <a href="/rankllms">rankllms</a> &middot; Models: <a href="/rankllms/models">/rankllms/models</a> &middot; Leaderboard: <a href="/llm-leaderboard">/llm-leaderboard</a></p>
-      <p>Product: <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; Built by <a href="https://codaipro.com" rel="noopener">CodaiPro</a></p>
+      <p>Source of truth: <a href="/rankllms">rankllms</a> &middot; <a href="/rankllms/models">All models</a> &middot; <a href="/llm-leaderboard">Leaderboard</a> &middot; Product: <a href="https://rankllms.com" rel="noopener">rankllms.com</a></p>
     </footer>
   </wa-page>
+
+  <style>
+    /* =====================================================================
+       RankLLMs homepage
+       Background plane (noise + grid) → content plane (panels) → no
+       attention-plane overlays. Accent is the brand terracotta only.
+       ===================================================================== */
+
+    .home {
+      /* Background plane: a faint dot grid, masked away from the edges so it
+         never fights the content. Never interactive. */
+      background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--wa-color-text-quiet) 26%, transparent) 1px, transparent 0);
+      background-size: 26px 26px;
+      background-position: -1px -1px;
+    }
+
+    .home-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      align-items: center;
+      gap: var(--wa-space-2xl) var(--wa-space-4xl);
+      padding-block: var(--wa-space-3xl) var(--wa-space-2xl);
+      /* Fade the grid out toward the top and bottom of the hero */
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+      mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+    }
+
+    .home-hero-copy {
+      max-width: 34rem;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .home-hero h1 {
+      font-family: var(--wa-font-family-display);
+      font-size: clamp(2.25rem, 4.6vw, 3.5rem);
+      line-height: 1.08;
+      letter-spacing: -0.025em;
+      font-weight: 500;
+      margin: var(--wa-space-m) 0 0;
+      text-wrap: balance;
+    }
+
+    /* Emphasis via weight + one accent word, not a gradient */
+    .home-hero h1 em {
+      font-style: normal;
+      font-weight: 600;
+      color: var(--wa-color-brand-fill-normal);
+    }
+
+    .home-hero-lede {
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-m);
+      line-height: 1.65;
+      max-width: 46ch;
+      margin: var(--wa-space-l) 0 0;
+      text-wrap: pretty;
+    }
+
+    .home-hero-actions {
+      margin-top: var(--wa-space-xl);
+    }
+
+    .home-hero-actions wa-button {
+      min-height: 2.75rem;
+    }
+
+    .home-hero-foot {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0 var(--wa-space-s);
+      margin: var(--wa-space-xl) 0 0;
+      padding-top: var(--wa-space-m);
+      border-top: 1px solid var(--wa-color-surface-border);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+    }
+
+    .home-hero-foot strong {
+      color: var(--wa-color-text-normal);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-sep {
+      color: var(--wa-color-surface-border);
+    }
+
+    /* ---- Artifact panel: the live leaderboard, styled as a real window ---- */
+    .hero-panel {
+      position: relative;
+      background: var(--rlx-panel);
+      border-radius: var(--wa-border-radius-l);
+      box-shadow: var(--rlx-elev-3);
+      padding: 0;
+      overflow: hidden;
+      animation-delay: var(--d, 0ms);
+    }
+
+    .hero-panel-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--wa-space-s);
+      padding: var(--wa-space-s) var(--wa-space-m);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+      background: var(--wa-color-surface-lowered);
+    }
+
+    .hero-panel-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: #3b7a57;
+      animation: rlx-pulse-dot 2.4s ease-in-out infinite;
+      flex: 0 0 auto;
+    }
+
+    .wa-dark .hero-panel-dot {
+      background: #6ee7a0;
+    }
+
+    .hero-panel-title {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+      letter-spacing: 0.04em;
+    }
+
+    .hero-panel-refresh {
+      margin-inline-start: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.55rem;
+      min-height: 1.75rem;
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--wa-border-radius-s);
+      cursor: pointer;
+      transition: color var(--rlx-dur-fast), background var(--rlx-dur-fast), border-color var(--rlx-dur-fast);
+    }
+
+    .hero-panel-refresh:hover {
+      color: var(--wa-color-text-normal);
+      background: var(--wa-color-surface-raised);
+      border-color: var(--wa-color-surface-border);
+    }
+
+    .hero-panel-refresh[aria-busy='true'] wa-icon {
+      animation: rlx-spin 900ms linear infinite;
+    }
+
+    @keyframes rlx-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hero-rank {
+      list-style: none;
+      margin: 0;
+      padding: var(--wa-space-2xs) 0;
+      counter-reset: none;
+    }
+
+    .hero-rank-item {
+      display: grid;
+      grid-template-columns: 1.75rem minmax(0, 1fr) 3.25rem;
+      align-items: center;
+      gap: var(--wa-space-s);
+      padding: var(--wa-space-s) var(--wa-space-m);
+      position: relative;
+    }
+
+    .hero-rank-item + .hero-rank-item {
+      border-top: 1px solid color-mix(in srgb, var(--wa-color-surface-border) 55%, transparent);
+    }
+
+    .hero-rank-pos {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      font-weight: 600;
+      color: var(--wa-color-text-quiet);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hero-rank-item:nth-child(1) .hero-rank-pos { color: #b45309; }
+    .hero-rank-item:nth-child(2) .hero-rank-pos { color: #8a7f74; }
+    .hero-rank-item:nth-child(3) .hero-rank-pos { color: #c2410c; }
+    .wa-dark .hero-rank-item:nth-child(1) .hero-rank-pos { color: #fbbf24; }
+    .wa-dark .hero-rank-item:nth-child(3) .hero-rank-pos { color: #fb923c; }
+
+    .hero-rank-main {
+      min-width: 0;
+    }
+
+    .hero-rank-name {
+      display: block;
+      font-size: var(--wa-font-size-xs);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hero-rank-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+      margin-top: 0.15rem;
+    }
+
+    /* Index bar: the visual proof that scores are real, comparable numbers.
+       Track and fill must be block-level — an inline span has no height. */
+    .hero-rank-bar {
+      display: block;
+      height: 3px;
+      width: 100%;
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--wa-color-text-quiet) 16%, transparent);
+      overflow: hidden;
+      margin-top: 0.35rem;
+    }
+
+    .bar-fill {
+      display: block;
+      height: 100%;
+      width: 100%;
+      border-radius: inherit;
+      background: linear-gradient(to right, var(--wa-color-brand-fill-normal), #e0a07f);
+      transform-origin: left center;
+      animation: rlx-grow-x 700ms var(--rlx-ease-out) both;
+      animation-delay: var(--d, 0ms);
+    }
+
+    .wa-dark .bar-fill {
+      background: linear-gradient(to right, var(--wa-color-brand-fill-normal), #e8b8a8);
+    }
+
+    .hero-rank-score {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-s);
+      font-weight: 600;
+      text-align: end;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hero-rank-badge {
+      font-family: var(--wa-font-family-mono);
+      font-size: 0.625rem;
+      padding: 0 0.3rem;
+      border-radius: 3px;
+      border: 1px solid var(--wa-color-surface-border);
+      color: var(--wa-color-text-quiet);
+      line-height: 1.5;
+    }
+
+    .hero-rank-skeleton {
+      height: 2.75rem;
+      margin: var(--wa-space-2xs) var(--wa-space-m);
+      border-radius: var(--wa-border-radius-s);
+      background: linear-gradient(90deg, var(--wa-color-surface-lowered), var(--wa-color-surface-raised), var(--wa-color-surface-lowered));
+      background-size: 200% 100%;
+      animation: rlx-shimmer 1.4s linear infinite;
+    }
+
+    @keyframes rlx-shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    .hero-panel-status {
+      margin: 0;
+      padding: var(--wa-space-s) var(--wa-space-m);
+      border-top: 1px solid var(--wa-color-surface-border);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+    }
+
+    .hero-panel-status.is-error {
+      color: var(--wa-color-danger-fill-normal, #dc2626);
+    }
+
+    .hero-panel-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: var(--wa-space-s) var(--wa-space-m);
+      background: var(--wa-color-surface-lowered);
+      border-top: 1px solid var(--wa-color-surface-border);
+      font-size: var(--wa-font-size-2xs);
+      font-weight: 600;
+      color: var(--wa-color-text-link);
+      text-decoration: none;
+    }
+
+    .hero-panel-foot:hover {
+      text-decoration: underline;
+    }
+
+    /* ---- Section head shared by the mid-page sections ---- */
+    .section-head {
+      margin-bottom: var(--wa-space-l);
+    }
+
+    /* ---- Surface list: rows, not a card grid ---- */
+    .surface-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-top: 1px solid var(--wa-color-surface-border);
+    }
+
+    .surface-row {
+      display: grid;
+      grid-template-columns: 3rem minmax(0, 1fr) minmax(0, 15rem);
+      gap: var(--wa-space-m) var(--wa-space-l);
+      align-items: start;
+      padding: var(--wa-space-l) 0;
+      border-bottom: 1px solid var(--wa-color-surface-border);
+      transition: background var(--rlx-dur) var(--rlx-ease-out);
+    }
+
+    .surface-row:hover {
+      background: color-mix(in srgb, var(--wa-color-surface-raised) 55%, transparent);
+    }
+
+    .surface-idx {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      font-weight: 600;
+      color: var(--wa-color-brand-fill-normal);
+      padding-top: 0.2rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .surface-body h3 {
+      margin: 0;
+      font-size: var(--wa-font-size-m);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .surface-body p {
+      margin: var(--wa-space-3xs) 0 0;
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-s);
+      line-height: 1.6;
+      max-width: 54ch;
+      text-wrap: pretty;
+    }
+
+    .surface-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--wa-space-2xs);
+    }
+
+    .surface-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: var(--wa-font-size-s);
+      font-weight: 600;
+      color: var(--wa-color-text-link);
+      text-decoration: none;
+    }
+
+    .surface-link:hover {
+      text-decoration: underline;
+    }
+
+    .surface-actions code {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+      background: var(--wa-color-surface-lowered);
+      border: 1px solid var(--wa-color-surface-border);
+      padding: 0.1rem 0.4rem;
+      border-radius: var(--wa-border-radius-s);
+      overflow-wrap: anywhere;
+    }
+
+    /* ---- Pipeline rail ---- */
+    .pipeline {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+      gap: var(--wa-space-m);
+      margin: 0;
+      padding: 0;
+      counter-reset: pipe;
+    }
+
+    .pipe-stage {
+      position: relative;
+      background: var(--rlx-panel);
+      border: 1px solid var(--wa-color-surface-border);
+      border-radius: var(--wa-border-radius-m);
+      padding: var(--wa-space-m);
+      box-shadow: var(--rlx-elev-1);
+    }
+
+    /* Connector: the arrow lives on the stage, not as a separate element */
+    .pipe-stage:not(:last-child)::after {
+      content: "\2192";
+      position: absolute;
+      top: 50%;
+      inset-inline-end: calc(-1 * var(--wa-space-m) - 0.65rem);
+      transform: translateY(-50%);
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-xs);
+      z-index: 1;
+    }
+
+    .pipe-label {
+      margin: 0 0 var(--wa-space-2xs);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--wa-color-text-quiet);
+    }
+
+    .pipe-text {
+      margin: 0;
+      font-size: var(--wa-font-size-2xs);
+      line-height: 1.6;
+      color: var(--wa-color-text-quiet);
+      text-wrap: pretty;
+    }
+
+    .pipe-strong {
+      color: var(--wa-color-text-normal);
+      font-weight: 600;
+      margin-bottom: var(--wa-space-2xs);
+    }
+
+    .pipe-stage-final {
+      background: var(--wa-color-brand-fill-quiet);
+      border-color: var(--wa-color-brand-border-quiet);
+      box-shadow: var(--rlx-elev-2);
+    }
+
+    .pipe-stage-final .pipe-label {
+      color: var(--wa-color-brand-on-quiet);
+    }
+
+    .pipe-sources {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: var(--wa-space-2xs);
+    }
+
+    .pipe-sources li {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: baseline;
+      gap: 0 0.4rem;
+      font-size: var(--wa-font-size-2xs);
+    }
+
+    .pipe-sources a {
+      color: var(--wa-color-text-normal);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .pipe-sources a:hover {
+      color: var(--wa-color-text-link);
+      text-decoration: underline;
+    }
+
+    .pipe-count {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      font-weight: 600;
+      color: var(--wa-color-brand-fill-normal);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pipe-note {
+      grid-column: 1 / -1;
+      font-family: var(--wa-font-family-mono);
+      font-size: 0.625rem;
+      color: var(--wa-color-text-quiet);
+    }
+
+    /* ---- API console ---- */
+    .console {
+      display: grid;
+      grid-template-columns: 15rem minmax(0, 1fr);
+      border: 1px solid var(--wa-color-surface-border);
+      border-radius: var(--wa-border-radius-l);
+      overflow: hidden;
+      background: var(--rlx-panel);
+      box-shadow: var(--rlx-elev-2);
+    }
+
+    .console-rail {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: var(--wa-space-2xs);
+      background: var(--wa-color-surface-lowered);
+      border-inline-end: 1px solid var(--wa-color-surface-border);
+    }
+
+    .console-endpoint {
+      display: flex;
+      align-items: center;
+      gap: var(--wa-space-s);
+      width: 100%;
+      padding: var(--wa-space-s) var(--wa-space-2xs);
+      min-height: 2.25rem;
+      text-align: start;
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+      background: transparent;
+      border: 0;
+      border-radius: var(--wa-border-radius-s);
+      cursor: pointer;
+      transition: background var(--rlx-dur-fast), color var(--rlx-dur-fast);
+    }
+
+    .console-endpoint:hover {
+      background: var(--wa-color-surface-raised);
+      color: var(--wa-color-text-normal);
+    }
+
+    .console-endpoint.is-selected {
+      background: var(--wa-color-brand-fill-quiet);
+      color: var(--wa-color-brand-on-quiet);
+      font-weight: 600;
+    }
+
+    .console-verb {
+      font-size: 0.5625rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #3b7a57;
+      flex: 0 0 auto;
+    }
+
+    .wa-dark .console-verb {
+      color: #6ee7a0;
+    }
+
+    .console-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .console-docs {
+      margin-top: auto;
+      padding: var(--wa-space-s) var(--wa-space-2xs);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-link);
+      text-decoration: none;
+    }
+
+    .console-docs:hover {
+      text-decoration: underline;
+    }
+
+    .console-main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .console-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--wa-space-s);
+      padding: var(--wa-space-s) var(--wa-space-m);
+      border-bottom: 1px solid var(--wa-color-surface-border);
+      background: var(--wa-color-surface-lowered);
+    }
+
+    .console-url {
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-normal);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    .console-run {
+      margin-inline-start: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 0 0 auto;
+      min-height: 2rem;
+      padding-inline: var(--wa-space-m);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      font-weight: 600;
+      color: var(--wa-color-brand-on-normal);
+      background: var(--wa-color-brand-fill-normal);
+      border: 0;
+      border-radius: var(--wa-border-radius-s);
+      cursor: pointer;
+      transition: filter var(--rlx-dur-fast), opacity var(--rlx-dur-fast);
+    }
+
+    .console-run:hover {
+      filter: brightness(1.06);
+    }
+
+    .console-run[disabled] {
+      opacity: 0.55;
+      cursor: progress;
+    }
+
+    .console-meta {
+      margin: 0;
+      padding: var(--wa-space-2xs) var(--wa-space-m);
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      color: var(--wa-color-text-quiet);
+      border-bottom: 1px solid color-mix(in srgb, var(--wa-color-surface-border) 60%, transparent);
+    }
+
+    .console-meta.is-error {
+      color: var(--wa-color-danger-fill-normal, #dc2626);
+    }
+
+    .console-meta.is-ok {
+      color: #3b7a57;
+    }
+
+    .wa-dark .console-meta.is-ok {
+      color: #6ee7a0;
+    }
+
+    .console-out {
+      margin: 0;
+      padding: var(--wa-space-m);
+      flex: 1 1 auto;
+      min-height: 11rem;
+      max-height: 22rem;
+      overflow: auto;
+      font-family: var(--wa-font-family-mono);
+      font-size: var(--wa-font-size-3xs);
+      line-height: 1.7;
+      color: var(--wa-color-text-normal);
+      background: var(--wa-color-surface-lowered);
+      white-space: pre;
+      tab-size: 2;
+    }
+
+    .console-out code {
+      font: inherit;
+    }
+
+    /* ---- Credits ---- */
+    .credits {
+      border-top: 1px solid var(--wa-color-surface-border);
+      padding-top: var(--wa-space-l);
+    }
+
+    .credits h2 {
+      font-family: var(--wa-font-family-display);
+      font-weight: 500;
+      font-size: var(--wa-font-size-l);
+      margin: 0 0 var(--wa-space-2xs);
+    }
+
+    .credits-lede {
+      margin: 0 0 var(--wa-space-m);
+      color: var(--wa-color-text-quiet);
+      font-size: var(--wa-font-size-s);
+      max-width: 60ch;
+      line-height: 1.6;
+    }
+
+    .credits-foot {
+      margin: var(--wa-space-m) 0 0;
+      display: flex;
+      gap: var(--wa-space-s);
+      font-size: var(--wa-font-size-2xs);
+      color: var(--wa-color-text-quiet);
+    }
+
+    .credits-foot a {
+      color: var(--wa-color-text-link);
+    }
+
+    /* ---- Responsive: recompose, don't just compress ---- */
+    @media (max-width: 1000px) {
+      .home-hero {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--wa-space-2xl);
+        padding-block: var(--wa-space-2xl) var(--wa-space-xl);
+      }
+
+      .home-hero-copy {
+        max-width: 42rem;
+      }
+
+      .console {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .console-rail {
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-inline-end: 0;
+        border-bottom: 1px solid var(--wa-color-surface-border);
+      }
+
+      .console-endpoint {
+        width: auto;
+      }
+
+      .console-docs {
+        margin-top: 0;
+        margin-inline-start: auto;
+      }
+
+      .pipe-stage:not(:last-child)::after {
+        display: none;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .surface-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr);
+      }
+
+      .surface-actions {
+        grid-column: 2;
+      }
+
+      .hero-rank-item {
+        grid-template-columns: 1.5rem minmax(0, 1fr) 2.75rem;
+      }
+    }
+
+    /* iOS Safari zooms any input under 16px; keep console controls safe */
+    @media (max-width: 640px) {
+      .console-run,
+      .hero-panel-refresh {
+        min-height: 2.5rem;
+      }
+    }
+  </style>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var nf = new Intl.NumberFormat('en-US');
+      var RANK_ENDPOINT = '/api/v1/leaderboard/rankindex?limit=8';
+
+      /* ---------- Hero: live leaderboard artifact ---------- */
+
+      function barWidth(value, max) {
+        var n = parseFloat(value);
+        if (!isFinite(n) || n <= 0) return 0;
+        // Scale against the leader in the set. A raw 0-100 bar makes 82.1 and
+        // 86.6 look identical, which hides the one thing the bar is there to show.
+        var m = isFinite(max) && max > 0 ? max : 100;
+        return Math.max(6, Math.min(100, (n / m) * 100));
+      }
+
+      function renderRankings(items) {
+        var list = document.querySelector('[data-rank-list]');
+        if (!list) return;
+
+        var max = items.reduce(function (acc, m) {
+          var n = parseFloat(m.rankllms_index);
+          return isFinite(n) && n > acc ? n : acc;
+        }, 0);
+
+        list.textContent = '';
+        items.forEach(function (m, i) {
+          var li = document.createElement('li');
+          li.className = 'hero-rank-item';
+
+          var pos = document.createElement('span');
+          pos.className = 'hero-rank-pos';
+          pos.textContent = '#' + (m.rank || i + 1);
+
+          var main = document.createElement('div');
+          main.className = 'hero-rank-main';
+
+          var name = document.createElement('span');
+          name.className = 'hero-rank-name';
+          name.textContent = m.name || m.canonical_slug || 'Unnamed model';
+          name.title = m.name || '';
+
+          var meta = document.createElement('span');
+          meta.className = 'hero-rank-meta';
+          meta.textContent = m.provider || 'unknown provider';
+
+          if (m.is_open_weight) {
+            var badge = document.createElement('span');
+            badge.className = 'hero-rank-badge';
+            badge.textContent = 'open';
+            meta.appendChild(badge);
+          }
+
+          var bar = document.createElement('span');
+          bar.className = 'hero-rank-bar';
+          var fill = document.createElement('span');
+          fill.className = 'bar-fill';
+          fill.style.width = barWidth(m.rankllms_index, max) + '%';
+          // Stagger with jitter so the cascade never reads as mechanical
+          fill.style.setProperty('--d', (60 + i * 45 + (i % 3) * 8) + 'ms');
+          bar.appendChild(fill);
+
+          main.appendChild(name);
+          main.appendChild(meta);
+          main.appendChild(bar);
+
+          var score = document.createElement('span');
+          score.className = 'hero-rank-score';
+          var idx = parseFloat(m.rankllms_index);
+          score.textContent = isFinite(idx) ? idx.toFixed(1) : '—';
+
+          li.appendChild(pos);
+          li.appendChild(main);
+          li.appendChild(score);
+          list.appendChild(li);
+        });
+      }
+
+      function setRankStatus(msg, isError) {
+        var el = document.querySelector('[data-rank-status]');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.toggle('is-error', !!isError);
+      }
+
+      function loadRankPanel() {
+        var btn = document.querySelector('[data-refresh-panel]');
+        if (btn) btn.setAttribute('aria-busy', 'true');
+        setRankStatus('Loading live rankings…', false);
+
+        return fetch(RANK_ENDPOINT, { headers: { Accept: 'application/json' } })
+          .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            var rows = (data && data.rankings) || [];
+            if (!rows.length) {
+              renderRankings([]);
+              setRankStatus('The merged table is empty right now. Try the full matrix.', true);
+              return;
+            }
+            renderRankings(rows.slice(0, 8));
+            setRankStatus(
+              nf.format(data.total || rows.length) + ' models in rankindex · live from /api/v1',
+              false
+            );
+          })
+          .catch(function (err) {
+            renderRankings([]);
+            setRankStatus('Could not reach the API (' + err.message + '). The full matrix is still browsable below.', true);
+          })
+          .then(function () {
+            if (btn) btn.removeAttribute('aria-busy');
+          });
+      }
+
+      /* ---------- Proof stats ---------- */
+
+      function setStat(name, value) {
+        var el = document.querySelector('[data-stat="' + name + '"]');
+        if (el && value !== null && value !== undefined && isFinite(value)) {
+          el.textContent = nf.format(value);
+        }
+      }
+
+      function loadStats() {
+        // Count of rows in the merged table, straight from the API response.
+        fetch('/api/v1/leaderboard/rankindex?limit=1')
+          .then(function (r) { return r.json(); })
+          .then(function (d) { setStat('models', d.total); })
+          .catch(function () { /* hero stat stays as a dash; not worth an error state */ });
+
+        fetch('/api/v1/leaderboard/rankindex?limit=1&category=open')
+          .then(function (r) { return r.json(); })
+          .then(function (d) { setStat('open', d.total); })
+          .catch(function () {});
+
+        fetch('/api/v1/health')
+          .then(function (r) { return r.json(); })
+          .then(function (d) { setStat('providers', d.total_providers); })
+          .catch(function () {});
+      }
+
+      /* ---------- Pipeline source counts ---------- */
+
+      function loadSourceCounts() {
+        [['ormodels', '/api/v1/ormodels?limit=1'], ['aamodels', '/api/v1/aamodels?limit=1']]
+          .forEach(function (pair) {
+            var key = pair[0];
+            var url = pair[1];
+            fetch(url)
+              .then(function (r) { return r.json(); })
+              .then(function (d) {
+                var el = document.querySelector('[data-count="' + key + '"]');
+                if (el) el.textContent = nf.format(d.total || 0);
+              })
+              .catch(function () { /* leave the dash in place */ });
+          });
+      }
+
+      /* ---------- API console ---------- */
+
+      function setConsoleMeta(text, state) {
+        var el = document.querySelector('[data-console-meta]');
+        if (!el) return;
+        el.textContent = text;
+        el.classList.toggle('is-error', state === 'error');
+        el.classList.toggle('is-ok', state === 'ok');
+      }
+
+      function runConsole() {
+        var urlEl = document.querySelector('[data-console-url]');
+        var outEl = document.querySelector('[data-console-out]');
+        var runBtn = document.querySelector('[data-console-run]');
+        if (!urlEl || !outEl) return;
+
+        var endpoint = (urlEl.textContent || '').trim();
+        if (!endpoint) return;
+        runBtn.disabled = true;
+        setConsoleMeta('Sending request…', null);
+        outEl.textContent = 'Requesting ' + endpoint + '…';
+
+        var started = (window.performance && performance.now) ? performance.now() : Date.now();
+
+        fetch(endpoint, { headers: { Accept: 'application/json' } })
+          .then(function (res) {
+            var ms = Math.round(((window.performance && performance.now) ? performance.now() : Date.now()) - started);
+            if (!res.ok) throw new Error('HTTP ' + res.status + ' in ' + ms + 'ms');
+            return res.json().then(function (body) {
+              setConsoleMeta('200 OK · ' + ms + 'ms · ' + res.headers.get('content-type'), 'ok');
+              // A single leaderboard row is ~40 fields. Show the ones a reader
+              // actually scans for, so the panel stays readable without
+              // hiding that the full payload is much larger.
+              var view = body;
+              if (body && Array.isArray(body.rankings) && body.rankings.length) {
+                view = {};
+                for (var k in body) {
+                  if (Object.prototype.hasOwnProperty.call(body, k) && k !== 'rankings') view[k] = body[k];
+                }
+                view.rankings = body.rankings.map(function (r) {
+                  return {
+                    rank: r.rank,
+                    name: r.name,
+                    provider: r.provider,
+                    rankllms_index: r.rankllms_index,
+                    intelligence_index: r.intelligence_index,
+                    coding_index: r.coding_index,
+                    is_open_weight: r.is_open_weight
+                  };
+                });
+                view._note = 'Trimmed to 7 fields per row. The full response returns ' +
+                  Object.keys(body.rankings[0]).length + ' fields per model.';
+              }
+              outEl.textContent = JSON.stringify(view, null, 2);
+            });
+          })
+          .catch(function (err) {
+            setConsoleMeta('Request failed · ' + err.message, 'error');
+            outEl.textContent = 'The request did not complete.\n' + err.message;
+          })
+          .then(function () { runBtn.disabled = false; });
+      }
+
+      function wireConsole() {
+        var buttons = document.querySelectorAll('.console-endpoint');
+        var urlEl = document.querySelector('[data-console-url]');
+        if (!urlEl) return;
+
+        buttons.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            buttons.forEach(function (b) { b.classList.remove('is-selected'); });
+            btn.classList.add('is-selected');
+            urlEl.textContent = btn.getAttribute('data-endpoint');
+            runConsole();
+          });
+        });
+
+        var runBtn = document.querySelector('[data-console-run]');
+        if (runBtn) runBtn.addEventListener('click', runConsole);
+
+        // Fire once on load so the section shows a real response, not a
+        // placeholder telling the reader to press a button.
+        runConsole();
+      }
+
+      /* ---------- Init ---------- */
+
+      document.addEventListener('DOMContentLoaded', function () {
+        loadRankPanel();
+        loadStats();
+        loadSourceCounts();
+        wireConsole();
+
+        var refresh = document.querySelector('[data-refresh-panel]');
+        if (refresh) {
+          refresh.addEventListener('click', function () {
+            loadRankPanel();
+            loadStats();
+          });
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

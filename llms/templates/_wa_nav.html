@@ -4,15 +4,19 @@ Shared RankLLMs primary nav — dual-include (header desktop / drawer mobile).
   {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
 Pass active_path=request.path to highlight the current page.
 Header: flat primary links + Sources dropdown. Drawer: full flat list (no dropdown).
+
+NOTE: Web Awesome 3.x dropped Shoelace 2.x's `appearance="text"`. Using it leaves the
+button on the default `filled` appearance (a solid dark pill). Use `appearance="plain"`
+for flat nav links, or plain <a> for real links. See _wa_head.html ::part(button).
 {% endcomment %}{% if nav_class == "header-nav" %}
 <nav class="header-nav" aria-label="Primary">
-  <wa-button href="/" appearance="text" size="s" data-drawer="close"{% if active_path == "/" %} class="is-active"{% endif %}>API</wa-button>
-  <wa-button href="/llm-leaderboard" appearance="text" size="s" data-drawer="close"{% if active_path == "/llm-leaderboard" %} class="is-active"{% endif %}>Leaderboard</wa-button>
-  <wa-button href="/rankllms" appearance="text" size="s" data-drawer="close"{% if active_path == "/rankllms" or active_path == "/rankindex" %} class="is-active"{% endif %}>RankLLMs</wa-button>
-  <wa-button href="/rankllms/models" appearance="text" size="s" data-drawer="close"{% if active_path == "/rankllms/models" %} class="is-active"{% endif %}>Models</wa-button>
-  <wa-button href="/compare" appearance="text" size="s" data-drawer="close"{% if active_path == "/compare" %} class="is-active"{% endif %}>Compare</wa-button>
+  <wa-button href="/" appearance="plain" size="s" data-drawer="close"{% if active_path == "/" %} class="is-active"{% endif %}>API</wa-button>
+  <wa-button href="/llm-leaderboard" appearance="plain" size="s" data-drawer="close"{% if active_path == "/llm-leaderboard" %} class="is-active"{% endif %}>Leaderboard</wa-button>
+  <wa-button href="/rankllms" appearance="plain" size="s" data-drawer="close"{% if active_path == "/rankllms" or active_path == "/rankindex" %} class="is-active"{% endif %}>RankLLMs</wa-button>
+  <wa-button href="/rankllms/models" appearance="plain" size="s" data-drawer="close"{% if active_path == "/rankllms/models" %} class="is-active"{% endif %}>Models</wa-button>
+  <wa-button href="/compare" appearance="plain" size="s" data-drawer="close"{% if active_path == "/compare" %} class="is-active"{% endif %}>Compare</wa-button>
   <wa-dropdown class="nav-sources">
-    <wa-button slot="trigger" appearance="text" size="s" with-caret{% if active_path == "/ormodels" or active_path == "/orbench" or active_path == "/aamodels" or active_path == "/aabanch" or active_path == "/modelsdev" %} class="is-active"{% endif %}>Sources</wa-button>
+    <wa-button slot="trigger" appearance="plain" size="s" with-caret{% if active_path == "/ormodels" or active_path == "/orbench" or active_path == "/aamodels" or active_path == "/aabanch" or active_path == "/modelsdev" %} class="is-active"{% endif %}>Sources</wa-button>
     <wa-dropdown-item href="/ormodels">OpenRouter models</wa-dropdown-item>
     <wa-dropdown-item href="/orbench">orbench</wa-dropdown-item>
     <wa-dropdown-item href="/aamodels">Artificial Analysis</wa-dropdown-item>
@@ -22,18 +26,18 @@ Header: flat primary links + Sources dropdown. Drawer: full flat list (no dropdo
 </nav>
 {% else %}
 <nav class="drawer-nav wa-stack wa-gap-2xs" slot="navigation" aria-label="Primary">
-  <wa-button href="/" appearance="text" size="s" data-drawer="close"{% if active_path == "/" %} class="is-active"{% endif %}>API</wa-button>
-  <wa-button href="/llm-leaderboard" appearance="text" size="s" data-drawer="close"{% if active_path == "/llm-leaderboard" %} class="is-active"{% endif %}>Leaderboard</wa-button>
-  <wa-button href="/rankllms" appearance="text" size="s" data-drawer="close"{% if active_path == "/rankllms" or active_path == "/rankindex" %} class="is-active"{% endif %}>RankLLMs</wa-button>
-  <wa-button href="/rankllms/models" appearance="text" size="s" data-drawer="close"{% if active_path == "/rankllms/models" %} class="is-active"{% endif %}>Models</wa-button>
-  <wa-button href="/compare" appearance="text" size="s" data-drawer="close"{% if active_path == "/compare" %} class="is-active"{% endif %}>Compare</wa-button>
+  <wa-button href="/" appearance="plain" size="s" data-drawer="close"{% if active_path == "/" %} class="is-active"{% endif %}>API</wa-button>
+  <wa-button href="/llm-leaderboard" appearance="plain" size="s" data-drawer="close"{% if active_path == "/llm-leaderboard" %} class="is-active"{% endif %}>Leaderboard</wa-button>
+  <wa-button href="/rankllms" appearance="plain" size="s" data-drawer="close"{% if active_path == "/rankllms" or active_path == "/rankindex" %} class="is-active"{% endif %}>RankLLMs</wa-button>
+  <wa-button href="/rankllms/models" appearance="plain" size="s" data-drawer="close"{% if active_path == "/rankllms/models" %} class="is-active"{% endif %}>Models</wa-button>
+  <wa-button href="/compare" appearance="plain" size="s" data-drawer="close"{% if active_path == "/compare" %} class="is-active"{% endif %}>Compare</wa-button>
   <div class="drawer-nav-group" role="presentation">
     <span class="drawer-nav-label">Sources</span>
-    <wa-button href="/ormodels" appearance="text" size="s" data-drawer="close"{% if active_path == "/ormodels" %} class="is-active"{% endif %}>OpenRouter models</wa-button>
-    <wa-button href="/orbench" appearance="text" size="s" data-drawer="close"{% if active_path == "/orbench" %} class="is-active"{% endif %}>orbench</wa-button>
-    <wa-button href="/aamodels" appearance="text" size="s" data-drawer="close"{% if active_path == "/aamodels" %} class="is-active"{% endif %}>Artificial Analysis</wa-button>
-    <wa-button href="/aabanch" appearance="text" size="s" data-drawer="close"{% if active_path == "/aabanch" %} class="is-active"{% endif %}>AA Benchmarks</wa-button>
-    <wa-button href="/modelsdev" appearance="text" size="s" data-drawer="close"{% if active_path == "/modelsdev" %} class="is-active"{% endif %}>models.dev</wa-button>
+    <wa-button href="/ormodels" appearance="plain" size="s" data-drawer="close"{% if active_path == "/ormodels" %} class="is-active"{% endif %}>OpenRouter models</wa-button>
+    <wa-button href="/orbench" appearance="plain" size="s" data-drawer="close"{% if active_path == "/orbench" %} class="is-active"{% endif %}>orbench</wa-button>
+    <wa-button href="/aamodels" appearance="plain" size="s" data-drawer="close"{% if active_path == "/aamodels" %} class="is-active"{% endif %}>Artificial Analysis</wa-button>
+    <wa-button href="/aabanch" appearance="plain" size="s" data-drawer="close"{% if active_path == "/aabanch" %} class="is-active"{% endif %}>AA Benchmarks</wa-button>
+    <wa-button href="/modelsdev" appearance="plain" size="s" data-drawer="close"{% if active_path == "/modelsdev" %} class="is-active"{% endif %}>models.dev</wa-button>
   </div>
 </nav>
 {% endif %}

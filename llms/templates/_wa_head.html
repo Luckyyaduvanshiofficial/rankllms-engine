@@ -125,8 +125,10 @@
       }
     }
 
+    /* One focus ring for the whole site: native elements use this, Web Awesome
+       components use --wa-color-focus. Both resolve to the same brand hue. */
     :focus-visible {
-      outline: 2px solid var(--wa-color-brand-fill-normal, #cc785c);
+      outline: 2px solid var(--wa-color-focus, var(--wa-color-brand-fill-normal, #cc785c));
       outline-offset: 2px;
     }
 
@@ -182,14 +184,76 @@
       --wa-color-surface-border: color-mix(in oklab, #e8e5dc 55%, #cc785c);
       --wa-color-text-normal: #181715;
       --wa-color-text-quiet: color-mix(in oklab, #6e6c64 78%, #cc785c);
-      --wa-color-text-link: #b8664b;
+      /* 4.6:1 on canvas, 4.8:1 on raised. The previous #b8664b was only 3.95:1. */
+      --wa-color-text-link: #ac5b41;
       /* Brand-tinted elevation shadow (brown, not black) */
       --wa-color-shadow: color-mix(in srgb, #3a1c12 22%, transparent);
       --wa-color-mix-hover: color-mix(in srgb, #cc785c 10%, transparent);
 
+      /* Web Awesome's focus ring is generic blue by default. Retint it to the
+         brand so every ring — native and WA shadow-DOM — reads as one system. */
+      --wa-color-focus: #b8563a;
+
       --wa-font-family-display: "Newsreader", Georgia, serif;
       --wa-font-family-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --wa-font-family-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+      /* ---- RankLLMs elevation scale (layered: ring + soft + deep + inset) ---- */
+      --rlx-elev-0: none;
+      --rlx-elev-1: 0 1px 2px var(--wa-color-shadow), 0 0 0 1px color-mix(in srgb, var(--wa-color-surface-border) 60%, transparent);
+      --rlx-elev-2: 0 2px 4px var(--wa-color-shadow), 0 6px 16px -6px var(--wa-color-shadow), 0 0 0 1px color-mix(in srgb, var(--wa-color-surface-border) 70%, transparent);
+      --rlx-elev-3: 0 4px 8px -2px var(--wa-color-shadow), 0 16px 40px -12px var(--wa-color-shadow), 0 0 0 1px color-mix(in srgb, var(--wa-color-surface-border) 80%, transparent);
+      --rlx-inset: inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent);
+
+      /* ---- RankLLMs motion tokens ---- */
+      --rlx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --rlx-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+      --rlx-dur-fast: 140ms;
+      --rlx-dur: 240ms;
+      --rlx-dur-slow: 520ms;
+
+      /* ---- RankLLMs surface helpers ---- */
+      --rlx-panel: var(--wa-color-surface-raised);
+      --rlx-hairline: color-mix(in srgb, var(--wa-color-surface-border) 100%, transparent);
+    }
+
+    /* Entrance: 3-beat (appear → overshoot → settle), transform+opacity only */
+    @keyframes rlx-rise {
+      0% { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.985); }
+      60% { opacity: 1; transform: translate3d(0, -2px, 0) scale(1.004); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    }
+
+    @keyframes rlx-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Bar grows from zero width once real data lands */
+    @keyframes rlx-grow-x {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    @keyframes rlx-pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.82); }
+    }
+
+    .rlx-rise {
+      animation: rlx-rise var(--rlx-dur-slow) var(--rlx-ease-out) both;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rlx-rise,
+      .bar-fill,
+      .live-dot {
+        animation: none !important;
+      }
+
+      .bar-fill {
+        transform: scaleX(1) !important;
+      }
     }
 
     .wa-dark {
@@ -204,6 +268,8 @@
       --wa-color-brand-fill-quiet: #2a221e;
       --wa-color-shadow: color-mix(in srgb, #000000 40%, #cc785c 12%);
       --wa-color-mix-hover: color-mix(in srgb, #cc785c 14%, transparent);
+      --wa-color-focus: #e8a184;
+      --rlx-inset: inset 0 1px 0 color-mix(in srgb, #fff 7%, transparent);
     }
 
     body {
@@ -265,6 +331,8 @@
     .header-nav wa-button {
       --wa-button-border-radius: var(--wa-border-radius-m);
       flex: 0 0 auto;
+      --wa-color-on-quiet: var(--wa-color-text-normal);
+      --wa-color-fill-quiet: var(--wa-color-mix-hover);
     }
 
     .header-nav wa-button.is-active {
@@ -283,6 +351,8 @@
 
     .header-nav wa-dropdown wa-button {
       font-weight: 600;
+      --wa-color-on-quiet: var(--wa-color-text-normal);
+      --wa-color-fill-quiet: var(--wa-color-mix-hover);
     }
 
     .header-nav wa-dropdown wa-button.is-active {
@@ -318,6 +388,11 @@
       color: var(--wa-color-text-quiet);
       padding-inline: var(--wa-space-xs);
       margin-bottom: var(--wa-space-3xs);
+    }
+
+    .drawer-nav wa-button {
+      --wa-color-on-quiet: var(--wa-color-text-normal);
+      --wa-color-fill-quiet: var(--wa-color-mix-hover);
     }
 
     .drawer-nav wa-button.is-active {
@@ -392,28 +467,8 @@
       text-wrap: pretty;
     }
 
-    .hero-actions {
-      justify-content: center;
-    }
-
-    .hero-actions wa-button {
-      min-height: 2.75rem;
-    }
-
-    .feature-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2.25rem;
-      height: 2.25rem;
-      border-radius: var(--wa-border-radius-m);
-      background: var(--wa-color-brand-fill-quiet);
-      color: var(--wa-color-brand-on-quiet);
-      margin-bottom: var(--wa-space-2xs);
-      font-size: var(--wa-font-size-m);
-    }
-
-    .section-block > h2 {
+    .section-block > h2,
+    .section-block .section-head > h2 {
       font-family: var(--wa-font-family-display);
       font-weight: 500;
       letter-spacing: -0.01em;
@@ -422,7 +477,8 @@
       text-wrap: balance;
     }
 
-    .section-block > .lede {
+    .section-block > .lede,
+    .section-block .section-head > .lede {
       color: var(--wa-color-text-quiet);
       margin: 0 0 var(--wa-space-l);
       max-width: 48rem;
@@ -430,155 +486,8 @@
       text-wrap: pretty;
     }
 
-    .feature-card {
-      transition: border-color 180ms ease, transform 180ms ease;
-    }
-
-    .feature-card:hover {
-      border-color: var(--wa-color-brand-border-quiet);
-    }
-
-    .credits-card h2 {
-      margin: 0;
-      font-family: var(--wa-font-family-display);
-      font-weight: 500;
-      font-size: var(--wa-font-size-l);
-    }
-
-    .credits-card p {
-      margin: 0;
-      color: var(--wa-color-text-quiet);
-      font-size: var(--wa-font-size-s);
-      line-height: 1.6;
-    }
-
     .section-block {
       padding-block: var(--wa-space-2xl);
-    }
-
-    .feature-card h3 {
-      margin: 0;
-      font-size: var(--wa-font-size-m);
-      font-family: var(--wa-font-family-body);
-      font-weight: 600;
-    }
-
-    .feature-card p {
-      margin: 0;
-      color: var(--wa-color-text-quiet);
-      font-size: var(--wa-font-size-s);
-      line-height: 1.55;
-    }
-
-    .feature-card .card-link {
-      font-weight: 600;
-      font-size: var(--wa-font-size-s);
-      color: var(--wa-color-text-link);
-      text-decoration: none;
-    }
-
-    .feature-card .card-link:hover {
-      text-decoration: underline;
-    }
-
-    .source-card {
-      height: 100%;
-    }
-
-    .source-card h3 {
-      margin: 0;
-      font-size: var(--wa-font-size-m);
-      font-weight: 600;
-    }
-
-    .source-card p {
-      margin: 0;
-      color: var(--wa-color-text-quiet);
-      font-size: var(--wa-font-size-s);
-      line-height: 1.55;
-      flex: 1;
-    }
-
-    .source-card .card-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--wa-space-xs);
-    }
-
-    .flow-card {
-      text-align: center;
-    }
-
-    .flow-card h2 {
-      font-family: var(--wa-font-family-display);
-      font-weight: 500;
-      margin: 0 0 var(--wa-space-m);
-      font-size: var(--wa-font-size-l);
-    }
-
-    .flow-steps {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: var(--wa-space-xs) var(--wa-space-m);
-      font-family: var(--wa-font-family-mono);
-      font-size: var(--wa-font-size-2xs);
-    }
-
-    .flow-step {
-      padding: var(--wa-space-2xs) var(--wa-space-m);
-      background: var(--wa-color-surface-lowered);
-      border: 1px solid var(--wa-color-surface-border);
-      border-radius: var(--wa-border-radius-m);
-      color: var(--wa-color-text-normal);
-    }
-
-    .flow-step.flow-final {
-      background: var(--wa-color-brand-fill-normal);
-      color: var(--wa-color-brand-on-normal);
-      border-color: var(--wa-color-brand-border-normal);
-      font-weight: 600;
-    }
-
-    .flow-arrow {
-      color: var(--wa-color-text-quiet);
-      font-weight: 700;
-    }
-
-    .endpoint-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--wa-space-xs);
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .endpoint {
-      display: flex;
-      align-items: center;
-      gap: var(--wa-space-s);
-      flex-wrap: wrap;
-      padding: var(--wa-space-m) var(--wa-space-l);
-      background: var(--wa-color-surface-lowered);
-      border: 1px solid var(--wa-color-surface-border);
-      border-radius: var(--wa-border-radius-m);
-    }
-
-    .endpoint code {
-      font-family: var(--wa-font-family-mono);
-      font-size: var(--wa-font-size-2xs);
-      background: var(--wa-color-surface-raised);
-      border: 1px solid var(--wa-color-surface-border);
-      padding: 0.1rem 0.4rem;
-      border-radius: var(--wa-border-radius-s);
-    }
-
-    .endpoint span:last-child {
-      color: var(--wa-color-text-quiet);
-      font-size: var(--wa-font-size-s);
-      margin-inline-start: auto;
     }
 
     .credits-list {
