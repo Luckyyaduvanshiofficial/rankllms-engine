@@ -34,6 +34,35 @@ DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
+# --- HTTPS / proxy-aware security -----------------------------------------
+# nginx (or Traefik in front of Dokploy) terminates TLS and sets
+# X-Forwarded-Proto. Without SECURE_PROXY_SSL_HEADER, Django treats every
+# request as plain HTTP and secure cookies are never issued.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# A production deploy without a real SECRET_KEY falls back to Django's
+# well-known default, which would let anyone forge sessions. An empty
+# SECRET_KEY= in .env is equally bad, so reject both. Fail loudly instead of
+# starting in a compromised state.
+if not DEBUG and (not SECRET_KEY or SECRET_KEY == 'django-insecure-default-key-change-me'):
+    raise RuntimeError(
+        'SECRET_KEY is unset or still the Django default. Generate one with: '
+        'python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key)"'
+    )
+
+# Secure cookies and HSTS only make sense behind TLS. Keep them off in DEBUG so
+# local http://127.0.0.1 development still works.
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True').lower() in ('true', '1', 't')
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
 
 # Application definition
 
@@ -52,6 +81,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise directly after SecurityMiddleware, per its docs. It serves
+    # /static/ when DEBUG=False, so the admin UI's CSS/JS loads without nginx.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -140,6 +172,19 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise serves collected static files straight from gunicorn, so a
+# container deploy needs no nginx `location /static/` block. Storage is
+# compressed at collect time and served with immutable caching, since
+# collectstatic fingerprints every filename.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 # CORS Settings
 CORS_ALLOW_ALL_ORIGINS = True  # Allows rankllms.com frontend or any origin to access the API

@@ -12,3 +12,6 @@ venv/
 skills-lock.json
 node_modules/
 .claude/
+
+# collectstatic output — generated at build time, never committed
+staticfiles/

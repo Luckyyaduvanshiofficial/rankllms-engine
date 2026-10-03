@@ -1,23 +1,4 @@
-version: "3.9"
-
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: rankllms
-      POSTGRES_USER: rankllms
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-    ports:
-      - "127.0.0.1:5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rankllms"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   web:
     build: .
     restart: unless-stopped
@@ -26,10 +7,42 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://rankllms:${POSTGRES_PASSWORD:-changeme}@db:5432/rankllms?sslmode=disable
-    depends_on:
-      db:
-        condition: service_healthy
+      # .env holds the real DATABASE_URL (Neon). This override is only for the
+      # optional local-postgres profile below; it is intentionally NOT set here
+      # so the container uses the DATABASE_URL from .env.
+      ENABLE_SCHEDULER: "${ENABLE_SCHEDULER:-false}"
+      RUN_MIGRATIONS: "${RUN_MIGRATIONS:-true}"
+      # WEB_CONCURRENCY is deliberately NOT set here. The entrypoint scales
+      # workers to the container's CPU count (clamped 2-8); injecting a default
+      # would override that logic and pin every host to a fixed worker count.
+    # Migrate before serving so the container is healthy only once the schema
+    # is current. Remove if you run migrations as a separate release job.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/ping || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional local Postgres for offline development. Start it explicitly:
+  #   docker compose --profile localdb up -d
+  # Then set DATABASE_URL in .env to:
+  #   postgresql://rankllms:changeme@db:5432/rankllms?sslmode=disable
+  db:
+    profiles: ["localdb"]
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: rankllms
+      POSTGRES_USER: rankllms
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rankllms"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:

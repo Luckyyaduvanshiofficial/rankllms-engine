@@ -36,6 +36,12 @@ DEBUG=False
 ALLOWED_HOSTS=*
 ARTIFICIAL_ANALYSIS_API_URL=https://artificialanalysis.ai/api/v2
 ARTIFICIAL_ANALYSIS_API_KEY=${ARTIFICIAL_ANALYSIS_API_KEY}
+MODELS_DEV_API_URL=https://models.dev/api.json
+
+# The 6-hourly sync runs in-process; with multiple gunicorn workers each would
+# run its own copy, so it stays off and sync_all is invoked on a cron/timer.
+ENABLE_SCHEDULER=false
+RUN_MIGRATIONS=true
 EOF
 
 # 5. Build and run with Neon DB (no local postgres)
