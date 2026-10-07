@@ -18,49 +18,26 @@ Before deploying to any platform:
 
 Render is one of the easiest platforms to host Django applications.
 
-### Step 1: Create a `render.yaml` or Web Service
-In the Render Dashboard:
-1. Click **New +** -> **Web Service**.
-2. Connect your GitHub repository: `https://github.com/Luckyyaduvanshiofficial/rankllms-engine.git`.
-3. Set build configuration:
-   - **Environment**: Python 3
-   - **Build Command**: `pip install -r requirements.txt && python manage.py migrate && python manage.py sync_all`
-   - **Start Command**: `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3`
+The repository includes a `render.yaml` Blueprint for a native Python web service. It installs dependencies, collects static files, runs migrations at startup, and configures `/ping` as the health check.
 
-### Step 2: Set Environment Variables on Render
-Add the following key-value pairs under **Environment**:
-```env
-DEBUG=False
-SECRET_KEY=your-super-secret-production-key
-DATABASE_URL=postgresql://user:password@ep-sample-123.neon.tech/neondb?sslmode=require
-ARTIFICIAL_ANALYSIS_API_URL=https://artificialanalysis.ai/api/v2
-ARTIFICIAL_ANALYSIS_API_KEY=your-artificial-analysis-api-key-here
-MODELS_DEV_API_URL=https://models.dev/api.json
-```
+### Step 1: Connect the Blueprint
+1. Push this repository to GitHub.
+2. In the Render Dashboard, click **New +** -> **Blueprint** and select the repository.
+3. Review and apply the Blueprint. It will create the `rankllms-engine` web service.
 
-### Step 3: Prevent Render Free Tier Sleeping (24/7 Keep-Alive Setup)
-Render's free web tier automatically spins down (sleeps) after 15 minutes of inactivity. To keep your API service awake **24/7 for free**, use an uptime pinger:
+### Step 2: Configure required environment variables
+Render generates `SECRET_KEY` and sets production `DEBUG` and `ALLOWED_HOSTS` from the Blueprint. During creation, provide:
 
-1. **Lightweight Keep-Alive Routes**:
-   - `GET /health` (Returns `{"status": "healthy", "render_keep_alive": true}`)
-   - `GET /ping` (Returns `pong`)
-   - `GET /api/v1/health`
+- `DATABASE_URL`: a PostgreSQL connection string (Neon is supported; include `sslmode=require`).
+- `ARTIFICIAL_ANALYSIS_API_KEY`: required if you want Artificial Analysis data synced.
+- `OPENROUTER_API_KEY`: optional; needed for OpenRouter-backed data.
 
-2. **Setup Free Uptime Monitor (Choose any service)**:
-   - **Option A: UptimeRobot** (Free forever):
-     - Go to [UptimeRobot.com](https://uptimerobot.com) -> Add New Monitor.
-     - Monitor Type: **HTTP(s)**
-     - Friendly Name: `RankLLMs Render Ping`
-     - URL/IP: `https://your-render-app-name.onrender.com/health` (or `/ping`)
-     - Monitoring Interval: **Every 5 minutes** (or 8 minutes).
-   - **Option B: Cron-Job.org** (Free forever):
-     - Go to [cron-job.org](https://cron-job.org) -> Create Cronjob.
-     - Target URL: `https://your-render-app-name.onrender.com/ping`
-     - Execution schedule: `Every 5 minutes`.
-   - **Option C: Uptime Kuma** (Self-hosted):
-     - Add HTTP monitor targeting `https://your-render-app-name.onrender.com/health` with interval `300s`.
+After the first deploy, trigger the initial catalog import from the service's **Shell** using `python manage.py sync_all`. The Blueprint leaves `RUN_INITIAL_SYNC=false` so a potentially slow upstream import does not delay service startup. For ongoing scheduled imports, configure a Render Cron Job or enable the app scheduler on a single web instance.
 
-Because Render receives an HTTP ping every 5 minutes, it **never hits the 15-minute inactivity limit** and stays online **24/7 without cost**!
+> The Blueprint uses Render's free web plan to avoid creating a paid resource by default. Free instances spin down when idle and have an ephemeral filesystem, so keep application data in PostgreSQL and expect cold starts. Choose a paid instance in Render if you need always-on service.
+
+### Step 3: Choose service availability
+Free instances spin down after a period without traffic and may take a little time to start on the next request. An external uptime monitor does not provide an always-on guarantee. Select a paid instance in Render when you need the service to remain available without cold starts.
 
 ---
 
