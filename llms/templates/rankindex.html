@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   {% include "_wa_head.html" %}
-  <title>Master AI Rank Index — Unified LLM Benchmark Matrix | RankLLMs</title>
-  <meta name="description" content="Unified AI benchmark matrix merging OpenRouter, Artificial Analysis, Design Arena, and models.dev into table 'rankindex'.">
-  <meta name="keywords" content="rankindex, unified AI benchmarks, LLM matrix, free leaderboard API">
-  <link rel="canonical" href="https://api.rankllms.com/rankindex">
+  <title>{{ title|default:"RankLLMs — AI Models Ranking & LLM Leaderboard by Intelligence, Coding & Benchmarks" }}</title>
+  <meta name="description" content="{{ description|default:"RankLLMs ranks AI models with a composite index built from OpenRouter, Artificial Analysis, Design Arena and models.dev. AI model rankings, benchmark matrix, pricing, and open-weight flags." }}">
+  <meta name="keywords" content="rankllms, rankllm, ai models ranking, llms leaderboard, AI model rankings, LLM rankings, openrouter models, artificial analysis">
+  <link rel="canonical" href="https://api.rankllms.com/rankllms">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Master AI Rank Index | RankLLMs">
   <meta property="og:description" content="Unified AI model benchmark matrix with intelligence, coding, pricing, and open-weight flags.">
-  <meta property="og:url" content="https://api.rankllms.com/rankindex">
+  <meta property="og:url" content="https://api.rankllms.com/rankllms">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Master AI Rank Index | RankLLMs">
   <meta name="twitter:description" content="Unified AI model benchmark matrix with intelligence, coding, pricing, and open-weight flags.">
@@ -42,8 +42,8 @@
             <wa-badge variant="brand" appearance="outlined" pill>PostgreSQL Master Table: rankindex</wa-badge>
             <span>&bull; Unified Merged Matrix (OpenRouter + Artificial Analysis + Arena)</span>
           </div>
-          <h1>Master AI Rank Index (rankindex)</h1>
-          <p class="page-lede">Unified database table merging all 4 sources into a single empirical ranking matrix.</p>
+          <h1>{{ h1|default:"RankLLMs — AI Models Ranking & LLM Leaderboard" }}</h1>
+          <p class="page-lede">{{ lede|default:"The RankLLMs index ranks AI models on intelligence, coding, reasoning and value. Merged from OpenRouter, Artificial Analysis, Design Arena and models.dev — one source of truth, free to browse." }} <strong>{{ total_models }}</strong> models ranked.</p>
         </div>
         <div class="page-actions">
           <wa-button appearance="outlined" size="s" onclick="loadRankIndex()">
@@ -127,7 +127,11 @@
             </tr>
           </thead>
           <tbody id="rankindex-table-body">
+            {% if top_rows_html %}
+            {{ top_rows_html|safe }}
+            {% else %}
             <tr><td colspan="9" class="loading-row">Loading merged models from master table 'rankindex'…</td></tr>
+            {% endif %}
           </tbody>
         </table>
       </div>
@@ -142,35 +146,37 @@
         <div>
           <div class="col-title">Master Matrix</div>
           <ul>
-            <li><a href="/rankindex" class="is-active">👑 rankindex (Master Table)</a></li>
-            <li><a href="/ormodels">📦 ormodels (OpenRouter Catalog)</a></li>
-            <li><a href="/orbench">📊 orbench (OpenRouter Benchmarks)</a></li>
-            <li><a href="/aamodels">🔬 aamodels (AA Catalog)</a></li>
-            <li><a href="/aabanch">📈 aabanch (AA Benchmarks)</a></li>
+            <li><a href="/rankllms" class="is-active">👑 RankLLMs AI Models Ranking</a></li>
+            <li><a href="/llm-leaderboard">🏆 LLM Leaderboard</a></li>
+            <li><a href="/rankllms/models">📚 All AI Models</a></li>
+            <li><a href="/benchmarks">🔬 Benchmarks</a></li>
+            <li><a href="/compare">⚔️ Compare Models</a></li>
           </ul>
         </div>
         <div>
-          <div class="col-title">Core Views</div>
+          <div class="col-title">Data Sources</div>
           <ul>
-            <li><a href="/leaderboard">🏆 AI Leaderboard</a></li>
-            <li><a href="/benchmarks">🔬 Unified Benchmarks</a></li>
-            <li><a href="/cards">🎴 Top 200 Cards</a></li>
-            <li><a href="/compare">⚔️ Model Comparison</a></li>
+            <li><a href="/ormodels">📦 OpenRouter models</a></li>
+            <li><a href="/orbench">📊 OpenRouter benchmarks</a></li>
+            <li><a href="/aamodels">🔬 Artificial Analysis models</a></li>
+            <li><a href="/aabanch">📈 AA benchmarks</a></li>
+            <li><a href="/modelsdev">🧩 models.dev</a></li>
           </ul>
         </div>
         <div>
-          <div class="col-title">Developers</div>
+          <div class="col-title">RankLLMs</div>
           <ul>
             <li><a href="/agent-guide">🤖 AI Agent Guide</a></li>
             <li><a href="/">⚡ API Studio &amp; Docs</a></li>
-            <li><a href="/docs" target="_blank" rel="noopener">📖 OpenAPI /docs</a></li>
+            <li><a href="/api/v1/rankindex" target="_blank" rel="noopener">RankIndex API</a></li>
             <li><a href="/llms.txt" target="_blank" rel="noopener">📄 llms.txt</a></li>
+            <li><a href="/sitemap.xml" target="_blank" rel="noopener">🗺️ Sitemap</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bar">
         <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" rel="noopener">CodaiPro</a></div>
-        <div>Data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></div>
+        <div>AI model rankings &amp; LLM leaderboard data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></div>
       </div>
     </footer>
   </wa-page>

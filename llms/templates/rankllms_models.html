@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   {% include "_wa_head.html" %}
-  <title>All AI Models — Full Catalog with Rankings, Pricing &amp; Specs | RankLLMs</title>
-  <meta name="description" content="Browse every AI model in the RankLLMs source of truth: ranks, intelligence/coding scores, context, pricing, speed, and open-weight flags — all in one sortable catalog.">
+  <title>{{ title|default:"All AI Models — Full Catalog with Rankings, Pricing & Specs | RankLLMs" }}</title>
+  <meta name="description" content="{{ description|default:"Browse every AI model in the RankLLMs source of truth: ranks, intelligence/coding scores, context, pricing, speed, and open-weight flags — all in one sortable catalog." }}">
+  <meta name="keywords" content="rankllms, rankllm, ai models ranking, llms leaderboard, all AI models, AI model catalog, LLM rankings">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://api.rankllms.com/rankllms/models">
   <meta property="og:type" content="website">
@@ -42,8 +43,8 @@
             <wa-badge variant="brand" appearance="outlined" pill>Source of Truth: rankindex</wa-badge>
             <span>&bull; Full catalog — ranks, scores, pricing, specs</span>
           </div>
-          <h1>All AI Models</h1>
-          <p class="page-lede">Every model in the merged RankLLMs source of truth, with full ranking, benchmark, pricing, and capability data. Sort by any column.</p>
+          <h1>{{ h1|default:"All AI Models" }}</h1>
+          <p class="page-lede">{{ lede|default:"Every model in the merged RankLLMs source of truth, with full ranking, benchmark, pricing, and capability data. Sort by any column." }}</p>
           <div class="page-meta">
             <span>Total: <strong id="models-total">—</strong></span>
             <span>Showing: <strong id="models-showing">—</strong></span>
@@ -113,7 +114,11 @@
             </tr>
           </thead>
           <tbody id="models-table-body">
+            {% if seed_rows_html %}
+            {{ seed_rows_html|safe }}
+            {% else %}
             <tr><td colspan="14" class="loading-row">Loading full model catalog…</td></tr>
+            {% endif %}
           </tbody>
         </table>
       </div>
@@ -131,25 +136,26 @@
       <div class="footer-cols">
         <div>
           <div class="brand-wordmark" style="font-size: var(--wa-font-size-xl);">RankLLMs</div>
-          <p class="col-blurb">The independent benchmark engine and intelligent model router powering production AI infrastructure.</p>
+          <p class="col-blurb">RankLLMs — AI models ranking and LLM leaderboard engine, merging OpenRouter, Artificial Analysis, Design Arena and models.dev.</p>
         </div>
         <div>
-          <div class="col-title">Core Views</div>
+          <div class="col-title">RankLLMs Rankings</div>
           <ul>
-            <li><a href="/rankllms">👑 rankllms (source of truth)</a></li>
+            <li><a href="/rankllms">👑 RankLLMs AI Models Ranking</a></li>
             <li><a href="/rankllms/models" class="is-active">📚 All Models</a></li>
             <li><a href="/llm-leaderboard">🏆 LLM Leaderboard</a></li>
             <li><a href="/benchmarks">🔬 Unified Benchmarks</a></li>
+            <li><a href="/compare">⚔️ Compare Models</a></li>
           </ul>
         </div>
         <div>
-          <div class="col-title">Raw Tables</div>
+          <div class="col-title">Data Sources</div>
           <ul>
-            <li><a href="/ormodels">📦 ormodels</a></li>
-            <li><a href="/orbench">📊 orbench</a></li>
-            <li><a href="/aamodels">🔬 aamodels</a></li>
-            <li><a href="/aabanch">📈 aabanch</a></li>
-            <li><a href="/modelsdev">🧩 modelsdev</a></li>
+            <li><a href="/ormodels">📦 OpenRouter models</a></li>
+            <li><a href="/orbench">📊 OpenRouter benchmarks</a></li>
+            <li><a href="/aamodels">🔬 Artificial Analysis models</a></li>
+            <li><a href="/aabanch">📈 AA benchmarks</a></li>
+            <li><a href="/modelsdev">🧩 models.dev</a></li>
           </ul>
         </div>
         <div>
@@ -158,12 +164,13 @@
             <li><a href="/">⚡ API Studio &amp; Docs</a></li>
             <li><a href="/api/v1/docs" target="_blank" rel="noopener">📖 OpenAPI /docs</a></li>
             <li><a href="/llms.txt" target="_blank" rel="noopener">📄 llms.txt</a></li>
+            <li><a href="/sitemap.xml" target="_blank" rel="noopener">🗺️ Sitemap</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bar">
         <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" rel="noopener">CodaiPro</a></div>
-        <div>Data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></div>
+        <div>AI model rankings &amp; LLM leaderboard data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></div>
       </div>
     </footer>
   </wa-page>

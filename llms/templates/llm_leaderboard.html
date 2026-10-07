@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   {% include "_wa_head.html" %}
-  <title>LLM Leaderboard — Free AI Model Rankings by Intelligence, Coding &amp; Value | RankLLMs</title>
-  <meta name="description" content="Free LLM leaderboard ranked by the RankLLMs composite index. Compare AI models by intelligence, coding, reasoning, value, context, and price — powered by the merged rankindex source of truth.">
+  <title>{{ title|default:"LLM Leaderboard — Free AI Model Rankings by Intelligence, Coding & Value | RankLLMs" }}</title>
+  <meta name="description" content="{{ description|default:"Free LLM leaderboard ranked by the RankLLMs composite index. Compare AI models by intelligence, coding, reasoning, value, context, and price — powered by the merged rankindex source of truth." }}">
+  <meta name="keywords" content="llms leaderboard, llm leaderboard, ai models ranking, rankllms, rankllm, AI model rankings, LLM rankings">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://api.rankllms.com/llm-leaderboard">
   <meta property="og:type" content="website">
@@ -20,7 +21,12 @@
     "@type": "ItemList",
     "name": "RankLLMs LLM Leaderboard",
     "description": "AI model rankings by RankLLMs composite index.",
-    "url": "https://api.rankllms.com/llm-leaderboard"
+    "url": "https://api.rankllms.com/llm-leaderboard",
+    "numberOfItems": {{ total_models|default:0 }},
+    "itemListElement": [
+      {% for item in json_ld_items %}{% if not forloop.first %},{% endif %}{"@type": "ListItem", "position": {{ item.position }}, "name": "{{ item.name|escapejs }}"}
+      {% endfor %}
+    ]
   }
   </script>
   <style>
@@ -67,8 +73,8 @@
             <wa-badge variant="brand" appearance="outlined" pill>Merged source of truth</wa-badge>
             <span>&bull; rankindex · OpenRouter + Artificial Analysis + Design Arena</span>
           </div>
-          <h1>LLM Leaderboard</h1>
-          <p class="page-lede">Free rankings of AI models by the RankLLMs composite index, intelligence, coding, reasoning, and value — built from the merged rankindex table.</p>
+          <h1>{{ h1|default:"LLM Leaderboard" }}</h1>
+          <p class="page-lede">{{ lede|default:"Free rankings of AI models by the RankLLMs composite index, intelligence, coding, reasoning, and value — built from the merged rankindex table." }}</p>
           <div class="page-meta">
             <span>Ranked: <strong id="lb-count">—</strong></span>
             <span>Source: <a href="/rankllms">/rankllms</a></span>
@@ -134,7 +140,11 @@
             </tr>
           </thead>
           <tbody id="lb-body">
+            {% if seed_rows_html %}
+            {{ seed_rows_html|safe }}
+            {% else %}
             <tr><td colspan="10" class="loading-row">Loading leaderboard…</td></tr>
+            {% endif %}
           </tbody>
         </table>
       </div>
@@ -150,9 +160,45 @@
     </main>
 
     <footer slot="footer" class="section site-footer content-wrap">
-      <p>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" rel="noopener">CodaiPro</a></p>
-      <p>Data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></p>
-      <p>Core: <a href="/rankllms">👑 source of truth</a> &middot; <a href="/rankllms/models">📚 models</a> &middot; <a href="/benchmarks">🔬 benchmarks</a> &middot; <a href="/">⚡ API</a></p>
+      <div class="footer-cols">
+        <div>
+          <div class="brand-wordmark" style="font-size: var(--wa-font-size-xl);">RankLLMs</div>
+          <p class="col-blurb">The AI models ranking and LLM leaderboard engine. RankLLMs merges OpenRouter, Artificial Analysis, Design Arena and models.dev into one source of truth.</p>
+        </div>
+        <div>
+          <div class="col-title">Rankings</div>
+          <ul>
+            <li><a href="/llm-leaderboard">🏆 LLM Leaderboard</a></li>
+            <li><a href="/rankllms">👑 RankLLMs AI Models Ranking</a></li>
+            <li><a href="/rankllms/models">📚 All AI Models</a></li>
+            <li><a href="/benchmarks">🔬 Benchmarks</a></li>
+            <li><a href="/cards">🎴 Top 200 Model Cards</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="col-title">RankLLMs API</div>
+          <ul>
+            <li><a href="/api/v1/leaderboard/rankindex" target="_blank" rel="noopener">Leaderboard API</a></li>
+            <li><a href="/api/v1/rankindex" target="_blank" rel="noopener">RankIndex API</a></li>
+            <li><a href="/api/v1/compare?ids=claude-3-7-sonnet,gpt-4o" target="_blank" rel="noopener">Compare API</a></li>
+            <li><a href="/api/v1/models" target="_blank" rel="noopener">Catalog Models API</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="col-title">Developers</div>
+          <ul>
+            <li><a href="/agent-guide">🤖 AI Agent Guide</a></li>
+            <li><a href="/">⚡ API Studio &amp; Docs</a></li>
+            <li><a href="/api/v1/docs" target="_blank" rel="noopener">📖 OpenAPI /docs</a></li>
+            <li><a href="/llms.txt" target="_blank" rel="noopener">📄 llms.txt</a></li>
+            <li><a href="/sitemap.xml" target="_blank" rel="noopener">🗺️ Sitemap</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bar">
+        <div>&copy; 2026 RankLLMs Engine &middot; <a href="https://rankllms.com" rel="noopener">rankllms.com</a> &middot; <a href="https://codaipro.com" rel="noopener">CodaiPro</a></div>
+        <div>AI model rankings &amp; LLM leaderboard data: <a href="https://openrouter.ai" rel="noopener">OpenRouter</a> &middot; <a href="https://artificialanalysis.ai" rel="noopener">Artificial Analysis</a> &middot; <a href="https://models.dev" rel="noopener">models.dev</a></div>
+      </div>
     </footer>
   </wa-page>
 

@@ -3,6 +3,15 @@ from django.urls import path
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from llms.api import api
+from llms.seo import robots_txt, sitemap_xml
+from llms.seo_context import (
+    get_seo_context,
+    item_list_jsonld,
+    leaderboard_rows,
+    models_rows,
+    rankindex_rows,
+)
+from llms.models import RankIndex
 
 
 def root_home(request):
@@ -14,7 +23,13 @@ def leaderboard_page(request):
 
 
 def llm_leaderboard_page(request):
-    return render(request, 'llm_leaderboard.html')
+    ctx = get_seo_context('llm-leaderboard')
+    ctx.update({
+        'seed_rows_html': leaderboard_rows(50),
+        'json_ld_items': item_list_jsonld(10),
+        'total_models': RankIndex.objects.count(),
+    })
+    return render(request, 'llm_leaderboard.html', ctx)
 
 
 def benchmarks_page(request):
@@ -42,11 +57,21 @@ def modelsdev_page(request):
 
 
 def rankllms_page(request):
-    return render(request, 'rankindex.html')
+    ctx = get_seo_context('rankllms')
+    ctx.update({
+        'total_models': RankIndex.objects.count(),
+        'top_rows_html': rankindex_rows(10),
+    })
+    return render(request, 'rankindex.html', ctx)
 
 
 def rankllms_models_page(request):
-    return render(request, 'rankllms_models.html')
+    ctx = get_seo_context('rankllms-models')
+    ctx.update({
+        'total_models': RankIndex.objects.count(),
+        'seed_rows_html': models_rows(50),
+    })
+    return render(request, 'rankllms_models.html', ctx)
 
 
 def compare_page(request):
@@ -99,6 +124,10 @@ urlpatterns = [
     path('healthz', health_view, name='healthz_view'),
     path('admin/', admin.site.urls),
     path('api/v1/', api.urls),
+
+    # SEO surfaces — must come before nothing (exact paths, no conflicts)
+    path('robots.txt', robots_txt, name='robots_txt'),
+    path('sitemap.xml', sitemap_xml, name='sitemap_xml'),
 ]
 
 
