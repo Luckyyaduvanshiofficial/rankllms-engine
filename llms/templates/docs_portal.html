@@ -9,25 +9,40 @@
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://api.rankllms.com/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="RankLLMs Engine — Free AI Model Leaderboard API">
-  <meta property="og:description" content="Free LLM leaderboard data API: intelligence, coding, pricing, and open-weight rankings for 800+ AI models.">
+  <meta property="og:title" content="RankLLMs API — Free AI Model Leaderboard &amp; Benchmark Data">
+  <meta property="og:description" content="Explore the free, open-source AI model leaderboard and access model rankings, benchmarks, and pricing through the RankLLMs API.">
   <meta property="og:url" content="https://api.rankllms.com/">
-  <meta property="og:site_name" content="RankLLMs">
+  <meta property="og:site_name" content="RankLLMs API">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="RankLLMs Engine — Free AI Model Leaderboard API">
-  <meta name="twitter:description" content="Free LLM leaderboard data API: intelligence, coding, pricing, and open-weight rankings for 800+ AI models.">
+  <meta name="twitter:title" content="RankLLMs API — Free AI Model Leaderboard &amp; Benchmark Data">
+  <meta name="twitter:description" content="Explore the free, open-source AI model leaderboard and access model rankings, benchmarks, and pricing through the RankLLMs API.">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebAPI",
-    "name": "RankLLMs Engine API",
-    "description": "Free high-performance API for AI model leaderboards, pricing, and benchmarks.",
-    "provider": {
-      "@type": "Organization",
-      "name": "RankLLMs",
-      "url": "https://rankllms.com"
-    },
-    "documentation": "https://api.rankllms.com/api/v1/docs"
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://api.rankllms.com/#website",
+        "url": "https://api.rankllms.com/",
+        "name": "RankLLMs API",
+        "alternateName": "api.rankllms.com",
+        "publisher": { "@id": "https://rankllms.com/#organization" }
+      },
+      {
+        "@type": "WebAPI",
+        "@id": "https://api.rankllms.com/#api",
+        "name": "RankLLMs API",
+        "description": "Free API for AI model leaderboard rankings, benchmarks, and pricing.",
+        "provider": { "@id": "https://rankllms.com/#organization" },
+        "documentation": "https://api.rankllms.com/api/v1/docs"
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://rankllms.com/#organization",
+        "name": "RankLLMs",
+        "url": "https://rankllms.com/"
+      }
+    ]
   }
   </script>
 </head>
