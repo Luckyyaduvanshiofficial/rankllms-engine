@@ -7,10 +7,11 @@ This guide covers step-by-step options to deploy **RankLLMs Engine** to producti
 ## 📌 Deployment Checklist
 
 Before deploying to any platform:
-1. Ensure your Neon PostgreSQL database URL is set: `DATABASE_URL=postgresql://...neon.tech/neondb?sslmode=require`
+1. Set a PostgreSQL `DATABASE_URL` (Neon is supported). Local development can use SQLite.
 2. Set `DEBUG=False` in production.
 3. Set a strong `SECRET_KEY`.
-4. Ensure `ARTIFICIAL_ANALYSIS_API_KEY` is added to your production environment.
+4. Add `ARTIFICIAL_ANALYSIS_API_KEY` and `OPENROUTER_API_KEY` as server-side secrets when those source datasets are enabled.
+5. Set explicit `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, and `CSRF_TRUSTED_ORIGINS`; never use `ALLOWED_HOSTS=*`.
 
 ---
 
@@ -26,13 +27,17 @@ The repository includes a `render.yaml` Blueprint for a native Python web servic
 3. Review and apply the Blueprint. It will create the `rankllms-engine` web service.
 
 ### Step 2: Configure required environment variables
-Render generates `SECRET_KEY` and sets production `DEBUG` and `ALLOWED_HOSTS` from the Blueprint. During creation, provide:
+Render generates `SECRET_KEY` and sets production `DEBUG`, explicit `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`, and the six-hour scheduler from the Blueprint. The host allowlist includes `api.rankllms.com` and `rankllms-engine-kqso.onrender.com`; edit the Blueprint if Render assigns a different service hostname. During creation, provide:
 
 - `DATABASE_URL`: a PostgreSQL connection string (Neon is supported; include `sslmode=require`).
-- `ARTIFICIAL_ANALYSIS_API_KEY`: required if you want Artificial Analysis data synced.
-- `OPENROUTER_API_KEY`: optional; needed for OpenRouter-backed data.
+- `ARTIFICIAL_ANALYSIS_API_KEY`: needed for AA sync. The default endpoint is the public Free-tier `language/models/free`; Pro access can select `language/models` with `ARTIFICIAL_ANALYSIS_MODELS_PATH`.
+- `OPENROUTER_API_KEY`: needed for OpenRouter benchmarks and Data API datasets. The public model catalog works without it.
 
-After the first deploy, trigger the initial catalog import from the service's **Shell** using `python manage.py sync_all`. The Blueprint leaves `RUN_INITIAL_SYNC=false` so a potentially slow upstream import does not delay service startup. For ongoing scheduled imports, configure a Render Cron Job or enable the app scheduler on a single web instance.
+After the first deploy, create a staff account from the service's **Shell** with `python manage.py createsuperuser`, sign in at `/admin/`, and run the first import at `/settings/data-sync/`. The Blueprint leaves `RUN_INITIAL_SYNC=false` so a slow source does not block startup. Later syncs are scheduled every six hours while the Render instance is awake. Free Render instances sleep when idle; use a Cron Job or an always-on instance for uninterrupted scheduling.
+
+### Custom domain behind Cloudflare
+
+For `api.rankllms.com`, set a Render custom domain and point the Cloudflare DNS record at the Render hostname. Django validates the original `Host` against `ALLOWED_HOSTS`; both the API hostname and Render hostname are explicitly listed. TLS terminates at Cloudflare/Render, and `SECURE_PROXY_SSL_HEADER` honors the forwarded HTTPS protocol. `USE_X_FORWARDED_HOST` stays disabled so a forwarded host cannot bypass Django's host validation. The previous 400 was caused by the Blueprint allowlist containing only `.onrender.com`, which rejected `api.rankllms.com`.
 
 > The Blueprint uses Render's free web plan to avoid creating a paid resource by default. Free instances spin down when idle and have an ephemeral filesystem, so keep application data in PostgreSQL and expect cold starts. Choose a paid instance in Render if you need always-on service.
 
@@ -66,6 +71,8 @@ sudo apt install python3-pip python3-venv nginx git -y
 ```bash
 cd /var/www
 sudo git clone https://github.com/Luckyyaduvanshiofficial/rankllms-engine.git
+sudo useradd --system --create-home --shell /usr/sbin/nologin rankllms
+sudo chown -R rankllms:rankllms /var/www/rankllms-engine
 cd rankllms-engine
 
 python3 -m venv venv
@@ -80,6 +87,7 @@ cp .env.example .env
 nano .env
 ```
 Fill in production `DATABASE_URL`, `SECRET_KEY`, `DEBUG=False`.
+Also set explicit `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, and `CSRF_TRUSTED_ORIGINS`; do not use `*`. Restrict the file to the service user: `chmod 600 .env`.
 
 ### Step 4: Run Migrations & Initial Sync
 ```bash
@@ -95,8 +103,9 @@ Description=RankLLMs Engine Gunicorn Service
 After=network.target
 
 [Service]
-User=root
+User=rankllms
 WorkingDirectory=/var/www/rankllms-engine
+EnvironmentFile=/var/www/rankllms-engine/.env
 ExecStart=/var/www/rankllms-engine/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 config.wsgi:application
 Restart=always
 
@@ -137,51 +146,11 @@ sudo systemctl reload nginx
 
 ## Option D: Docker & Docker Compose Deployment
 
-If you prefer containerized deployment, Dockerfiles are provided in the repo.
+Use the repository's actual hardened `Dockerfile` and `docker-compose.yml`. `.env` is excluded from the image and loaded by Compose at runtime. Set production hosts/origins, `DEBUG=False`, a strong `SECRET_KEY`, and database/source credentials in `.env` or a secret manager.
 
-### `Dockerfile`
-```dockerfile
-FROM python:3.12-slim
-
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
-
-COPY . .
-
-EXPOSE 8000
-
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]
-```
-
-### `docker-compose.yml`
-```yaml
-version: '3.8'
-
-services:
-  engine:
-    build: .
-    container_name: rankllms_engine
-    restart: always
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py sync_all &&
-             gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application"
-```
-
-To run with Docker:
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
+docker compose exec web python manage.py createsuperuser
 ```
+
+The entrypoint waits for PostgreSQL, runs migrations, collects static files, and starts Gunicorn. Set `RUN_INITIAL_SYNC=false` in production and run the first import from the staff Settings page, or use `docker compose exec web python manage.py sync_all`.

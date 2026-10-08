@@ -8,10 +8,10 @@ Welcome to the **RankLLMs Engine** documentation. This engine powers [RankLLMs.c
 
 ## 1. Project Overview & Vision
 
-**Goal:** Create an independent, cached, high-performance API catalog of all Large Language Models (LLMs) available across the industry.
+**Goal:** Build a source-attributed canonical model catalog for metadata, pricing, performance, and independent benchmarks.
 
-RankLLMs Engine ingests data from OpenRouter's 70+ endpoints and stores it cleanly inside your own Neon PostgreSQL database. This enables RankLLMs.com to feature:
-- **Zero API Lock-in:** Full independence from external API rate-limits, downtime, or paywall changes.
+RankLLMs Engine ingests the OpenRouter model catalog and selected key-gated Data API feeds, Artificial Analysis Data API v2, and models.dev. It validates source snapshots and stores them in PostgreSQL (SQLite locally). This enables RankLLMs.com to feature:
+- **Cached public reads:** Normal visitors use the stored database snapshot; user requests do not call source APIs.
 - **Artificial Analysis Benchmarks:** Ingests `intelligence_index`, `coding_index`, and `agentic_index`.
 - **Top AI App Usage Rankings:** Shows token consumption trends across major AI agents & apps.
 - **Task Classification Market Share:** Shows breakdown of tokens by task type (Workflow Execution, Code Generation, Debugging, Reasoning, Writing).
@@ -23,19 +23,19 @@ RankLLMs Engine ingests data from OpenRouter's 70+ endpoints and stores it clean
 
 | Layer | Technology |
 | :--- | :--- |
-| **Framework** | Django 6.0 / Python 3.14 |
+| **Framework** | Django 6.x / Python 3.12+ |
 | **API Framework** | Django Ninja (Fast, Pydantic-validated OpenAPI) |
-| **Database** | Neon PostgreSQL (`rankllms-engine`) |
+| **Database** | PostgreSQL via `DATABASE_URL` (Neon supported); SQLite for tests/local development |
 | **DB Driver** | `psycopg2-binary` + `dj-database-url` |
 | **Data Ingestion** | Custom Django Management Command + Requests |
-| **Background Scheduler** | APScheduler (Automated 6-hour interval sync) |
+| **Background Scheduler** | APScheduler (configured interval; Render instances may sleep) |
 | **CORS** | `django-cors-headers` (Configured for frontend consumption) |
 
 ---
 
 ## 3. Database Schema
 
-The database models are located in [`llms/models.py`](file:///C:/Users/pc/Documents/LuckyLabs/rankllms-engine/llms/models.py):
+The database models are located in [`llms/models.py`](../llms/models.py):
 
 ### `Provider` Table
 Stores AI model vendors/creators (OpenAI, Anthropic, Google, Meta, DeepSeek, Mistral, etc.).
@@ -46,13 +46,13 @@ Stores individual language, image, video, and embedding models.
 - `slug` (unique string): URL-friendly slug (e.g., `openai-gpt-4o`).
 - `name` (string): Model name.
 - `provider` (FK to `Provider`).
-- `category` (choice): `llm`, `image`, `video`, `embedding`.
-- `context_length` (int): Context window size in tokens.
+- `category` (choice): `llm`, `image`, `video`, `audio`, `music`, `embedding`.
+- `context_length` (nullable int): Context window size in tokens when a source reports it.
 - `max_completion_tokens` (int): Maximum output tokens.
 - `modality` (string), `is_multimodal` (bool), `supports_vision` (bool), `supports_tools` (bool).
 - `prompt_price_per_1m` (decimal): Cost per 1 Million prompt/input tokens.
 - `completion_price_per_1m` (decimal): Cost per 1 Million completion/output tokens.
-- `is_free` (bool): True if prompt and completion costs are zero.
+- `is_free` (nullable bool): True/false only when source prices establish free/paid; otherwise unknown.
 - **Artificial Analysis Indices:** `intelligence_index` (float), `coding_index` (float), `agentic_index` (float).
 - `elo_score` (float), `rank_overall` (int).
 - `raw_json` (JSONField): Complete original JSON payload.
@@ -75,13 +75,13 @@ Historical log of model price adjustments.
 
 ## 4. OpenRouter Data Ingestion Pipeline
 
-### Data Sync Service ([`llms/services/openrouter_sync.py`](file:///C:/Users/pc/Documents/LuckyLabs/rankllms-engine/llms/services/openrouter_sync.py))
+### Data Sync Service ([`llms/services/openrouter_sync.py`](../llms/services/openrouter_sync.py))
 - Fetches data from:
   - `GET /api/v1/models` (Catalog & Pricing)
-  - `GET /api/v1/benchmarks` (Artificial Analysis Indices)
+  - `GET /api/v1/benchmarks` (requires an OpenRouter key; unified third-party benchmark records)
   - `GET /api/v1/datasets/app-rankings` (Top AI Applications)
   - `GET /api/v1/classifications/task` (Task Market Share)
-- Executes ultra-fast **bulk database operations** (`bulk_create`, `bulk_update` with `ignore_conflicts=True`) inside a single atomic transaction block.
+- Validates responses before atomic source writes, uses bounded retries, and preserves raw source payloads for provenance.
 
 ### Running Manual Sync
 You can trigger data ingestion at any time via the Django CLI:
@@ -107,7 +107,10 @@ Interactive Swagger/OpenAPI documentation: `/api/v1/docs`.
 | `/api/v1/apps` | `GET` | Top AI applications ranked by total token volume |
 | `/api/v1/task-share` | `GET` | Task classification market share (Workflow Execution, Code Gen, Debugging) |
 | `/api/v1/compare` | `GET` | Side-by-side comparison payload for multiple models |
-| `/api/v1/sync` | `POST` | Trigger full data sync on demand |
+| `/api/v1/rankindex` | `GET` | Normalized canonical catalog with source IDs and provenance |
+| `/api/v1/leaderboard/rankindex` | `GET` | Canonical RankLLMs leaderboard |
+| `/api/v1/sync` | `POST` | Staff-session/CSRF protected; queues a background sync |
+| `/settings/data-sync/` | `GET/POST` | Staff-only source controls, dry run, history, and integrity report |
 
 ---
 

@@ -8,7 +8,7 @@ This guide explains how to set up, test, debug, and run data synchronization com
 
 - **Python 3.12+**
 - **Git**
-- **Neon PostgreSQL Database** (or local PostgreSQL 15+)
+- **PostgreSQL** for production (Neon is supported). Local development and tests can use SQLite.
 
 ---
 
@@ -46,7 +46,7 @@ RankLLMs Engine includes specialized CLI management commands for data ingestion 
 1. `sync_openrouter_models()` (Catalog & Pricing)
 2. `sync_models_dev_catalog()` (models.dev provider/model metadata)
 3. `sync_artificial_analysis_data()` (LLM Benchmarks & Media Arena ELO)
-4. `fill_all_nulls()` (Intelligent backfill for 100% data coverage)
+4. Atomic merge of validated source snapshots into `rankindex`.
 
 ```bash
 python manage.py sync_all
@@ -71,9 +71,19 @@ python manage.py sync_artificial_analysis
 ```
 
 ### 5. `python manage.py fill_nulls`
-Runs database-wide null and missing field backfill only.
+Reports missing catalog records without filling or estimating values.
 ```bash
 python manage.py fill_nulls
+```
+
+The Settings page at `/settings/data-sync/` is the recommended manual control surface. It requires a Django staff account and includes normal sync, provider-specific sync, dry-run, source settings, history, and integrity counts.
+
+### Test checks (isolated SQLite)
+
+```bash
+DJANGO_SETTINGS_MODULE=config.test_settings python manage.py check
+DJANGO_SETTINGS_MODULE=config.test_settings python manage.py makemigrations --check --dry-run
+DJANGO_SETTINGS_MODULE=config.test_settings python manage.py test
 ```
 
 ---

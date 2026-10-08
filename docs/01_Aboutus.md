@@ -7,24 +7,24 @@
 
 ## 🌟 Mission & Overview
 
-**RankLLMs Engine** is a specialized, production-ready backend engine designed to aggregate, normalize, score, and rank **760+ AI models** (Large Language Models, Image Generation, Video Generation, and Audio/Speech models) across **120+ AI providers** (including OpenAI, Anthropic, Google, Meta, DeepSeek, Qwen, Mistral, xAI, Cohere, and more).
+**RankLLMs Engine** is a backend for aggregating, normalizing, and publishing model metadata, prices, and third-party benchmark results across OpenRouter, Artificial Analysis, and models.dev. Catalog size changes as upstream sources change; this README does not promise a hardcoded model count.
 
 The engine powers high-speed REST APIs and pre-calculated datasets for:
 - 📊 **Comprehensive AI Leaderboards** sorted by the proprietary **RankLLMs Index**.
 - 🔓 **Open-LLM Leaderboards** tracking open-weights models and license compliance.
 - ⚖️ **Dynamic Side-by-Side Model Comparisons** (specs, pricing, benchmarks, context windows).
 - 🏆 **Weekly Top 10 Charts** across coding, reasoning, value, and open-source categories.
-- 🎴 **Top 200 Curated Model Cards** ready for frontend direct imports (`.json` and `.ts`).
+- 🎴 **Live Model Cards API** for fetching a limited set of current catalog records.
 - 📈 **Token Usage & Task Classification Market Share** analytics.
 
 ---
 
 ## 🛠️ Technology Stack & Infrastructure
 
-- **Language & Framework**: Python 3.12+ with **Django 6.0**
+- **Language & Framework**: Python 3.12+ with **Django 6.x**
 - **API Layer**: **Django Ninja** (Powered by Pydantic v2 schemas for high-speed serialization, OpenAPI/Swagger docs, and strict type safety)
-- **Database**: **Neon Serverless PostgreSQL** with connection pooling and SSL encryption
-- **Automated Scheduling**: **APScheduler** background daemon executing automated data synchronization every 6 hours
+- **Database**: PostgreSQL through `DATABASE_URL` (Neon supported); SQLite for isolated local tests
+- **Automated Scheduling**: **APScheduler** can queue syncs every configured interval; Render is set to six hours while its instance is awake
 - **Developer Studio / Dashboard**: Built-in interactive light-themed developer portal served directly from `/`
 
 ---
@@ -32,42 +32,21 @@ The engine powers high-speed REST APIs and pre-calculated datasets for:
 ## 🏛️ High-Level System Architecture
 
 ```
- +-------------------------+       +------------------------------------+
- |  OpenRouter API Catalog |       |  Artificial Analysis Data API v2   |
- |  (Models + Analytics)   |       |  (LLM Benchmarks + Intelligence)   |
- +------------+------------+       +-----------------+------------------+
-              |                                      |
-              v                                      v
-    [ openrouter_sync.py ]                [ artificial_analysis_sync.py ]
-    (Catalog & App Rankings)              (Direct Benchmark Ingestion)
-              |                                      |
-              +-------------------+------------------+
-                                  |
-                                  v
-                        [ fill_nulls.py ]
-                        (Backfill specs, pricing & fallback scores)
-                                  |
-                                  v
-                        [ deduplication.py ]
-                        (Filter redundant variant endpoints down
-                         to ~200 curated unique core models)
-                                  |
-                                  v
-                        [ rankllms_calculator.py ]
-                        (Compute official RankLLMs Index)
-                                  |
-                                  v
-                    +---------------------------+
-                    |  Neon PostgreSQL Database |
-                    +-------------+-------------+
-                                  |
-            +---------------------+---------------------+
-            |                                           |
-            v                                           v
-+---------------------------+               +---------------------------+
-| Django Ninja REST API v1  |               | Static Model Cards Export |
-|   (/api/v1/* Endpoints)   |               |   (/data/top_200_models)  |
-+---------------------------+               +---------------------------+
+  +------------+       +-----------------------+       +-------------+
+  | OpenRouter |       | Artificial Analysis   |       | models.dev  |
+  | catalog +  |       | language + media API  |       | catalog     |
+  | Data API   |       +-----------+-----------+       +------+------+
+  +-----+------+                   |                          |
+        +--------------------------+--------------------------+
+                                   v
+                       validated source snapshots
+                                   v
+                    provider-scoped ID matching
+                                   v
+            canonical rankindex + source provenance
+                       /                    \
+                      v                      v
+             Django Ninja API          server-rendered UI
 ```
 
 ---
@@ -76,14 +55,13 @@ The engine powers high-speed REST APIs and pre-calculated datasets for:
 
 The **RankLLMs Index** is a transparent, composite score calculated to reflect real-world model capability:
 
-$$\text{RankLLMs Index} = 0.40 \cdot I + 0.25 \cdot C + 0.15 \cdot A + 0.10 \cdot S + 0.10 \cdot E$$
+$$\text{RankLLMs Index} = \frac{0.35I + 0.30C + 0.15A + 0.10G + 0.10T}{\text{sum of weights for available signals}}$$
 
 Where:
-- **$I$ (Intelligence Index - 40%)**: Composite reasoning, knowledge, and problem-solving index.
-- **$C$ (Coding Index - 25%)**: Software engineering, syntax, logic, and code generation score.
-- **$A$ (Agentic Index - 15%)**: Tool use, function calling, structured output adherence, and multi-step planning.
-- **$S$ (SWE-Bench Resolved % - 10%)**: Real-world GitHub issue resolution benchmark.
-- **$E$ (Arena ELO Normalized - 10%)**: LMSYS Chatbot Arena human preference score ($\text{Normalized} = \frac{\text{ELO} - 1000}{5}$).
+- **$I$ (Intelligence Index - 35%)**, **$C$ (Coding Index - 30%)**, and **$A$ (Agentic Index - 15%)** use the published 0–100 Artificial Analysis indices.
+- **$G$ (GPQA Diamond - 10%)** and **$T$ (TerminalBench Hard or v2.1 - 10%)** are converted from fractions to percentages when needed.
+- Missing metrics are excluded and the remaining weights are renormalized. Price, speed, context, and Arena ELO do not contribute to this composite. No benchmark score is inferred from a model name.
+- All benchmark data is credited to its source; RankLLMs does not claim to have run third-party evaluations.
 
 ---
 
@@ -95,26 +73,26 @@ All API endpoints are available under the `/api/v1/` prefix:
 | :--- | :---: | :--- | :--- |
 | `/api/v1/models` | `GET` | **Models Catalog** | Full catalog with filtering (provider, modality, license, max price, context size) & search |
 | `/api/v1/models/{identifier}` | `GET` | **Models Catalog** | Detailed specs, pricing, and benchmarks for a specific model slug or ID |
-| `/api/v1/models/cards` | `GET` | **Static Cards API** | Curated Top 200 Model Cards with tags, pricing, and specs |
-| `/api/v1/leaderboard` | `GET` | **LLM Leaderboard** | Full leaderboard ranked by RankLLMs Index / Intelligence Index |
+| `/api/v1/models/cards` | `GET` | **Model Cards API** | Live catalog cards with tags, nullable pricing, and available specs |
+| `/api/v1/leaderboard` | `GET` | **Legacy LLM Leaderboard** | Source benchmark leaderboard; accepts supported metric sort fields |
+| `/api/v1/leaderboard/rankindex` | `GET` | **Canonical Leaderboard** | Merged RankLLMs composite snapshot and provenance |
 | `/api/v1/leaderboard/open-weights`| `GET` | **Open-LLM** | Leaderboard dedicated exclusively to open-weight/open-source models |
 | `/api/v1/compare` | `GET` | **Comparison** | Side-by-side comparison between 2 to 5 models with metric winners |
 | `/api/v1/top-10` | `GET` | **Top 10 Rankings** | Curated weekly rankings across 5 categories with rank deltas |
 | `/api/v1/benchmarks` | `GET` | **Benchmarks** | Benchmarks dataset with `rankllms_index`, coding, and SWE-bench |
 | `/api/v1/apps` | `GET` | **Analytics & Usage**| Top AI applications ranked by real-world token consumption |
 | `/api/v1/task-share` | `GET` | **Analytics & Usage**| Market share distribution across AI task categories |
-| `/api/v1/keys/generate` | `POST` | **API Key Manager**| Generate API keys for frontend/client application access |
-| `/api/v1/keys` | `GET` | **API Key Manager**| List and manage active API keys |
-| `/api/v1/sync` | `POST` | **Data Pipeline** | Trigger immediate asynchronous master data sync |
+| `/api/v1/keys/generate` | `POST` | **Staff only** | Issue a key (returned once); keys do not currently enforce read quotas |
+| `/api/v1/keys` | `GET` | **Staff only** | List key metadata with masked previews |
+| `/api/v1/sync` | `POST` | **Staff only** | Queue a background full source sync; requires session + CSRF |
+| `/settings/data-sync/` | `GET/POST` | **Staff only** | Source status, manual sync, dry run, safe settings, history, integrity |
 | `/api/v1/health` | `GET` | **System** | Service and database health check status |
 
 ---
 
 ## 🗃️ Key Datasets & Exports
 
-Located in [`data/`](file:///C:/Users/pc/Documents/LuckyLabs/rankllms-engine/data/):
-- **[`top_200_models.json`](file:///C:/Users/pc/Documents/LuckyLabs/rankllms-engine/data/top_200_models.json)**: Normalized, deduplicated JSON dataset of the top 200 AI models.
-- **[`top_200_models.ts`](file:///C:/Users/pc/Documents/LuckyLabs/rankllms-engine/data/top_200_models.ts)**: TypeScript typed interface `ModelCard` and typed array for instant frontend import.
+The `data/top_200_models.json` and `.ts` files are historical static exports and are not used by the Django API or UI. Use the live API and `rankindex` snapshot for current values.
 
 ---
 

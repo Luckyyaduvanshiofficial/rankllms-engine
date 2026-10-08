@@ -21,7 +21,7 @@ Powering **[rankllms.com](https://rankllms.com)** · Open source by **[CodaiPro]
 curl "https://api.rankllms.com/api/v1/leaderboard?limit=10&dedup=true"
 ```
 
-Sort options: `intelligence` (default), `coding`, `swe_bench`, `agentic`, `context`, `cost`.
+Sort options: `intelligence` (legacy default), `rankllms_index` (canonical composite), `coding`, `swe_bench`, `agentic`, `context`, `cost`.
 
 ```bash
 curl "https://api.rankllms.com/api/v1/leaderboard?sort_by=coding&limit=5&dedup=true"
@@ -34,7 +34,7 @@ curl "https://api.rankllms.com/api/v1/leaderboard?sort_by=coding&limit=5&dedup=t
 curl "https://api.rankllms.com/api/v1/models?is_open_weight=true&supports_vision=true&max_prompt_price_1m=1.00&dedup=true&limit=5"
 ```
 
-Useful query params: `search`, `provider`, `is_open_weight`, `is_free`, `supports_vision`, `supports_tools`, `max_prompt_price_1m`, `min_context_length`, `ordering`, `limit`, `page`.
+Useful query params: `search`, `provider`, `is_open_weight`, `is_free`, `supports_vision`, `supports_tools`, `max_prompt_price_1m`, `min_context`, `ordering`, `limit`, `offset`.
 
 ### 3. Model detail
 
@@ -97,7 +97,7 @@ console.log(data.rankings);
 | `/providers` | GET | All AI providers |
 | `/models` | GET | Search / filter / paginate model catalog |
 | `/models/{slug}` | GET | Full specs, pricing, benchmarks |
-| `/models/cards` | GET | Curated Top 200 model cards |
+| `/models/cards` | GET | Up to 500 model cards |
 | `/leaderboard` | GET | Ranked leaderboard |
 | `/leaderboard/open-weights` | GET | Open-source / open-weight only |
 | `/compare` | GET | Side-by-side comparison |
@@ -105,7 +105,7 @@ console.log(data.rankings);
 | `/top-10` | GET | Weekly top 10 categories |
 | `/apps` | GET | Top AI apps by token usage |
 | `/task-share` | GET | Task classification market share |
-| `/sync` | POST | Trigger master data sync (admin) |
+| `/sync` | POST | Queue a full sync (Django staff session + CSRF required; returns 202) |
 
 Full parameter tables: [docs/02_API_Reference.md](docs/02_API_Reference.md).
 
@@ -116,7 +116,7 @@ Full parameter tables: [docs/02_API_Reference.md](docs/02_API_Reference.md).
 We thank and credit:
 
 - **[OpenRouter](https://openrouter.ai)** — model catalog, pricing, unified benchmarks
-- **[Artificial Analysis](https://artificialanalysis.ai)** — intelligence / coding / agentic indices
+- **[Artificial Analysis](https://artificialanalysis.ai)** — independent intelligence, capability, benchmark, performance, and pricing data
 - **[models.dev](https://models.dev)** — provider & model metadata
 - **[RankLLMs](https://rankllms.com)** — product & leaderboards
 - **[CodaiPro](https://codaipro.com)** — open-source maintenance
@@ -129,10 +129,10 @@ We thank and credit:
 Yes. Core leaderboard and catalog endpoints are free for personal and production use.
 
 **Do I need an API key?**  
-No for standard read endpoints. Optional key generation exists for apps that want quota tracking.
+No for standard read endpoints. API-key administration is staff-only. Generated keys are not currently used to enforce public request quotas.
 
 **How fresh is the data?**  
-The master pipeline (`sync_all`) runs every 6 hours and can be triggered via `POST /api/v1/sync`.
+Render queues the master pipeline every 6 hours while its instance is awake. Free Render instances sleep while idle. Staff can run all sources or one source at `/settings/data-sync/`; a dry run previews the same pipeline and rolls back all writes. `POST /api/v1/sync` requires a staff session and CSRF token.
 
 **Can I self-host?**  
 Yes — see [docs/03_Deployment_Guide.md](docs/03_Deployment_Guide.md) and the [Dockerfile](Dockerfile).

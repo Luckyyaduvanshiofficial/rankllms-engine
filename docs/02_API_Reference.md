@@ -1,6 +1,6 @@
 # 🔌 API Reference Guide
 
-The RankLLMs REST API is powered by **Django Ninja** and **Pydantic v2**. It offers high-speed JSON serialization, automatic null guarding, and interactive OpenAPI Swagger documentation at **`/api/v1/docs`**.
+The RankLLMs REST API is powered by **Django Ninja** and **Pydantic v2**. OpenAPI documentation is at **`/api/v1/docs`**. Public read endpoints do not require a RankLLMs API key. Missing source values are represented as `null` where the canonical schema supports it.
 
 Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
 
@@ -15,14 +15,16 @@ Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
 | Endpoint | Method | Tag | Description |
 | :--- | :---: | :--- | :--- |
 | **`/health`** | `GET` | Health | Service status, total database record counts |
-| **`/providers`** | `GET` | Providers | List of all 120+ AI Providers & Model Counts |
-| **`/models`** | `GET` | Catalog | Search, filter, and paginate 760+ AI models |
+| **`/providers`** | `GET` | Providers | List active providers and model counts |
+| **`/models`** | `GET` | Catalog | Search, filter, and paginate the legacy provider catalog |
+| **`/rankindex`** | `GET` | Canonical catalog | Search, filter, and paginate normalized cross-source model records |
+| **`/leaderboard/rankindex`** | `GET` | Canonical leaderboard | Rankings calculated from the merged source snapshot |
 | **`/models/{identifier}`** | `GET` | Catalog | Get detailed model specs, pricing & benchmarks |
 | **`/leaderboard`** | `GET` | Leaderboards | Filterable model leaderboards (coding, speed, price, open-weight) |
 | **`/apps`** | `GET` | Analytics | Top 50 AI apps ranked by token consumption |
 | **`/task-share`** | `GET` | Analytics | Task classification market share breakdown |
 | **`/compare`** | `GET` | Analytics | Side-by-side spec & pricing comparison |
-| **`/sync`** | `POST` | Admin | Trigger full master data sync pipeline |
+| **`/sync`** | `POST` | Staff sync | Queue a full source sync; requires a Django staff session and CSRF token |
 
 ---
 
@@ -46,7 +48,7 @@ Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
 
 ---
 
-### 2. Models Catalog
+### 2. Models Catalog (legacy-compatible)
 `GET /api/v1/models`
 
 **Query Parameters:**
@@ -57,10 +59,14 @@ Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
 - `is_open_weight` *(boolean, optional)*: `true` to return open-weight/open-source models.
 - `limit` *(int, default: 50)*: Number of records to return.
 
-**Response Example:**
+**Response envelope:**
 ```json
-[
-  {
+{
+  "total": 1,
+  "limit": 50,
+  "offset": 0,
+  "items": [
+    {
     "id": 1,
     "openrouter_id": "anthropic/claude-3.7-sonnet",
     "slug": "claude-3-7-sonnet",
@@ -91,9 +97,14 @@ Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
       "tokens_per_second": 65.2,
       "time_to_first_token": 0.45
     }
-  }
-]
+    }
+  ]
+}
 ```
+
+For the normalized canonical record, use `GET /api/v1/rankindex`. The canonical response preserves OpenRouter, Artificial Analysis, and models.dev IDs in its `openrouter_id`, `aa_slug`, `modelsdev_id`, and `aliases` fields, with source names and original payloads retained for attribution.
+
+The canonical and Artificial Analysis APIs expose nullable AA `agentic_index`, six capability indices (`finance_and_accounting_index`, `strategy_and_ops_index`, `legal_index`, `healthcare_and_medical_index`, `engineering_index`, `economics_index`), four performance medians, and cache-hit/cache-write prices where supplied. Media records expose route-specific measures in `media_metrics`; Free API records do not imply paid pricing or sample counts when those fields are absent.
 
 ---
 
@@ -102,7 +113,8 @@ Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
 
 **Query Parameters:**
 - `sort_by` *(string, default: `rankllms_index`)*:
-  - `rankllms_index`: Sorted by RankLLMs Index (highest overall intelligence at top).
+  - `rankllms_index`: Canonical composite from the merged source snapshot.
+  - `intelligence`: Legacy Artificial Analysis intelligence index.
 
   - `coding`: Sorted by Coding Index.
   - `speed`: Sorted by output throughput (`tokens_per_second`).
@@ -151,19 +163,26 @@ Base API URL: `http://localhost:8000/api/v1` (or your production server URL)
 
 ---
 
-### 5. Master Data Sync Trigger
+### 5. Staff-only master data sync trigger
 `POST /api/v1/sync`
+
+This endpoint is not public. It requires an authenticated Django staff session and Django's CSRF protection. The endpoint queues a background job and returns `202 Accepted`; view status and detailed counts in the staff Settings page at `/settings/data-sync/`.
 
 **Response Example:**
 ```json
 {
-  "status": "success",
-  "summary": {
-    "elapsed_seconds": 152.7,
-    "total_models": 764,
-    "total_providers": 123,
-    "total_benchmarks": 764,
-    "coverage_pct": 100.0
-  }
+  "status": "accepted",
+  "run_id": 42,
+  "summary": { "message": "Sync queued. Poll the staff Settings page for the result." }
 }
 ```
+
+Unknown models return `404`, invalid parameters return `400`, a running sync returns `409`, and unavailable service/database health returns `503`. Pagination is bounded (at most 1,000 rows per page on raw/canonical table endpoints).
+
+### 6. API key administration
+
+`POST /api/v1/keys/generate` and `GET /api/v1/keys` require a Django staff session. The generated key is returned once; the list endpoint exposes only a short masked preview. These keys do not currently enforce quotas on public read endpoints.
+
+### 7. Freshness and health
+
+`GET /api/v1/health` is a database readiness check and includes the latest canonical snapshot time. `/ping` is the lightweight liveness probe used by Render. Public benchmark reads use the stored snapshot; they do not make an upstream call per visitor request.

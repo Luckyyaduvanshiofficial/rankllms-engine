@@ -2,7 +2,9 @@
 
 > **Target Audience:** Autonomous AI Agents, LLM Prompt Chains, Multi-Agent Orchestrators (LangChain, AutoGen, CrewAI, LlamaIndex), and Model Routing Engines.
 
-The **RankLLMs Engine** is a high-performance, real-time AI Model Intelligence and Leaderboard API. It evaluates, ranks, and benchmarks over **900+ foundation models** across proprietary (OpenAI, Anthropic, Google, xAI) and open-weight (DeepSeek, Meta, Alibaba, Mistral) providers.
+The **RankLLMs Engine** is an AI model catalog and leaderboard API. It aggregates source-published data for proprietary and open-weight providers; catalog size changes as upstream sources change.
+
+> **Data quality:** API values are source-backed snapshots, not live evaluations. Missing metrics and prices may be `null`; never treat them as zero. Examples in this guide illustrate response shapes and are not current model recommendations. Query the API for current records and inspect each field's source attribution.
 
 **Product:** [rankllms.com](https://rankllms.com) · **Maintainer:** [CodaiPro](https://codaipro.com) · **Free user guide:** [USER_GUIDE.md](../USER_GUIDE.md)
 
@@ -27,14 +29,15 @@ The **RankLLMs Engine** is a high-performance, real-time AI Model Intelligence a
 
 When making autonomous model selection decisions, use the **RankLLMs Composite Intelligence Formula**:
 
-$$\text{RankLLMs Index} = 0.40 \times \text{Intelligence} + 0.25 \times \text{Coding} + 0.15 \times \text{Agentic} + 0.10 \times \text{SWE-Bench} + 0.10 \times \text{Efficiency}$$
+$$\text{RankLLMs Index} = \frac{0.35I + 0.30C + 0.15A + 0.10G + 0.10T}{\text{sum of weights for available signals}}$$
 
 | Metric Key | Scale | Description | Primary Use Case for Agents |
 | :--- | :--- | :--- | :--- |
 | `rankllms_index` | 0 – 100 | Composite holistic intelligence score | Default general-purpose model routing |
 | `coding_index` | 0 – 100 | LiveCodeBench, HumanEval, and code synthesis | Code generation, debugging, refactoring |
 | `agentic_index` | 0 – 100 | Multi-step tool use, function calling, planning | Autonomous agents, workflow execution |
-| `swe_bench_score` | 0 – 100 | Real GitHub issue resolution rate | Software engineering & deep bug fixing |
+| `gpqa_diamond` | 0 – 100 | GPQA Diamond (fractional source scores are normalized to percent) | Scientific reasoning |
+| `terminalbench_hard` | 0 – 100 | TerminalBench Hard (fractional source scores are normalized to percent) | Terminal and code-execution tasks |
 | `context_length` | Integer | Maximum token capacity | Document synthesis & multi-file ingest |
 | `prompt_price_per_1m` | USD ($) | Price per 1,000,000 input tokens | Budget optimization & cost-benefit routing |
 
@@ -53,14 +56,15 @@ GET /api/v1/leaderboard?sort_by={sort_key}&dedup=true&limit={limit}
 
 #### Query Parameters
 - `sort_by`:
-  - `rankllms_index` (Default): General overall intelligence.
+  - `rankllms_index`: Canonical RankLLMs composite; missing components are omitted and remaining weights are renormalized.
+  - `intelligence` (legacy default): Artificial Analysis Intelligence Index.
   - `coding`: Highest code generation and refactoring capability.
-  - `swe_bench`: Complex multi-file repository problem resolution.
+  - `swe_bench`: Legacy field; use TerminalBench or LiveCodeBench-specific endpoints when available.
   - `agentic`: Tool use, function execution, and multi-turn planning.
   - `context`: Largest context window (e.g. 2M+ tokens).
   - `cost`: Lowest price per million input tokens.
-- `dedup`: `true` (Collapses batch endpoints, previews, and effort tags to canonical flagship models).
-- `limit`: Integer (1 to 100).
+- `dedup`: `true` (Compatibility parameter. It does not fuzzy-merge dated releases or effort variants.)
+- `limit`: Integer (1 to 500).
 
 #### Example cURL
 ```bash
@@ -76,21 +80,20 @@ curl -X GET "https://api.rankllms.com/api/v1/leaderboard?sort_by=coding&dedup=tr
   "rankings": [
     {
       "rank": 1,
-      "id": 142,
-      "slug": "anthropic-claude-opus-5",
-      "openrouter_id": "anthropic/claude-opus-5",
-      "name": "Claude Opus 5",
-      "provider": "Anthropic",
-      "is_open_weight": false,
-      "rankllms_index": 94.2,
-      "intelligence_index": 92.5,
-      "coding_index": 99.0,
-      "agentic_index": 95.0,
-      "swe_bench_score": 88.4,
-      "context_length": 200000,
-      "prompt_price_per_1m": "15.00",
-      "completion_price_per_1m": "75.00",
-      "is_free": false
+      "id": "<database id>",
+      "slug": "<canonical slug>",
+      "openrouter_id": "<source ID or empty>",
+      "name": "<source display name>",
+      "provider": "<source provider>",
+      "is_open_weight": null,
+      "rankllms_index": null,
+      "intelligence_index": null,
+      "coding_index": null,
+      "agentic_index": null,
+      "context_length": null,
+      "prompt_price_per_1m": null,
+      "completion_price_per_1m": null,
+      "is_free": null
     }
   ]
 }
@@ -115,7 +118,7 @@ GET /api/v1/models
 - `is_free`: `true` | `false`.
 - `supports_vision`: `true` | `false`.
 - `supports_tools`: `true` | `false`.
-- `min_context`: Integer (e.g. `128000`).
+- `min_context`: Integer (e.g. `128000`). Missing context is `null` and does not satisfy a minimum.
 - `max_prompt_price_1m`: Float in USD (e.g. `2.50`).
 - `ordering`: `-rankllms_index` | `-coding_index` | `prompt_price` | `-context_length`.
 - `dedup`: `true`.

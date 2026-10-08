@@ -2,39 +2,28 @@
 
 ## Overview
 
-RankLLMs Engine is built on a high-throughput, bulk-optimized data architecture designed to aggregate AI model capabilities, pricing, live throughput/latency, and usage rankings into a unified PostgreSQL database.
+RankLLMs Engine stores validated source snapshots and a canonical cross-source catalog in PostgreSQL. Public reads use the database snapshot; they do not call upstream APIs per visitor request.
 
 ---
 
 ## 🏛️ System Architecture Diagram
 
 ```
- +-------------------------+       +------------------------------------+
- |  OpenRouter API Catalog |       |  Artificial Analysis Data API v2   |
- |  (Models + Analytics)   |       |  (LLM Benchmarks + Media Rating)   |
- +------------+------------+       +-----------------+------------------+
-              |                                      |
-              v                                      v
-    [ openrouter_sync.py ]                [ artificial_analysis_sync.py ]
-    (Catalog & App Rankings)              (Intelligence, Coding & Media)
-              |                                      |
-              +-------------------+------------------+
-                                  |
-                                  v
-                        [ fill_nulls.py ]
-                        (Backfills missing specs,
-                         pricing & benchmarks)
-                                  |
-                                  v
-                    +---------------------------+
-                    |  Neon PostgreSQL Database |
-                    +-------------+-------------+
-                                  |
-                                  v
-                    +---------------------------+
-                    | Django Ninja REST API v1  |
-                    |   (High-Speed Endpoints)  |
-                    +---------------------------+
+ +-------------------+    +----------------------+    +------------------+
+ | OpenRouter        |    | Artificial Analysis  |    | models.dev       |
+ | catalog + Data API|    | language + media API |    | model catalog    |
+ +---------+---------+    +----------+-----------+    +--------+---------+
+           |                         |                         |
+           +-------------------------+-------------------------+
+                                     v
+                        validated source snapshots
+                                     v
+                     provider-scoped identity matching
+                                     v
+                  canonical rankindex + source provenance
+                           /                    \
+                          v                      v
+                 Django Ninja API        server-rendered UI
 ```
 
 ---
@@ -60,26 +49,26 @@ Core model registry entity containing base classification and parameters.
 
 ### 3. `ModelSpecification` (1:1 with `LLMModel`)
 Technical specifications and hardware parameters.
-- `context_length`: Maximum context window tokens (e.g. `200000`, `1048576`).
+- `context_length`: Maximum context window tokens when a source publishes one; otherwise null.
 - `max_completion_tokens`: Maximum output generation window.
 - `modality`: Input/output modality (e.g. `text->text`, `text+image->text`).
-- `is_multimodal`, `supports_vision`, `supports_audio`, `supports_tools`: Boolean flags.
+- `is_multimodal`, `supports_vision`, `supports_audio`, `supports_tools`: Nullable source-backed flags.
 
 ### 4. `ModelPricing` (1:1 with `LLMModel`)
 Granular pricing normalized per 1 Million tokens in USD.
-- `prompt_price_per_1m`: Prompt input price per 1M tokens (e.g. `$3.00`).
+- `prompt_price_per_1m`: Prompt input price per 1M tokens in USD, or null when unknown.
 - `completion_price_per_1m`: Completion output price per 1M tokens (e.g. `$15.00`).
 - `prompt_price_per_token`: Raw per-token Decimal.
 - `completion_price_per_token`: Raw per-token Decimal.
 
 ### 5. `ModelBenchmark` (1:1 with `LLMModel`)
 Evaluations, speed metrics, and Elo ratings.
-- `intelligence_index`: Artificial Analysis Intelligence Index score (e.g. `78.0`).
+- `intelligence_index`: Artificial Analysis Intelligence Index (0–100) when reported.
 - `coding_index`: Artificial Analysis Coding Index score (e.g. `76.5`).
-- `agentic_index`: Function calling & tool use performance score.
+- `agentic_index`: Artificial Analysis Agentic Index when reported; it is not inferred from tool-support flags.
 - `tokens_per_second`: Live output throughput speed (tokens/sec).
 - `time_to_first_token`: Initial latency response time (seconds).
-- `arena_elo`: Media arena Elo rating (for image/video models).
+- Missing benchmark values remain null. AA's documented Free media endpoints return route-specific ELO/confidence or task scores; they generally do not include pricing or sample counts. Those values are retained only when actually returned, alongside the source endpoint, in `AABench` and canonical `media_metrics`.
 
 ### 6. `AppRanking` & `TaskClassification`
 Analytics tracking real-world application usage:
@@ -88,37 +77,25 @@ Analytics tracking real-world application usage:
 
 ---
 
-## ⚙️ Data Pipeline Synchronization (`sync_all`)
+## ⚙️ Data Pipeline Synchronization
 
-The `run_master_sync()` pipeline executes in six fault-tolerant bulk steps:
+The sync is source-scoped and preserves the last validated source snapshot when a fetch or schema check fails:
 
-1. **Step 1: OpenRouter Sync (`openrouter_sync.py`)**
-   - Fetches 410+ models from OpenRouter catalog.
-   - Bulk inserts/updates `LLMModel`, `ModelSpecification`, `ModelPricing`, and provider relationships.
-   - Ingests top app rankings and task shares.
+1. **Fetch** — OpenRouter (`/api/v1/models`, plus key-gated Data API datasets), Artificial Analysis (`/api/v2/language/models/free` by default, plus its documented free-tier media endpoints), and models.dev (`/api.json`). Requests use HTTPS host allowlists, bounded timeouts/retries, capped `Retry-After`, and schema checks.
+2. **Source snapshots** — catalogs and benchmark records are upserted to `ormodels`, `orbench`, `aamodels`, `aabanch`, and `modelsdev`. Malformed/empty snapshots are rejected. Records missing from a validated response are marked inactive where retained, rather than silently erased.
+3. **Normalization and matching** — provider-scoped IDs and explicit `canonical_model_id` values are preferred. Model versions and variant suffixes are retained. A source record with multiple possible matches is kept separate and reported as ambiguous.
+4. **Enrichment** — fields are copied from sources only when known. Original IDs and raw JSON remain available in the canonical record. Pricing differences are recorded as merge conflicts with both source payloads retained.
+5. **Ranking** — `rankindex` is rebuilt atomically from the valid source snapshots. Unknown components are omitted and remaining RankLLMs weights are renormalized; model-name estimates and synthetic ELO/SWE scores are not used.
 
-2. **Step 2: models.dev Sync (`models_dev_sync.py`)**
-   - Fetches free public catalog from `https://models.dev/api.json` (200+ providers, 8000+ models).
-   - Bulk inserts/updates dedicated `modelsdev` table and creates missing `Provider` rows.
-   - Lightly enriches matching main-catalog models (description, open-weight flag, context, pricing, tool/JSON capabilities).
+The source tables are browsable at `/ormodels`, `/orbench`, `/aamodels`, `/aabanch`, and `/modelsdev`. The canonical snapshot is browsable at `/rankllms` and `/rankllms/models`, and exposed at `GET /api/v1/rankindex` and `GET /api/v1/leaderboard/rankindex`.
 
-3. **Step 3: Artificial Analysis Ingestion (`artificial_analysis_sync.py`)**
-   - Fetches official benchmark evaluations from Artificial Analysis Data API (`/data/llms/models`).
-   - Fetches media ratings for text-to-image, image-editing, text-to-video, and text-to-speech endpoints.
-   - Bulk enriches matched database models with exact `intelligence_index`, `coding_index`, and `tokens_per_second` metrics.
+`python manage.py fill_nulls` remains as a compatibility command, but it is a **read-only completeness report**. It does not fill values. The staff-only `/settings/data-sync/` page stores sync history, source enable/timeout/retry settings, manual run status, previews, and a compact integrity report. Dry runs execute the same services inside one outer database transaction and roll back all writes.
 
-4. **Step 4: Dedicated Raw Tables (`sync_dedicated_tables.py`)**
-   - Ingests as-is source rows into `ormodels`, `orbench`, `aamodels`, and `aabanch`.
-   - These four tables are the raw inputs for the merge and are browsable at `/ormodels`, `/orbench`, `/aamodels`, `/aabanch`.
+Render enables the in-process scheduler at six hours. It runs only while the web instance is awake; Render free instances can sleep. Multi-instance deployments should use a single Render Cron Job or another external scheduler rather than enabling one scheduler per instance.
 
-5. **Step 5: Intelligent Null Backfill (`fill_nulls.py`)**
-   - Scans all database models for any missing specifications, pricing, or benchmarks.
-   - Uses context length heuristics, modality tags, and intelligence score interpolation to ensure **100% of models are fully populated**.
+The AA Free language response includes Intelligence, Coding, Agentic, six Capability Indexes, four performance medians, and input/output/cache-hit/cache-write prices. RankLLMs stores those as nullable numeric fields and keeps the original response. Free pagination is requested with the `page` parameter; the API's response reports `pagination.has_more`/`total_pages`. Free media routes have different response metrics by task, so `media_metrics` preserves Speech-to-Text WER and Speech-to-Speech scores without treating them as ELO. See the [AA Data API docs](https://artificialanalysis.ai/data-api/docs) and [OpenAPI schema](https://artificialanalysis.ai/api/v2/openapi) for the upstream contract.
 
-6. **Step 6: Merge into `rankindex` (`merge_rankindex.py`)**
-   - Normalizes and joins the four source tables into the unified `rankindex` table.
-   - Computes the composite **RankLLMs Index** plus overall/coding/reasoning/value ranks.
-   - Serves the product-facing source-of-truth page at `/rankllms` (alias `/rankindex`) and `GET /api/v1/rankindex`.
+Artificial Analysis documents a shared Free-tier allowance of 100 requests per 24 hours. A complete sync calls eleven media routes plus each language-model page, so avoid repeated manual runs and check the captured rate-limit headers before increasing the six-hour schedule.
 
 ---
 
@@ -127,7 +104,7 @@ The `run_master_sync()` pipeline executes in six fault-tolerant bulk steps:
 | Source | Role | Link |
 | :--- | :--- | :--- |
 | OpenRouter | Model catalog, pricing, unified benchmarks | https://openrouter.ai |
-| Artificial Analysis | Intelligence / coding / agentic indices | https://artificialanalysis.ai |
+| Artificial Analysis | Independent language indices, benchmarks, media arena results, performance and pricing | https://artificialanalysis.ai |
 | models.dev | Provider & model metadata catalog | https://models.dev |
 | RankLLMs | Product & leaderboards | https://rankllms.com |
 | CodaiPro | Engineering & open-source maintenance | https://codaipro.com |
