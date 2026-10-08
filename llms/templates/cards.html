@@ -268,11 +268,12 @@
       const container = document.getElementById('cards-grid-container');
       try {
         const res = await fetch('/api/v1/models/cards');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const cards = await res.json();
         globalModelCards = cards || [];
         renderModelCards(globalModelCards);
       } catch (err) {
-        container.innerHTML = `<div class="cards-loading is-error">Error loading cards: ${err.message}</div>`;
+        container.innerHTML = `<div class="cards-loading is-error">Error loading cards: ${window.rankllmsEscapeHtml(err.message)}</div>`;
       }
     }
 
@@ -284,36 +285,36 @@
       }
 
       container.innerHTML = cards.map(c => {
-        const intel = c.rankllmsIndex || c.intelligenceIndex || 0;
-        const coding = c.codingIndex || 0;
-        const pIn = c.inputPricePerM ? parseFloat(c.inputPricePerM).toFixed(2) : '0.00';
-        const pOut = c.outputPricePerM ? parseFloat(c.outputPricePerM).toFixed(2) : '0.00';
+        const intel = c.rankllmsIndex ?? c.intelligenceIndex;
+        const coding = c.codingIndex;
+        const pIn = c.inputPricePerM == null ? '—' : parseFloat(c.inputPricePerM).toFixed(2);
+        const pOut = c.outputPricePerM == null ? '—' : parseFloat(c.outputPricePerM).toFixed(2);
         const ctx = c.contextWindow ? (c.contextWindow >= 1000000 ? (c.contextWindow / 1000000).toFixed(1) + 'M' : Math.round(c.contextWindow / 1000) + 'k') : 'N/A';
         const tags = c.strengths || c.tags || [];
 
         return `
           <div class="model-card">
             <div class="model-card-top">
-              <span class="model-card-provider">${c.provider}</span>
+              <span class="model-card-provider">${window.rankllmsEscapeHtml(c.provider)}</span>
               <span class="model-card-ctx">${ctx} context</span>
             </div>
-            <h3>${c.name}</h3>
-            <p>${c.description || 'Frontier intelligence model.'}</p>
+            <h3>${window.rankllmsEscapeHtml(c.name)}</h3>
+            <p>${window.rankllmsEscapeHtml(c.description || 'Description not available from sources.')}</p>
             <div class="strength-tags">
-              ${tags.map(t => `<span>${t}</span>`).join('')}
+              ${tags.map(t => `<span>${window.rankllmsEscapeHtml(t)}</span>`).join('')}
             </div>
             <div class="model-card-metrics">
               <div>
                 <span class="metric-label">RankLLMs</span>
-                <span class="metric-value">${parseFloat(intel).toFixed(1)}</span>
+                <span class="metric-value">${intel == null ? '—' : parseFloat(intel).toFixed(1)}</span>
               </div>
               <div>
                 <span class="metric-label">Coding</span>
-                <span class="metric-value metric-code">${parseFloat(coding).toFixed(1)}</span>
+                <span class="metric-value metric-code">${coding == null ? '—' : parseFloat(coding).toFixed(1)}</span>
               </div>
               <div class="metric-price">
                 <span class="metric-label">$/1M In/Out</span>
-                <span>$${pIn} / $${pOut}</span>
+                <span>${c.isFree === true ? 'Free' : (pIn === '—' && pOut === '—' ? '—' : '$' + pIn + ' / $' + pOut)}</span>
               </div>
             </div>
           </div>

@@ -166,12 +166,13 @@
       tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Loading benchmark runs from table 'orbench'…</td></tr>`;
 
       try {
-        const res = await fetch(`/api/v1/orbench?limit=1500`);
+        const res = await fetch(`/api/v1/orbench?limit=1000`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         rawORBench = data.items || [];
         applySorting();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="loading-row is-error">Error loading orbench: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="loading-row is-error">Error loading orbench: ${window.rankllmsEscapeHtml(err.message)}</td></tr>`;
       }
     }
 
@@ -245,25 +246,27 @@
           valB = (b.display_name || '').toLowerCase();
           return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else if (currentSortField === 'accuracy') {
-          valA = parseFloat(a.accuracy || 0);
-          valB = parseFloat(b.accuracy || 0);
+          valA = a.accuracy == null ? null : parseFloat(a.accuracy);
+          valB = b.accuracy == null ? null : parseFloat(b.accuracy);
         } else if (currentSortField === 'elo') {
-          valA = parseFloat(a.elo || 0);
-          valB = parseFloat(b.elo || 0);
+          valA = a.elo == null ? null : parseFloat(a.elo);
+          valB = b.elo == null ? null : parseFloat(b.elo);
         } else if (currentSortField === 'win_rate') {
-          valA = parseFloat(a.win_rate || 0);
-          valB = parseFloat(b.win_rate || 0);
+          valA = a.win_rate == null ? null : parseFloat(a.win_rate);
+          valB = b.win_rate == null ? null : parseFloat(b.win_rate);
         } else if (currentSortField === 'intelligence') {
-          valA = parseFloat(a.intelligence_index || 0);
-          valB = parseFloat(b.intelligence_index || 0);
+          valA = a.intelligence_index == null ? null : parseFloat(a.intelligence_index);
+          valB = b.intelligence_index == null ? null : parseFloat(b.intelligence_index);
         } else if (currentSortField === 'coding') {
-          valA = parseFloat(a.coding_index || 0);
-          valB = parseFloat(b.coding_index || 0);
+          valA = a.coding_index == null ? null : parseFloat(a.coding_index);
+          valB = b.coding_index == null ? null : parseFloat(b.coding_index);
         } else { // score
           valA = a.accuracy ? parseFloat(a.accuracy) * 100 : (a.elo ? parseFloat(a.elo) : parseFloat(a.intelligence_index || 0));
           valB = b.accuracy ? parseFloat(b.accuracy) * 100 : (b.elo ? parseFloat(b.elo) : parseFloat(b.intelligence_index || 0));
         }
 
+        if (valA == null) return valB == null ? 0 : 1;
+        if (valB == null) return -1;
         return currentSortDir === 'desc' ? (valB - valA) : (valA - valB);
       });
 
@@ -309,33 +312,38 @@
 
         if (src === 'openrouter') {
           srcBadge = '<wa-badge appearance="outlined" pill>OpenRouter</wa-badge>';
-          const accPct = item.accuracy ? (parseFloat(item.accuracy) * 100).toFixed(1) + '%' : '-';
-          scorePill = `<span class="score score-code">${accPct}</span>`;
-          detail1 = `<span class="provider">${item.benchmark_type || 'gpqa_diamond'}</span>`;
+          const score = item.primary_score != null ? Number(item.primary_score) : (item.accuracy == null ? null : Number(item.accuracy));
+          const metric = item.primary_metric || (item.accuracy != null ? 'accuracy' : 'score');
+          const percentMetric = /accuracy|f1|win_rate|rate/i.test(metric);
+          const scoreText = score == null || !Number.isFinite(score)
+            ? '-'
+            : (percentMetric && score <= 1 ? score * 100 : score).toFixed(1) + (percentMetric ? '%' : '');
+          scorePill = `<span class="score score-code">${scoreText}${scoreText !== '-' ? ' ' + window.rankllmsEscapeHtml(metric) : ''}</span>`;
+          detail1 = `<span class="provider">${window.rankllmsEscapeHtml(item.benchmark_type || 'gpqa_diamond')}</span>`;
           detail2 = item.total_tasks ? `<span class="provider">${item.total_tasks} tasks</span>` : '-';
           costCol = item.avg_cost_per_task ? `<span class="num">$${parseFloat(item.avg_cost_per_task).toFixed(4)}/task</span>` : '-';
         } else if (src === 'design-arena') {
           srcBadge = '<wa-badge variant="neutral" appearance="outlined" pill>Design Arena</wa-badge>';
-          const elo = item.elo ? Math.round(item.elo) : '-';
+          const elo = item.elo != null ? Math.round(item.elo) : '-';
           scorePill = `<span class="score score-index">${elo} ELO</span>`;
-          detail1 = `<wa-badge appearance="outlined" pill>${item.category || item.arena || 'arena'}</wa-badge>`;
-          detail2 = item.win_rate ? `<span class="score score-code">${parseFloat(item.win_rate).toFixed(1)}% win</span>` : '-';
+          detail1 = `<wa-badge appearance="outlined" pill>${window.rankllmsEscapeHtml(item.category || item.arena || 'arena')}</wa-badge>`;
+          detail2 = item.win_rate != null ? `<span class="score score-code">${parseFloat(item.win_rate).toFixed(1)}% win</span>` : '-';
           costCol = item.tournament_stats ? `<span class="provider">${item.tournament_stats.total || 0} matches</span>` : '-';
         } else { // artificial-analysis
           srcBadge = '<wa-badge variant="success" appearance="outlined" pill>Artificial Analysis</wa-badge>';
-          const intel = item.intelligence_index ? parseFloat(item.intelligence_index).toFixed(1) : '-';
+          const intel = item.intelligence_index != null ? parseFloat(item.intelligence_index).toFixed(1) : '-';
           scorePill = `<span class="score score-code">${intel} Intel</span>`;
-          detail1 = item.agentic_index ? `<span class="provider">${parseFloat(item.agentic_index).toFixed(1)} Agentic</span>` : '-';
-          detail2 = item.coding_index ? `<span class="score score-code">${parseFloat(item.coding_index).toFixed(1)} Code</span>` : '-';
-          const pPrompt = item.pricing?.prompt ? (parseFloat(item.pricing.prompt) * 1000000).toFixed(2) : '0.00';
-          const pComp = item.pricing?.completion ? (parseFloat(item.pricing.completion) * 1000000).toFixed(2) : '0.00';
-          costCol = `<span class="num">$${pPrompt} / $${pComp}</span>`;
+          detail1 = item.agentic_index != null ? `<span class="provider">${parseFloat(item.agentic_index).toFixed(1)} Agentic</span>` : '-';
+          detail2 = item.coding_index != null ? `<span class="score score-code">${parseFloat(item.coding_index).toFixed(1)} Code</span>` : '-';
+          const pPrompt = item.pricing?.prompt != null ? '$' + (parseFloat(item.pricing.prompt) * 1000000).toFixed(2) : '—';
+          const pComp = item.pricing?.completion != null ? '$' + (parseFloat(item.pricing.completion) * 1000000).toFixed(2) : '—';
+          costCol = `<span class="num">${pPrompt} / ${pComp}</span>`;
         }
 
         return `
           <tr>
             <td class="num">#${idx + 1}</td>
-            <td class="model-cell">${name}<span class="slug">${slug}</span></td>
+            <td class="model-cell">${window.rankllmsEscapeHtml(name)}<span class="slug">${window.rankllmsEscapeHtml(slug)}</span></td>
             <td class="num">${srcBadge}</td>
             <td class="num">${scorePill}</td>
             <td class="num">${detail1}</td>

@@ -23,6 +23,7 @@ for flat nav links, or plain <a> for real links. See _wa_head.html ::part(button
     <wa-dropdown-item href="/aabanch">AA Benchmarks</wa-dropdown-item>
     <wa-dropdown-item href="/modelsdev">models.dev</wa-dropdown-item>
   </wa-dropdown>
+  {% if request.user.is_staff %}<wa-button href="/settings/data-sync/" appearance="plain" size="s" data-drawer="close"{% if active_path == "/settings/data-sync/" %} class="is-active"{% endif %}>Data sync</wa-button>{% endif %}
 </nav>
 {% else %}
 <nav class="drawer-nav wa-stack wa-gap-2xs" slot="navigation" aria-label="Primary">
@@ -39,5 +40,6 @@ for flat nav links, or plain <a> for real links. See _wa_head.html ::part(button
     <wa-button href="/aabanch" appearance="plain" size="s" data-drawer="close"{% if active_path == "/aabanch" %} class="is-active"{% endif %}>AA Benchmarks</wa-button>
     <wa-button href="/modelsdev" appearance="plain" size="s" data-drawer="close"{% if active_path == "/modelsdev" %} class="is-active"{% endif %}>models.dev</wa-button>
   </div>
+  {% if request.user.is_staff %}<wa-button href="/settings/data-sync/" appearance="plain" size="s" data-drawer="close"{% if active_path == "/settings/data-sync/" %} class="is-active"{% endif %}>Data sync</wa-button>{% endif %}
 </nav>
 {% endif %}

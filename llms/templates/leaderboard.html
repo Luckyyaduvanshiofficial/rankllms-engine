@@ -4,16 +4,16 @@
   <meta charset="UTF-8">
   {% include "_wa_head.html" %}
   <title>AI Model Leaderboard — Free LLM Rankings | RankLLMs</title>
-  <meta name="description" content="Free AI model leaderboard ranked by intelligence, coding, and agentic indices. Compare thousands of LLMs by price, context, and open-weight status.">
+  <meta name="description" content="Browse source-backed AI model rankings by intelligence, coding, and agentic indices. Compare published price, context, and open-weight metadata where available.">
   <meta name="keywords" content="AI leaderboard, LLM rankings, best AI models, open-weight models, free benchmark API, rankllms, ai models ranking, llms leaderboard">
   <link rel="canonical" href="https://api.rankllms.com/leaderboard">
   <meta property="og:type" content="website">
   <meta property="og:title" content="AI Model Leaderboard | RankLLMs">
-  <meta property="og:description" content="Free rankings of 8000+ AI models by intelligence, coding, and agentic performance.">
+  <meta property="og:description" content="Free rankings of AI models using source-backed intelligence, coding, and agentic performance data.">
   <meta property="og:url" content="https://api.rankllms.com/leaderboard">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="AI Model Leaderboard | RankLLMs">
-  <meta name="twitter:description" content="Free rankings of 8000+ AI models by intelligence, coding, and agentic performance.">
+  <meta name="twitter:description" content="Free rankings of AI models using source-backed intelligence, coding, and agentic performance data.">
 </head>
 <body>
   <wa-page>
@@ -32,16 +32,15 @@
         <div>
           <div class="page-meta">
             <wa-badge variant="neutral" appearance="outlined" pill>Legacy</wa-badge>
-            <span>&bull; ranked by Intelligence, Coding, Agentic, SWE-Bench &amp; Context</span>
+            <span>&bull; legacy leaderboard sorted by published model metrics</span>
           </div>
           <h1>AI Models Leaderboard</h1>
-          <p class="page-lede">Free rankings of 8000+ models. Prefer the merged composite index? Use the <a href="/llm-leaderboard">main LLM Leaderboard</a>.</p>
+          <p class="page-lede">Browse models with source-published scores. Missing benchmark data stays blank. For the merged RankLLMs composite, use the <a href="/llm-leaderboard">canonical leaderboard</a>.</p>
         </div>
         <div class="page-controls">
           <wa-select label="Sort by" size="s" id="sortBy" onchange="loadLeaderboard()">
             <wa-option value="intelligence" selected>Intelligence</wa-option>
             <wa-option value="coding">Coding</wa-option>
-            <wa-option value="swe_bench">SWE-Bench</wa-option>
             <wa-option value="agentic">Agentic</wa-option>
             <wa-option value="context">Context Length</wa-option>
           </wa-select>
@@ -94,7 +93,9 @@
       table.style.display = 'none';
 
       try {
-        const res = await fetch(`/api/v1/leaderboard?sort_by=${sortBy}&limit=${limit}`);
+        const params = new URLSearchParams({ sort_by: sortBy, limit: limit });
+        const res = await fetch(`/api/v1/leaderboard?${params.toString()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
         tbody.innerHTML = '';
@@ -108,19 +109,19 @@
           else if (model.rank === 3) rankClass = 'rank-3';
 
           const badges = [];
-          if (model.is_free) badges.push('<wa-badge variant="success" appearance="outlined" pill>FREE</wa-badge>');
-          if (model.is_open_weight) badges.push('<wa-badge variant="info" appearance="outlined" pill>OPEN</wa-badge>');
+          if (model.is_free === true) badges.push('<wa-badge variant="success" appearance="outlined" pill>FREE</wa-badge>');
+          if (model.is_open_weight === true) badges.push('<wa-badge variant="info" appearance="outlined" pill>OPEN</wa-badge>');
 
-          const price = model.prompt_price_per_1m === '0' ? '<span class="price-free">Free</span>' : `$${model.prompt_price_per_1m}/M`;
+          const price = model.is_free === true ? '<span class="price-free">Free</span>' : (model.prompt_price_per_1m == null ? '—' : `$${model.prompt_price_per_1m}/M`);
 
           row.innerHTML = `
             <td class="num"><span class="lb-rank ${rankClass}">#${model.rank}</span></td>
-            <td class="model-cell">${badges.join(' ')} ${model.name}</td>
-            <td class="provider">${model.provider}</td>
+            <td class="model-cell">${badges.join(' ')} ${window.rankllmsEscapeHtml(model.name)}</td>
+            <td class="provider">${window.rankllmsEscapeHtml(model.provider)}</td>
             <td class="num">${model.context_length ? model.context_length.toLocaleString() : '—'}</td>
-            <td class="score">${model.intelligence_index.toFixed(1)}</td>
-            <td class="score score-code">${model.coding_index.toFixed(1)}</td>
-            <td class="score">${model.agentic_index.toFixed(1)}</td>
+            <td class="score">${model.intelligence_index == null ? '—' : Number(model.intelligence_index).toFixed(1)}</td>
+            <td class="score score-code">${model.coding_index == null ? '—' : Number(model.coding_index).toFixed(1)}</td>
+            <td class="score">${model.agentic_index == null ? '—' : Number(model.agentic_index).toFixed(1)}</td>
             <td class="num">${price}</td>
           `;
           tbody.appendChild(row);

@@ -1,3 +1,4 @@
+/** @deprecated Historical static snapshot. Use the live /api/v1/models/cards or /api/v1/rankindex API. See data/README.md. */
 export interface LLMModel {
   id: string;
   openrouter_id: string;

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   {% include "_wa_head.html" %}
   <title>{{ title|default:"All AI Models — Full Catalog with Rankings, Pricing & Specs | RankLLMs" }}</title>
-  <meta name="description" content="{{ description|default:"Browse every AI model in the RankLLMs source of truth: ranks, intelligence/coding scores, context, pricing, speed, and open-weight flags — all in one sortable catalog." }}">
+  <meta name="description" content="{{ description|default:"Browse the RankLLMs catalog: composite ranks, source-published intelligence/coding/agentic scores, context, pricing, speed, and open-weight flags." }}">
   <meta name="keywords" content="rankllms, rankllm, ai models ranking, llms leaderboard, all AI models, AI model catalog, LLM rankings">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://api.rankllms.com/rankllms/models">
@@ -72,6 +72,7 @@
               <wa-option value="rankllms_index">Sort: RankLLMs Index</wa-option>
               <wa-option value="intelligence">Sort: Intelligence</wa-option>
               <wa-option value="coding">Sort: Coding</wa-option>
+              <wa-option value="agentic">Sort: Agentic</wa-option>
               <wa-option value="name">Sort: Name A–Z</wa-option>
               <wa-option value="provider">Sort: Provider</wa-option>
               <wa-option value="context_length">Sort: Context Length</wa-option>
@@ -103,6 +104,7 @@
               <th scope="col" style="text-align: center;">Index</th>
               <th scope="col" style="text-align: center;">Intel</th>
               <th scope="col" style="text-align: center;">Code</th>
+              <th scope="col" style="text-align: center;" title="Artificial Analysis Agentic Index, when reported">Agentic</th>
               <th scope="col" style="text-align: center;">GPQA</th>
               <th scope="col" style="text-align: center;">Context</th>
               <th scope="col" style="text-align: center;">Max out</th>
@@ -117,15 +119,21 @@
             {% if seed_rows_html %}
             {{ seed_rows_html|safe }}
             {% else %}
-            <tr><td colspan="14" class="loading-row">Loading full model catalog…</td></tr>
+            <tr><td colspan="15" class="loading-row">Loading full model catalog…</td></tr>
             {% endif %}
           </tbody>
         </table>
       </div>
 
+      <nav class="catalog-pagination" aria-label="Model catalog pages">
+        <button type="button" id="models-prev" disabled>Previous</button>
+        <span id="models-page-status" aria-live="polite">Loading page…</span>
+        <button type="button" id="models-next" disabled>Next</button>
+      </nav>
+
       <wa-card class="controls-card">
         <p class="api-note">
-          Want this data? <code>GET /api/v1/rankindex?limit=1000&amp;sort_by=release_date</code> —
+          Want this data? <code>GET /api/v1/rankindex?limit=100&amp;offset=0&amp;sort_by=release_date</code> —
           <a href="/api/v1/rankindex" target="_blank" rel="noopener">try it</a>
           · Source of truth: <a href="/rankllms">/rankllms</a>
         </p>
@@ -175,182 +183,199 @@
     </footer>
   </wa-page>
 
+  <style>
+    .catalog-pagination { display:flex; align-items:center; justify-content:center; gap:var(--wa-space-m); color:var(--wa-color-text-quiet); font:var(--wa-font-size-2xs) var(--wa-font-family-mono); }
+    .catalog-pagination button { min-height:2.4rem; padding:0 var(--wa-space-m); border:1px solid var(--wa-color-surface-border); border-radius:var(--wa-border-radius-s); background:var(--wa-color-surface-raised); color:var(--wa-color-text-normal); cursor:pointer; }
+    .catalog-pagination button:disabled { opacity:.5; cursor:not-allowed; }
+  </style>
   <script>
-    let rawModels = [];
     let sortField = 'release_date';
     let sortDir = 'desc';
     let flagFilter = 'all';
-
+    let currentOffset = 0;
+    let currentTotal = 0;
+    let pendingSearch;
+    const pageSize = 100;
     const orderFields = {
-      rank: 'rank',
-      rankllms_index: 'rankllms_index',
-      intelligence: 'intelligence',
-      coding: 'coding',
-      name: 'name',
-      provider: 'name',
-      context_length: 'context_length',
-      prompt_price: 'prompt_price',
-      completion_price: 'completion_price',
-      speed: 'speed',
+      rank: 'rank', rankllms_index: 'rankllms_index', intelligence: 'intelligence',
+      coding: 'coding', agentic: 'agentic', name: 'name', provider: 'provider', context_length: 'context_length',
+      prompt_price: 'prompt_price', completion_price: 'completion_price', speed: 'speed',
       release_date: 'release_date'
     };
 
-    const numericSort = {
-      rank: m => parseInt(m.rank_overall || 9999),
-      rankllms_index: m => parseFloat(m.rankllms_index || 0),
-      intelligence: m => parseFloat(m.intelligence_index || 0),
-      coding: m => parseFloat(m.coding_index || 0),
-      context_length: m => parseInt(m.context_length || 0),
-      prompt_price: m => parseFloat(m.prompt_price_per_1m || 0),
-      completion_price: m => parseFloat(m.completion_price_per_1m || 0),
-      speed: m => parseFloat(m.tokens_per_second || 0),
-    };
+    function setLoading(text, isError) {
+      const cell = document.createElement('td');
+      cell.colSpan = 15;
+      cell.className = isError ? 'loading-row is-error' : 'loading-row';
+      cell.textContent = text;
+      const row = document.createElement('tr');
+      row.appendChild(cell);
+      const body = document.getElementById('models-table-body');
+      body.replaceChildren(row);
+    }
 
     async function loadModels() {
-      const tbody = document.getElementById('models-table-body');
-      tbody.innerHTML = `<tr><td colspan="14" class="loading-row">Loading full model catalog…</td></tr>`;
+      const params = new URLSearchParams({
+        limit: String(pageSize),
+        offset: String(currentOffset),
+        sort_by: orderFields[sortField] || 'release_date',
+        sort_dir: sortDir
+      });
+      const search = document.getElementById('models-search')?.value.trim();
+      if (search) params.set('search', search);
+      if (flagFilter === 'open') params.set('is_open_weight', 'true');
+      if (flagFilter === 'closed') params.set('is_open_weight', 'false');
+      if (flagFilter === 'free') params.set('is_free', 'true');
+      if (flagFilter === 'paid') params.set('is_free', 'false');
+
+      setLoading('Loading model snapshot…', false);
       try {
-        const res = await fetch('/api/v1/rankindex?limit=1000&sort_by=release_date&sort_dir=desc');
-        const data = await res.json();
-        rawModels = data.items || [];
-        document.getElementById('models-total').textContent = (data.total ?? rawModels.length).toLocaleString();
-        applyFilters();
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="14" class="loading-row is-error">Error loading models: ${err.message}</td></tr>`;
+        const response = await fetch(`/api/v1/rankindex?${params.toString()}`, { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error(`API returned ${response.status}`);
+        const data = await response.json();
+        const items = data.items || [];
+        currentTotal = Number(data.total || 0);
+        document.getElementById('models-total').textContent = currentTotal.toLocaleString();
+        document.getElementById('models-showing').textContent = items.length.toLocaleString();
+        document.getElementById('models-page-status').textContent = currentTotal
+          ? `${(currentOffset + 1).toLocaleString()}–${(currentOffset + items.length).toLocaleString()} of ${currentTotal.toLocaleString()}`
+          : 'No matching models';
+        document.getElementById('models-prev').disabled = currentOffset <= 0;
+        document.getElementById('models-next').disabled = currentOffset + pageSize >= currentTotal;
+        renderTable(items);
+      } catch (error) {
+        document.getElementById('models-page-status').textContent = 'Catalog request failed';
+        setLoading(`Could not load model data (${error.message}).`, true);
       }
     }
 
     function setFlag(flag) {
       flagFilter = flag;
-      ['all','open','closed','free','paid'].forEach(f => {
-        const btn = document.getElementById('flag-' + f);
-        if (!btn) return;
-        if (f === flagFilter) {
-          btn.setAttribute('appearance', 'filled');
-          btn.setAttribute('variant', 'brand');
+      currentOffset = 0;
+      ['all','open','closed','free','paid'].forEach(key => {
+        const button = document.getElementById('flag-' + key);
+        if (!button) return;
+        if (key === flagFilter) {
+          button.setAttribute('appearance', 'filled');
+          button.setAttribute('variant', 'brand');
         } else {
-          btn.removeAttribute('variant');
-          btn.setAttribute('appearance', 'outlined');
+          button.removeAttribute('variant');
+          button.setAttribute('appearance', 'outlined');
         }
       });
-      applyFilters();
+      loadModels();
     }
 
     function onSortChange() {
       sortField = document.getElementById('models-sort').value;
       sortDir = (sortField === 'name' || sortField === 'rank' || sortField === 'provider') ? 'asc' : 'desc';
+      currentOffset = 0;
       updateSortUI();
-      applyFilters();
+      loadModels();
     }
 
     function toggleSortDir() {
       sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+      currentOffset = 0;
       updateSortUI();
-      applyFilters();
+      loadModels();
     }
 
     function updateSortUI() {
       const icon = document.getElementById('sort-dir-icon');
       const label = document.getElementById('sort-dir-label');
       if (icon && label) {
-        icon.innerText = sortDir === 'desc' ? '↓' : '↑';
-        label.innerText = sortDir === 'desc' ? 'High to Low' : 'Low to High';
+        icon.textContent = sortDir === 'desc' ? '↓' : '↑';
+        label.textContent = sortDir === 'desc' ? 'High to Low' : 'Low to High';
       }
     }
 
     function applyFilters() {
-      const query = (document.getElementById('models-search')?.value || '').toLowerCase();
-      let items = rawModels.filter(m => {
-        if (flagFilter === 'open' && !m.is_open_weight) return false;
-        if (flagFilter === 'closed' && m.is_open_weight) return false;
-        if (flagFilter === 'free' && !m.is_free) return false;
-        if (flagFilter === 'paid' && m.is_free) return false;
-        if (query) {
-          const hay = [m.name, m.provider, m.canonical_slug, m.openrouter_id, m.aa_slug]
-            .map(x => (x || '').toLowerCase()).join(' ');
-          if (!hay.includes(query)) return false;
-        }
-        return true;
-      });
-
-      items.sort((a, b) => {
-        if (sortField === 'name' || sortField === 'provider') {
-          const key = sortField === 'provider' ? 'provider' : 'name';
-          const va = (a[key] || '').toLowerCase();
-          const vb = (b[key] || '').toLowerCase();
-          return sortDir === 'desc' ? vb.localeCompare(va) : va.localeCompare(vb);
-        }
-        if (sortField === 'release_date') {
-          const va = a.release_date || '';
-          const vb = b.release_date || '';
-          if (!va && !vb) return 0;
-          if (!va) return 1;
-          if (!vb) return -1;
-          return sortDir === 'desc' ? vb.localeCompare(va) : va.localeCompare(vb);
-        }
-        const fn = numericSort[sortField];
-        if (!fn) return 0;
-        const va = fn(a);
-        const vb = fn(b);
-        return sortDir === 'desc' ? (vb - va) : (va - vb);
-      });
-
-      document.getElementById('models-showing').textContent = items.length.toLocaleString();
-      renderTable(items);
+      currentOffset = 0;
+      window.clearTimeout(pendingSearch);
+      pendingSearch = window.setTimeout(loadModels, 250);
     }
 
-    function formatCtx(n) {
-      if (!n) return '—';
+    function formatCtx(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n) || n <= 0) return '—';
       return n >= 1000000 ? (n / 1000000).toFixed(1) + 'M' : Math.round(n / 1000) + 'k';
     }
 
-    function formatPct(v) {
-      if (v === null || v === undefined || isNaN(v) || parseFloat(v) === 0) return '—';
-      const num = parseFloat(v);
-      return (num <= 1.0 ? (num * 100).toFixed(1) : num.toFixed(1)) + '%';
+    function formatScore(value) {
+      if (value === null || value === undefined || value === '') return '—';
+      const n = Number(value);
+      return Number.isFinite(n) ? n.toFixed(1) : '—';
+    }
+
+    function formatPct(value) {
+      if (value === null || value === undefined || value === '') return '—';
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      return (n <= 1 ? (n * 100).toFixed(1) : n.toFixed(1)) + '%';
+    }
+
+    function formatPrice(value, isFree) {
+      if (isFree === true) return '<span class="price-free">Free</span>';
+      if (value === null || value === undefined || value === '') return '—';
+      const n = Number(value);
+      return Number.isFinite(n) ? '$' + n.toFixed(2) : '—';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[char]);
     }
 
     function renderTable(items) {
       const tbody = document.getElementById('models-table-body');
       if (!items.length) {
-        tbody.innerHTML = `<tr><td colspan="14" class="table-empty">No models match your filters.</td></tr>`;
+        setLoading('No models match these filters.', false);
         return;
       }
-      tbody.innerHTML = items.map((m, idx) => {
-        const pIn = m.is_free ? '0.00' : parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
-        const pOut = m.is_free ? '0.00' : parseFloat(m.completion_price_per_1m || 0).toFixed(2);
-        const speed = m.tokens_per_second ? parseFloat(m.tokens_per_second).toFixed(0) : '—';
-        const released = m.release_date ? String(m.release_date).slice(0, 10) : '—';
+      tbody.innerHTML = items.map(m => {
+        const speed = m.tokens_per_second != null ? formatScore(m.tokens_per_second) : '—';
+        const released = m.release_date ? escapeHtml(String(m.release_date).slice(0, 10)) : '—';
         const flags = [
-          m.is_open_weight ? '<wa-badge variant="success" appearance="outlined" pill>Open</wa-badge>' : '',
-          m.is_free ? '<wa-badge variant="neutral" appearance="outlined" pill>Free</wa-badge>' : '',
+          m.is_open_weight === true ? '<wa-badge variant="success" appearance="outlined" pill>Open</wa-badge>' : '',
+          m.is_free === true ? '<wa-badge variant="neutral" appearance="outlined" pill>Free</wa-badge>' : '',
           m.has_openrouter ? '<wa-badge appearance="outlined" pill>OR</wa-badge>' : '',
           m.has_artificial_analysis ? '<wa-badge appearance="outlined" pill>AA</wa-badge>' : '',
           m.has_design_arena ? '<wa-badge appearance="outlined" pill>Arena</wa-badge>' : '',
         ].filter(Boolean).join(' ');
-
-        return `
-          <tr>
-            <td class="num lb-rank">#${m.rank_overall || idx + 1}</td>
-            <td class="model-cell">${m.name || '—'}<span class="slug">${m.canonical_slug || m.openrouter_id || m.aa_slug || ''}</span></td>
-            <td class="provider">${m.provider || '—'}</td>
-            <td class="score score-index">${m.rankllms_index ? parseFloat(m.rankllms_index).toFixed(1) : '0.0'}</td>
-            <td class="score">${m.intelligence_index ? parseFloat(m.intelligence_index).toFixed(1) : '—'}</td>
-            <td class="score score-code">${m.coding_index ? parseFloat(m.coding_index).toFixed(1) : '—'}</td>
-            <td class="score">${formatPct(m.gpqa_diamond)}</td>
-            <td class="num">${formatCtx(m.context_length)}</td>
-            <td class="num">${m.max_output_tokens ? Math.round(m.max_output_tokens / 1000) + 'k' : '—'}</td>
-            <td class="num" style="text-align: right;">${m.is_free ? '<span class="price-free">Free</span>' : '$' + pIn}</td>
-            <td class="num" style="text-align: right;">${m.is_free ? '<span class="price-free">Free</span>' : '$' + pOut}</td>
-            <td class="score">${speed}</td>
-            <td class="num">${released}</td>
-            <td class="num">${flags || '<span class="provider">—</span>'}</td>
-          </tr>
-        `;
+        const rank = m.rank_overall == null ? '—' : `#${m.rank_overall}`;
+        return `<tr>
+          <td class="num lb-rank">${rank}</td>
+          <td class="model-cell">${escapeHtml(m.name || '—')}<span class="slug">${escapeHtml(m.canonical_slug || m.openrouter_id || m.aa_slug || '')}</span></td>
+          <td class="provider">${escapeHtml(m.provider || '—')}</td>
+          <td class="score score-index">${formatScore(m.rankllms_index)}</td>
+          <td class="score">${formatScore(m.intelligence_index)}</td>
+          <td class="score score-code">${formatScore(m.coding_index)}</td>
+          <td class="score">${formatScore(m.agentic_index)}</td>
+          <td class="score">${formatPct(m.gpqa_diamond)}</td>
+          <td class="num">${formatCtx(m.context_length)}</td>
+          <td class="num">${m.max_output_tokens ? Math.round(m.max_output_tokens / 1000) + 'k' : '—'}</td>
+          <td class="num" style="text-align:right">${formatPrice(m.prompt_price_per_1m, m.is_free)}</td>
+          <td class="num" style="text-align:right">${formatPrice(m.completion_price_per_1m, m.is_free)}</td>
+          <td class="score">${speed}</td>
+          <td class="num">${released}</td>
+          <td class="num">${flags || '<span class="provider">—</span>'}</td>
+        </tr>`;
       }).join('');
     }
 
-    document.addEventListener('DOMContentLoaded', loadModels);
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('models-prev').addEventListener('click', () => {
+        currentOffset = Math.max(0, currentOffset - pageSize);
+        loadModels();
+      });
+      document.getElementById('models-next').addEventListener('click', () => {
+        if (currentOffset + pageSize < currentTotal) currentOffset += pageSize;
+        loadModels();
+      });
+      loadModels();
+    });
   </script>
 </body>
 </html>

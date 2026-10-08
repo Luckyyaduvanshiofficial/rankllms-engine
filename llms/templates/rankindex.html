@@ -197,7 +197,7 @@
         rawRankIndex = data.items || [];
         applySorting();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="9" class="loading-row is-error">Error loading rankindex: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="loading-row is-error">Error loading rankindex: ${window.rankllmsEscapeHtml(err.message)}</td></tr>`;
       }
     }
 
@@ -321,9 +321,9 @@
     function filterRankIndex() {
       const query = (document.getElementById('rank-search-input')?.value || '').toLowerCase();
       const filtered = rawRankIndex.filter(m => {
-        if (currentCategoryFilter === 'open_weight' && !m.is_open_weight) return false;
-        if (currentCategoryFilter === 'frontier' && m.is_open_weight) return false;
-        if (currentCategoryFilter === 'free' && !m.is_free) return false;
+        if (currentCategoryFilter === 'open_weight' && m.is_open_weight !== true) return false;
+        if (currentCategoryFilter === 'frontier' && m.is_open_weight !== false) return false;
+        if (currentCategoryFilter === 'free' && m.is_free !== true) return false;
 
         if (query) {
           const name = (m.name || '').toLowerCase();
@@ -356,11 +356,11 @@
       }
 
       tbody.innerHTML = items.map((m, idx) => {
-        const rankIdx = m.rankllms_index ? parseFloat(m.rankllms_index).toFixed(1) : '0.0';
-        const intel = m.intelligence_index ? parseFloat(m.intelligence_index).toFixed(1) : '-';
+        const rankIdx = m.rankllms_index != null ? parseFloat(m.rankllms_index).toFixed(1) : '—';
+        const intel = m.intelligence_index != null ? parseFloat(m.intelligence_index).toFixed(1) : '-';
 
         const tbHard = formatPct(m.terminalbench_hard);
-        const codeIdx = m.coding_index ? parseFloat(m.coding_index).toFixed(1) : '-';
+        const codeIdx = m.coding_index != null ? parseFloat(m.coding_index).toFixed(1) : '-';
         let codeStr = '-';
         if (tbHard !== '-') {
           codeStr = `<strong>${tbHard} TB</strong>`;
@@ -372,9 +372,9 @@
 
         const ctx = m.context_length ? (m.context_length >= 1000000 ? (m.context_length / 1000000).toFixed(1) + 'M' : Math.round(m.context_length / 1000) + 'k') : '-';
 
-        const pIn = parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
-        const pOut = parseFloat(m.completion_price_per_1m || 0).toFixed(2);
-        const priceStr = m.is_free ? '<span class="price-free">Free</span>' : `$${pIn} / $${pOut}`;
+        const pIn = m.prompt_price_per_1m != null ? '$' + parseFloat(m.prompt_price_per_1m).toFixed(2) : '—';
+        const pOut = m.completion_price_per_1m != null ? '$' + parseFloat(m.completion_price_per_1m).toFixed(2) : '—';
+        const priceStr = m.is_free === true ? '<span class="price-free">Free</span>' : `${pIn} / ${pOut}`;
 
         const srcBadges = (m.sources || []).map(s => {
           if (s === 'openrouter') return '<wa-badge appearance="outlined" pill>OR</wa-badge>';
@@ -385,8 +385,8 @@
 
         return `
           <tr>
-            <td class="num lb-rank">#${m.rank_overall || idx + 1}</td>
-            <td class="model-cell">${m.name}${m.is_open_weight ? ' <wa-badge appearance="outlined" pill>Open-Weight</wa-badge>' : ''}<span class="slug">${m.provider} &bull; ${m.canonical_slug}</span></td>
+            <td class="num lb-rank">${m.rank_overall == null ? '—' : '#' + m.rank_overall}</td>
+            <td class="model-cell">${window.rankllmsEscapeHtml(m.name)}${m.is_open_weight === true ? ' <wa-badge appearance="outlined" pill>Open-Weight</wa-badge>' : ''}<span class="slug">${window.rankllmsEscapeHtml(m.provider)} &bull; ${window.rankllmsEscapeHtml(m.canonical_slug)}</span></td>
             <td class="score score-index">${rankIdx}</td>
             <td class="score">${intel}</td>
             <td class="score">${codeStr}</td>

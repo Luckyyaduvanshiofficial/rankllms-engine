@@ -40,7 +40,7 @@
         <div>
           <div class="page-meta">
             <wa-badge variant="success" appearance="outlined" pill>PostgreSQL Table: aabanch</wa-badge>
-            <span>&bull; 17 Ingested Empirical Benchmarks</span>
+            <span>&bull; AA evaluations plus media-arena results</span>
           </div>
           <h1>Artificial Analysis Benchmarks (aabanch)</h1>
           <p class="page-lede">Direct database table of 600+ models with TerminalBench, GPQA, MMLU-Pro, LiveCodeBench, AIME 2025, HLE, and SciCode.</p>
@@ -88,7 +88,8 @@
             <wa-option value="ifbench">Sort: IFBench (Instruction Following)</wa-option>
             <wa-option value="lcr">Sort: LCR (Long Context Reasoning)</wa-option>
             <wa-option value="tau2">Sort: Tau-Bench 2 (Agentic)</wa-option>
-            <wa-option value="speed">Sort: Output Speed (Tokens/s)</wa-option>
+        <wa-option value="speed">Sort: Output Speed (Tokens/s)</wa-option>
+        <wa-option value="media_elo">Sort: Media Arena ELO</wa-option>
             <wa-option value="latency">Sort: Time to First Token (TTFT)</wa-option>
             <wa-option value="name">Sort: Model Name Alphabetical</wa-option>
           </wa-select>
@@ -106,6 +107,8 @@
               <th scope="col" class="sortable" onclick="sortByHeader('name')">
                 <span class="th-inner">Model &amp; Creator <span id="hdr-sort-name" class="sort-ind">↕</span></span>
               </th>
+              <th scope="col" class="sortable" onclick="sortByHeader('media_elo')" style="text-align:center"><span class="th-inner center">Media ELO <span id="hdr-sort-media_elo" class="sort-ind">↕</span></span></th>
+              <th scope="col" style="text-align:right">Media price</th>
               <th scope="col" class="sortable" onclick="sortByHeader('intelligence')" style="text-align: center;">
                 <span class="th-inner center">Intelligence <span id="hdr-sort-intelligence" class="sort-ind is-active">↓</span></span>
               </th>
@@ -139,7 +142,7 @@
             </tr>
           </thead>
           <tbody id="aabanch-table-body">
-            <tr><td colspan="12" class="loading-row">Loading benchmark evaluations from table 'aabanch'…</td></tr>
+            <tr><td colspan="14" class="loading-row">Loading benchmark and media evaluations from table 'aabanch'…</td></tr>
           </tbody>
         </table>
       </div>
@@ -194,15 +197,16 @@
 
     async function loadAABanch() {
       const tbody = document.getElementById('aabanch-table-body');
-      tbody.innerHTML = `<tr><td colspan="12" class="loading-row">Loading all 17 benchmark metrics from table 'aabanch'…</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="14" class="loading-row">Loading benchmark and media metrics from table 'aabanch'…</td></tr>`;
 
       try {
         const res = await fetch(`/api/v1/aabanch?limit=1000`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         rawAABanch = data.items || [];
         applySorting();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="12" class="loading-row is-error">Error loading aabanch: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="14" class="loading-row is-error">Error loading aabanch: ${window.rankllmsEscapeHtml(err.message)}</td></tr>`;
       }
     }
 
@@ -274,7 +278,7 @@
         dirLabel.innerText = currentSortDir === 'desc' ? 'High to Low' : 'Low to High';
       }
 
-      ['name', 'intelligence', 'terminalbench_hard', 'gpqa', 'mmlu_pro', 'livecodebench', 'aime_25', 'hle', 'ifbench', 'tau2', 'speed'].forEach(f => {
+      ['name', 'intelligence', 'terminalbench_hard', 'gpqa', 'mmlu_pro', 'livecodebench', 'aime_25', 'hle', 'ifbench', 'tau2', 'speed', 'media_elo'].forEach(f => {
         const el = document.getElementById(`hdr-sort-${f}`);
         if (el) {
           if (f === currentSortField) {
@@ -296,53 +300,60 @@
           valB = (b.model_name || '').toLowerCase();
           return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else if (currentSortField === 'terminalbench_hard') {
-          valA = parseFloat(a.terminalbench_hard || a.terminalbench_v2_1 || 0);
-          valB = parseFloat(b.terminalbench_hard || b.terminalbench_v2_1 || 0);
+          valA = a.terminalbench_hard != null ? parseFloat(a.terminalbench_hard) : (a.terminalbench_v2_1 == null ? null : parseFloat(a.terminalbench_v2_1));
+          valB = b.terminalbench_hard != null ? parseFloat(b.terminalbench_hard) : (b.terminalbench_v2_1 == null ? null : parseFloat(b.terminalbench_v2_1));
         } else if (currentSortField === 'terminalbench_v2_1') {
-          valA = parseFloat(a.terminalbench_v2_1 || 0);
-          valB = parseFloat(b.terminalbench_v2_1 || 0);
+          valA = a.terminalbench_v2_1 == null ? null : parseFloat(a.terminalbench_v2_1);
+          valB = b.terminalbench_v2_1 == null ? null : parseFloat(b.terminalbench_v2_1);
         } else if (currentSortField === 'gpqa') {
-          valA = parseFloat(a.gpqa || 0);
-          valB = parseFloat(b.gpqa || 0);
+          valA = a.gpqa == null ? null : parseFloat(a.gpqa);
+          valB = b.gpqa == null ? null : parseFloat(b.gpqa);
         } else if (currentSortField === 'mmlu_pro') {
-          valA = parseFloat(a.mmlu_pro || 0);
-          valB = parseFloat(b.mmlu_pro || 0);
+          valA = a.mmlu_pro == null ? null : parseFloat(a.mmlu_pro);
+          valB = b.mmlu_pro == null ? null : parseFloat(b.mmlu_pro);
         } else if (currentSortField === 'livecodebench') {
-          valA = parseFloat(a.livecodebench || a.coding_index || 0);
-          valB = parseFloat(b.livecodebench || b.coding_index || 0);
+          valA = a.livecodebench != null ? parseFloat(a.livecodebench) : (a.coding_index == null ? null : parseFloat(a.coding_index));
+          valB = b.livecodebench != null ? parseFloat(b.livecodebench) : (b.coding_index == null ? null : parseFloat(b.coding_index));
         } else if (currentSortField === 'scicode') {
-          valA = parseFloat(a.scicode || 0);
-          valB = parseFloat(b.scicode || 0);
+          valA = a.scicode == null ? null : parseFloat(a.scicode);
+          valB = b.scicode == null ? null : parseFloat(b.scicode);
         } else if (currentSortField === 'aime_25') {
-          valA = parseFloat(a.aime_25 || a.aime || 0);
-          valB = parseFloat(b.aime_25 || b.aime || 0);
+          valA = a.aime_25 != null ? parseFloat(a.aime_25) : (a.aime == null ? null : parseFloat(a.aime));
+          valB = b.aime_25 != null ? parseFloat(b.aime_25) : (b.aime == null ? null : parseFloat(b.aime));
         } else if (currentSortField === 'math_500') {
-          valA = parseFloat(a.math_500 || a.math_index || 0);
-          valB = parseFloat(b.math_500 || b.math_index || 0);
+          valA = a.math_500 != null ? parseFloat(a.math_500) : (a.math_index == null ? null : parseFloat(a.math_index));
+          valB = b.math_500 != null ? parseFloat(b.math_500) : (b.math_index == null ? null : parseFloat(b.math_index));
         } else if (currentSortField === 'hle') {
-          valA = parseFloat(a.hle || 0);
-          valB = parseFloat(b.hle || 0);
+          valA = a.hle == null ? null : parseFloat(a.hle);
+          valB = b.hle == null ? null : parseFloat(b.hle);
         } else if (currentSortField === 'ifbench') {
-          valA = parseFloat(a.ifbench || 0);
-          valB = parseFloat(b.ifbench || 0);
+          valA = a.ifbench == null ? null : parseFloat(a.ifbench);
+          valB = b.ifbench == null ? null : parseFloat(b.ifbench);
         } else if (currentSortField === 'lcr') {
-          valA = parseFloat(a.lcr || 0);
-          valB = parseFloat(b.lcr || 0);
+          valA = a.lcr == null ? null : parseFloat(a.lcr);
+          valB = b.lcr == null ? null : parseFloat(b.lcr);
         } else if (currentSortField === 'tau2') {
-          valA = parseFloat(a.tau2 || a.tau_banking || 0);
-          valB = parseFloat(b.tau2 || b.tau_banking || 0);
+          valA = a.tau2 != null ? parseFloat(a.tau2) : (a.tau_banking == null ? null : parseFloat(a.tau_banking));
+          valB = b.tau2 != null ? parseFloat(b.tau2) : (b.tau_banking == null ? null : parseFloat(b.tau_banking));
+        } else if (currentSortField === 'media_elo') {
+          valA = a.elo == null ? null : parseFloat(a.elo);
+          valB = b.elo == null ? null : parseFloat(b.elo);
         } else if (currentSortField === 'speed') {
-          valA = parseFloat(a.tokens_per_second || 0);
-          valB = parseFloat(b.tokens_per_second || 0);
+          valA = a.tokens_per_second == null ? null : parseFloat(a.tokens_per_second);
+          valB = b.tokens_per_second == null ? null : parseFloat(b.tokens_per_second);
         } else if (currentSortField === 'latency') {
-          valA = parseFloat(a.time_to_first_token || 0);
-          valB = parseFloat(b.time_to_first_token || 0);
+          valA = a.time_to_first_token == null ? null : parseFloat(a.time_to_first_token);
+          valB = b.time_to_first_token == null ? null : parseFloat(b.time_to_first_token);
+          if (valA == null) return valB == null ? 0 : 1;
+          if (valB == null) return -1;
           return currentSortDir === 'desc' ? (valA - valB) : (valB - valA);
         } else {
-          valA = parseFloat(a.intelligence_index || 0);
-          valB = parseFloat(b.intelligence_index || 0);
+          valA = a.intelligence_index == null ? null : parseFloat(a.intelligence_index);
+          valB = b.intelligence_index == null ? null : parseFloat(b.intelligence_index);
         }
 
+        if (valA == null) return valB == null ? 0 : 1;
+        if (valB == null) return -1;
         return currentSortDir === 'desc' ? (valB - valA) : (valA - valB);
       });
 
@@ -362,7 +373,7 @@
     }
 
     function formatPct(val) {
-      if (val === null || val === undefined || isNaN(val) || val === 0) return '-';
+      if (val === null || val === undefined || isNaN(val)) return '-';
       const num = parseFloat(val);
       if (num <= 1.0) {
         return (num * 100).toFixed(1) + '%';
@@ -373,12 +384,12 @@
     function renderTable(items) {
       const tbody = document.getElementById('aabanch-table-body');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="table-empty">No matching evaluations found in table 'aabanch'.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="14" class="table-empty">No matching evaluations found in table 'aabanch'.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = items.slice(0, 300).map((m, idx) => {
-        const intel = m.intelligence_index ? parseFloat(m.intelligence_index).toFixed(1) : '-';
+        const intel = m.intelligence_index != null ? parseFloat(m.intelligence_index).toFixed(1) : '-';
 
         const tbHard = formatPct(m.terminalbench_hard);
         const tbV2 = formatPct(m.terminalbench_v2_1);
@@ -391,7 +402,7 @@
         const mmluStr = formatPct(m.mmlu_pro);
 
         const livecode = formatPct(m.livecodebench);
-        const codeIdx = m.coding_index ? parseFloat(m.coding_index).toFixed(1) : '-';
+        const codeIdx = m.coding_index != null ? parseFloat(m.coding_index).toFixed(1) : '-';
         const codeStr = livecode !== '-' ? `<span class="score-code">${livecode}</span>` : (codeIdx !== '-' ? `${codeIdx}` : '-');
 
         const aimeStr = formatPct(m.aime_25 || m.aime);
@@ -414,11 +425,15 @@
 
         const tps = m.tokens_per_second ? parseFloat(m.tokens_per_second).toFixed(1) + ' tps' : '-';
         const ttft = m.time_to_first_token ? parseFloat(m.time_to_first_token).toFixed(2) + 's' : '-';
+        const mediaElo = m.elo == null ? '—' : `${Number(m.elo).toFixed(0)}${m.confidence_interval == null ? '' : ` ±${Number(m.confidence_interval).toFixed(0)}`}${m.samples == null ? '' : ` · ${Number(m.samples).toLocaleString()} n`}`;
+        const mediaPrice = m.price_per_unit == null ? '—' : `$${Number(m.price_per_unit).toFixed(2)} / ${window.rankllmsEscapeHtml(m.price_unit || 'unit')}`;
 
         return `
           <tr>
             <td class="num">#${idx + 1}</td>
-            <td class="model-cell">${m.model_name}<span class="slug">${m.creator_name} &bull; ${m.model_slug}</span></td>
+            <td class="model-cell">${window.rankllmsEscapeHtml(m.model_name)}<span class="slug">${window.rankllmsEscapeHtml(m.creator_name)} &bull; ${window.rankllmsEscapeHtml(m.model_slug)}</span></td>
+            <td class="score">${mediaElo}</td>
+            <td class="num">${mediaPrice}</td>
             <td class="score score-index">${intel}</td>
             <td class="score">${tbStr}</td>
             <td class="score">${gpqaStr}</td>

@@ -111,8 +111,9 @@
       wrap.style.display = 'none';
 
       try {
-        const url = `/api/v1/benchmarks/openrouter?source=${source}&sort_by=${sortBy}&limit=100`;
-        const res = await fetch(url);
+        const params = new URLSearchParams({ source, sort_by: sortBy, limit: '100' });
+        const res = await fetch(`/api/v1/benchmarks/openrouter?${params.toString()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
         tbody.innerHTML = '';
@@ -125,17 +126,20 @@
           if (item.source === 'openrouter') sourceBadge = '<wa-badge appearance="outlined" pill>OpenRouter</wa-badge>';
           else if (item.source === 'design-arena') sourceBadge = '<wa-badge variant="neutral" appearance="outlined" pill>Design Arena</wa-badge>';
           else if (item.source === 'artificial-analysis') sourceBadge = '<wa-badge variant="success" appearance="outlined" pill>Artificial Analysis</wa-badge>';
-          else sourceBadge = `<wa-badge appearance="outlined" pill>${item.source || '-'}</wa-badge>`;
+          else sourceBadge = `<wa-badge appearance="outlined" pill>${window.rankllmsEscapeHtml(item.source || '-')}</wa-badge>`;
+          const accuracy = item.accuracy == null ? null : Number(item.accuracy);
+          const accuracyText = accuracy == null ? '—' : ((accuracy <= 1 ? accuracy * 100 : accuracy).toFixed(1) + '%');
+          const eloText = item.elo == null ? '—' : Number(item.elo).toFixed(0);
 
           row.innerHTML = `
             <td class="num lb-rank">${i + 1}</td>
-            <td class="model-cell">${item.display_name || item.model_permaslug || '-'}</td>
+            <td class="model-cell">${window.rankllmsEscapeHtml(item.display_name || item.model_permaslug || '-')}</td>
             <td class="num">${sourceBadge}</td>
-            <td class="provider">${item.benchmark_type || item.category || '-'}</td>
-            <td class="score">${item.accuracy ? item.accuracy.toFixed(1) + '%' : '-'}</td>
-            <td class="score">${item.elo ? item.elo.toFixed(0) : '-'}</td>
-            <td class="score">${item.intelligence_index ? item.intelligence_index.toFixed(1) : '-'}</td>
-            <td class="score score-code">${item.coding_index ? item.coding_index.toFixed(1) : '-'}</td>
+            <td class="provider">${window.rankllmsEscapeHtml(item.benchmark_type || item.category || '-')}</td>
+            <td class="score">${accuracyText}</td>
+            <td class="score">${eloText}</td>
+            <td class="score">${item.intelligence_index == null ? '—' : Number(item.intelligence_index).toFixed(1)}</td>
+            <td class="score score-code">${item.coding_index == null ? '—' : Number(item.coding_index).toFixed(1)}</td>
           `;
           tbody.appendChild(row);
         }

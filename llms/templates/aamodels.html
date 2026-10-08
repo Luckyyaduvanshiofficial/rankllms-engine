@@ -166,11 +166,12 @@
 
       try {
         const res = await fetch(`/api/v1/aamodels?limit=1000`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         rawAAModels = data.items || [];
         applySorting();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="loading-row is-error">Error loading aamodels: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="loading-row is-error">Error loading aamodels: ${window.rankllmsEscapeHtml(err.message)}</td></tr>`;
       }
     }
 
@@ -239,16 +240,18 @@
           if (!valB) return -1;
           return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else if (currentSortField === 'prompt_price') {
-          valA = parseFloat(a.prompt_price_per_1m || 0);
-          valB = parseFloat(b.prompt_price_per_1m || 0);
+          valA = a.prompt_price_per_1m == null ? null : parseFloat(a.prompt_price_per_1m);
+          valB = b.prompt_price_per_1m == null ? null : parseFloat(b.prompt_price_per_1m);
         } else if (currentSortField === 'completion_price') {
-          valA = parseFloat(a.completion_price_per_1m || 0);
-          valB = parseFloat(b.completion_price_per_1m || 0);
+          valA = a.completion_price_per_1m == null ? null : parseFloat(a.completion_price_per_1m);
+          valB = b.completion_price_per_1m == null ? null : parseFloat(b.completion_price_per_1m);
         } else {
-          valA = parseInt(a.context_window || 0);
-          valB = parseInt(b.context_window || 0);
+          valA = a.context_window == null ? null : parseInt(a.context_window);
+          valB = b.context_window == null ? null : parseInt(b.context_window);
         }
 
+        if (valA == null) return valB == null ? 0 : 1;
+        if (valB == null) return -1;
         return currentSortDir === 'desc' ? (valB - valA) : (valA - valB);
       });
 
@@ -275,20 +278,20 @@
       }
 
       tbody.innerHTML = items.map((m, idx) => {
-        const ctx = m.context_window ? (m.context_window >= 1000000 ? (m.context_window / 1000000).toFixed(1) + 'M' : Math.round(m.context_window / 1000) + 'k') : '0';
-        const pIn = parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
-        const pOut = parseFloat(m.completion_price_per_1m || 0).toFixed(2);
+        const ctx = m.context_window ? (m.context_window >= 1000000 ? (m.context_window / 1000000).toFixed(1) + 'M' : Math.round(m.context_window / 1000) + 'k') : '—';
+        const pIn = m.prompt_price_per_1m == null ? '—' : parseFloat(m.prompt_price_per_1m).toFixed(2);
+        const pOut = m.completion_price_per_1m == null ? '—' : parseFloat(m.completion_price_per_1m).toFixed(2);
         const rel = m.release_date || '—';
 
         return `
           <tr>
             <td class="num">#${idx + 1}</td>
-            <td class="model-cell">${m.name}<span class="slug">${m.slug}</span></td>
-            <td class="provider">${m.creator_name || 'Independent'}</td>
-            <td class="num">${rel}</td>
+            <td class="model-cell">${window.rankllmsEscapeHtml(m.name)}${m.model_type && m.model_type !== 'llm' ? ` <wa-badge appearance="outlined" pill>${window.rankllmsEscapeHtml(m.model_type)}</wa-badge>` : ''}<span class="slug">${window.rankllmsEscapeHtml(m.source_slug || m.slug)} · ${window.rankllmsEscapeHtml(m.source_endpoint || '')}</span></td>
+            <td class="provider">${window.rankllmsEscapeHtml(m.creator_name || 'Independent')}</td>
+            <td class="num">${window.rankllmsEscapeHtml(rel)}</td>
             <td class="score">${ctx}</td>
-            <td class="num" style="text-align: right;">$${pIn}</td>
-            <td class="num" style="text-align: right;">$${pOut}</td>
+            <td class="num" style="text-align: right;">${pIn === '—' ? '—' : '$' + pIn}</td>
+            <td class="num" style="text-align: right;">${pOut === '—' ? '—' : '$' + pOut}</td>
           </tr>
         `;
       }).join('');

@@ -160,11 +160,12 @@
       tbody.innerHTML = `<tr><td colspan="7" class="loading-row">Loading models.dev catalog from database table 'modelsdev'…</td></tr>`;
       try {
         const res = await fetch(`/api/v1/modelsdev?limit=1000`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         rawModelsDev = data.items || [];
         applySorting();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="loading-row is-error">Error loading modelsdev: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="loading-row is-error">Error loading modelsdev: ${window.rankllmsEscapeHtml(err.message)}</td></tr>`;
       }
     }
 
@@ -214,11 +215,11 @@
           valB = (b[key] || '').toLowerCase();
           return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else if (currentSortField === 'prompt_price') {
-          valA = parseFloat(a.prompt_price_per_1m || 0);
-          valB = parseFloat(b.prompt_price_per_1m || 0);
+          valA = a.prompt_price_per_1m == null ? null : parseFloat(a.prompt_price_per_1m);
+          valB = b.prompt_price_per_1m == null ? null : parseFloat(b.prompt_price_per_1m);
         } else if (currentSortField === 'completion_price') {
-          valA = parseFloat(a.completion_price_per_1m || 0);
-          valB = parseFloat(b.completion_price_per_1m || 0);
+          valA = a.completion_price_per_1m == null ? null : parseFloat(a.completion_price_per_1m);
+          valB = b.completion_price_per_1m == null ? null : parseFloat(b.completion_price_per_1m);
         } else if (currentSortField === 'release_date') {
           valA = a.release_date || '';
           valB = b.release_date || '';
@@ -227,9 +228,11 @@
           if (!valB) return -1;
           return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else {
-          valA = parseInt(a.context_length || 0);
-          valB = parseInt(b.context_length || 0);
+          valA = a.context_length == null ? null : parseInt(a.context_length);
+          valB = b.context_length == null ? null : parseInt(b.context_length);
         }
+        if (valA == null) return valB == null ? 0 : 1;
+        if (valB == null) return -1;
         return currentSortDir === 'desc' ? (valB - valA) : (valA - valB);
       });
       filterModelsDev();
@@ -242,9 +245,9 @@
           m.name, m.modelsdev_id, m.provider_name, m.family, m.description
         ].map(x => (x || '').toLowerCase()).join(' ');
         if (query && !hay.includes(query)) return false;
-        if (flagFilters.open && !m.open_weights) return false;
-        if (flagFilters.reason && !m.reasoning) return false;
-        if (flagFilters.tools && !m.tool_call) return false;
+        if (flagFilters.open && m.open_weights !== true) return false;
+        if (flagFilters.reason && m.reasoning !== true) return false;
+        if (flagFilters.tools && m.tool_call !== true) return false;
         return true;
       });
       renderTable(filtered);
@@ -261,15 +264,15 @@
         const pIn = m.prompt_price_per_1m != null ? parseFloat(m.prompt_price_per_1m).toFixed(2) : '—';
         const pOut = m.completion_price_per_1m != null ? parseFloat(m.completion_price_per_1m).toFixed(2) : '—';
         const flags = [
-          m.open_weights ? '<wa-badge variant="success" appearance="outlined" pill>Open</wa-badge>' : '',
-          m.reasoning ? '<wa-badge variant="neutral" appearance="outlined" pill>Reason</wa-badge>' : '',
-          m.tool_call ? '<wa-badge variant="neutral" appearance="outlined" pill>Tools</wa-badge>' : '',
+          m.open_weights === true ? '<wa-badge variant="success" appearance="outlined" pill>Open</wa-badge>' : '',
+          m.reasoning === true ? '<wa-badge variant="neutral" appearance="outlined" pill>Reason</wa-badge>' : '',
+          m.tool_call === true ? '<wa-badge variant="neutral" appearance="outlined" pill>Tools</wa-badge>' : '',
         ].filter(Boolean).join(' ');
         return `
           <tr>
             <td class="num">#${idx + 1}</td>
-            <td class="model-cell">${m.name}<span class="slug">${m.modelsdev_id}</span></td>
-            <td class="provider">${m.provider_name || m.provider_slug || '-'}</td>
+            <td class="model-cell">${window.rankllmsEscapeHtml(m.name)}<span class="slug">${window.rankllmsEscapeHtml(m.modelsdev_id)}</span></td>
+            <td class="provider">${window.rankllmsEscapeHtml(m.provider_name || m.provider_slug || '-')}</td>
             <td class="score">${ctx}</td>
             <td class="num" style="text-align: right;">$${pIn}</td>
             <td class="num" style="text-align: right;">$${pOut}</td>

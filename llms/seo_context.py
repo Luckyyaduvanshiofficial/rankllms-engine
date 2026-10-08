@@ -11,6 +11,8 @@ All three read the same merged ``rankindex`` table the API serves, so
 crawlable HTML and the live API never disagree.
 """
 
+from math import isfinite
+
 from django.utils.html import escape
 
 from llms.models import RankIndex
@@ -22,14 +24,17 @@ def _esc(value):
 
 
 def _fmt_price(value):
+    if value is None or value == "":
+        return "—"
     try:
-        return f"${float(value):.2f}"
+        num = float(value)
     except (TypeError, ValueError):
         return "—"
+    return f"${num:.2f}" if isfinite(num) and num >= 0 else "—"
 
 
 def _fmt_ctx(value):
-    if not value:
+    if value is None or value <= 0:
         return "—"
     if value >= 1_000_000:
         return f"{float(value) / 1_000_000:.1f}M"
@@ -41,13 +46,14 @@ def _fmt_pct(value):
         num = float(value)
     except (TypeError, ValueError):
         return "—"
-    if num == 0:
+    if not isfinite(num):
         return "—"
     return f"{(num * 100 if num <= 1.0 else num):.1f}%"
 
 
 def _medal(rank):
-    rank = rank or 0
+    if rank is None:
+        return "—"
     if rank == 1:
         return '<span class="lb-medal medal-1">#1</span>'
     if rank == 2:
@@ -57,14 +63,20 @@ def _medal(rank):
     return f'<span class="lb-medal">#{rank}</span>'
 
 
-def _score_cell(value, cls="score"):
+def _fmt_score(value):
+    if value is None or value == "":
+        return "—"
     try:
         num = float(value)
     except (TypeError, ValueError):
-        return f'<td class="{cls}">—</td>'
-    if num == 0:
-        return f'<td class="{cls}">—</td>'
-    return f'<td class="{cls}">{num:.1f}</td>'
+        return "—"
+    if not isfinite(num):
+        return "—"
+    return f"{num:.1f}"
+
+
+def _score_cell(value, cls="score"):
+    return f'<td class="{cls}">{_fmt_score(value)}</td>'
 
 
 def _src_badges(sources):
@@ -91,6 +103,7 @@ def _base_rows(limit):
         "rankllms_index",
         "intelligence_index",
         "coding_index",
+        "agentic_index",
         "terminalbench_hard",
         "gpqa_diamond",
         "context_length",
@@ -133,7 +146,7 @@ def leaderboard_rows(limit=50):
     <span class="slug">{_esc(m['canonical_slug'] or m['openrouter_id'])}</span>
   </td>
   <td class="provider">{_esc(m['provider'])}</td>
-  <td class="score score-index">{float(m['rankllms_index'] or 0):.1f}</td>
+  {_score_cell(m['rankllms_index'], 'score score-index')}
   {_score_cell(m['intelligence_index'])}
   {_score_cell(m['coding_index'], 'score score-code')}
   <td class="score">{_fmt_pct(m['gpqa_diamond'])}</td>
@@ -165,7 +178,7 @@ def rankindex_rows(limit=10):
         tb = _fmt_pct(m["terminalbench_hard"])
         if tb != "—":
             code_str = f"<strong>{tb} TB</strong>"
-        elif m["coding_index"]:
+        elif m["coding_index"] is not None:
             code_str = f'<span class="score-code">{float(m["coding_index"]):.1f}</span>'
         else:
             code_str = "-"
@@ -174,8 +187,8 @@ def rankindex_rows(limit=10):
             f"""<tr>
   <td class="num lb-rank">{_medal(m['rank_overall'])}</td>
   <td class="model-cell">{_esc(m['name'])}{open_badge}<span class="slug">{_esc(m['provider'])} &bull; {_esc(m['canonical_slug'] or m['openrouter_id'])}</span></td>
-  <td class="score score-index">{float(m['rankllms_index'] or 0):.1f}</td>
-  <td class="score">{_esc(m['intelligence_index']) if m['intelligence_index'] else '-'}</td>
+  <td class="score score-index">{_fmt_score(m['rankllms_index'])}</td>
+  <td class="score">{_fmt_score(m['intelligence_index'])}</td>
   <td class="score">{code_str}</td>
   <td class="score">{_fmt_pct(m['gpqa_diamond'])}</td>
   <td class="num">{_fmt_ctx(m['context_length'])}</td>
@@ -188,7 +201,7 @@ def rankindex_rows(limit=10):
 
 def models_rows(limit=50):
     """
-    Top N rows for rankllms_models.html (14-column full catalog). Mirrors
+    Top N rows for rankllms_models.html (15-column full catalog). Mirrors
     the client-side renderTable() there, including max output, speed and
     release date columns.
     """
@@ -196,7 +209,7 @@ def models_rows(limit=50):
     for m in _base_rows(limit):
         p_in = _fmt_price(m["prompt_price_per_1m"])
         p_out = _fmt_price(m["completion_price_per_1m"])
-        speed = f"{round(float(m['tokens_per_second']))}" if m["tokens_per_second"] else "—"
+        speed = f"{round(float(m['tokens_per_second']))}" if m["tokens_per_second"] is not None else "—"
         released = (
             str(m["release_date"])[:10] if m["release_date"] else "—"
         )
@@ -222,9 +235,10 @@ def models_rows(limit=50):
   <td class="num lb-rank">{_medal(m['rank_overall'])}</td>
   <td class="model-cell">{_esc(m['name'])}<span class="slug">{_esc(m['canonical_slug'] or m['openrouter_id'])}</span></td>
   <td class="provider">{_esc(m['provider'])}</td>
-  <td class="score score-index">{float(m['rankllms_index'] or 0):.1f}</td>
+  <td class="score score-index">{_fmt_score(m['rankllms_index'])}</td>
   {_score_cell(m['intelligence_index'])}
   {_score_cell(m['coding_index'], 'score score-code')}
+  {_score_cell(m['agentic_index'])}
   <td class="score">{_fmt_pct(m['gpqa_diamond'])}</td>
   <td class="num">{_fmt_ctx(m['context_length'])}</td>
   <td class="num">{max_out}</td>

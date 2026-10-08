@@ -160,11 +160,12 @@
 
       try {
         const res = await fetch(`/api/v1/ormodels?limit=1000`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         rawORModels = data.items || [];
         applySorting();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="loading-row is-error">Error loading ormodels: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="loading-row is-error">Error loading ormodels: ${window.rankllmsEscapeHtml(err.message)}</td></tr>`;
       }
     }
 
@@ -230,16 +231,18 @@
           valB = b.created_at || '';
           return currentSortDir === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
         } else if (currentSortField === 'prompt_price') {
-          valA = parseFloat(a.prompt_price_per_1m || 0);
-          valB = parseFloat(b.prompt_price_per_1m || 0);
+          valA = a.prompt_price_per_1m == null ? null : parseFloat(a.prompt_price_per_1m);
+          valB = b.prompt_price_per_1m == null ? null : parseFloat(b.prompt_price_per_1m);
         } else if (currentSortField === 'completion_price') {
-          valA = parseFloat(a.completion_price_per_1m || 0);
-          valB = parseFloat(b.completion_price_per_1m || 0);
+          valA = a.completion_price_per_1m == null ? null : parseFloat(a.completion_price_per_1m);
+          valB = b.completion_price_per_1m == null ? null : parseFloat(b.completion_price_per_1m);
         } else {
-          valA = parseInt(a.context_length || 0);
-          valB = parseInt(b.context_length || 0);
+          valA = a.context_length == null ? null : parseInt(a.context_length);
+          valB = b.context_length == null ? null : parseInt(b.context_length);
         }
 
+        if (valA == null) return valB == null ? 0 : 1;
+        if (valB == null) return -1;
         return currentSortDir === 'desc' ? (valB - valA) : (valA - valB);
       });
 
@@ -266,18 +269,18 @@
       }
 
       tbody.innerHTML = items.map((m, idx) => {
-        const ctx = m.context_length ? (m.context_length >= 1000000 ? (m.context_length / 1000000).toFixed(1) + 'M' : Math.round(m.context_length / 1000) + 'k') : '0';
-        const pIn = parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
-        const pOut = parseFloat(m.completion_price_per_1m || 0).toFixed(2);
+        const ctx = m.context_length ? (m.context_length >= 1000000 ? (m.context_length / 1000000).toFixed(1) + 'M' : Math.round(m.context_length / 1000) + 'k') : '—';
+        const pIn = m.prompt_price_per_1m == null ? '—' : parseFloat(m.prompt_price_per_1m).toFixed(2);
+        const pOut = m.completion_price_per_1m == null ? '—' : parseFloat(m.completion_price_per_1m).toFixed(2);
 
         return `
           <tr>
             <td class="num">#${idx + 1}</td>
-            <td class="model-cell">${m.name}${m.is_free ? ' <wa-badge variant="success" appearance="outlined" pill>Free</wa-badge>' : ''}<span class="slug">${m.openrouter_id}</span></td>
-            <td class="provider">${m.author || '-'}</td>
+            <td class="model-cell">${window.rankllmsEscapeHtml(m.name)}${m.is_free === true ? ' <wa-badge variant="success" appearance="outlined" pill>Free</wa-badge>' : ''}<span class="slug">${window.rankllmsEscapeHtml(m.openrouter_id)}</span></td>
+            <td class="provider">${window.rankllmsEscapeHtml(m.author || '-')}</td>
             <td class="score">${ctx}</td>
-            <td class="num" style="text-align: right;">$${pIn}</td>
-            <td class="num" style="text-align: right;">$${pOut}</td>
+            <td class="num" style="text-align: right;">${m.is_free === true ? '<span class="price-free">Free</span>' : (pIn === '—' ? '—' : '$' + pIn)}</td>
+            <td class="num" style="text-align: right;">${m.is_free === true ? '<span class="price-free">Free</span>' : (pOut === '—' ? '—' : '$' + pOut)}</td>
           </tr>
         `;
       }).join('');

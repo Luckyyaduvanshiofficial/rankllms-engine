@@ -394,6 +394,7 @@
     async function populateSelectors() {
       try {
         const res = await fetch('/api/v1/models?limit=250&dedup=true');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const models = data.items || [];
         if (models.length === 0) return;
@@ -403,7 +404,7 @@
           if (!select) return;
           const currentVal = select.value;
           select.innerHTML = models.map(m => `
-            <wa-option value="${m.slug}" ${m.slug === currentVal ? 'selected' : ''}>${m.name} (${m.provider_name})</wa-option>
+            <wa-option value="${window.rankllmsEscapeHtml(m.slug)}" ${m.slug === currentVal ? 'selected' : ''}>${window.rankllmsEscapeHtml(m.name)} (${window.rankllmsEscapeHtml(m.provider_name)})</wa-option>
           `).join('');
         });
       } catch (e) {
@@ -423,38 +424,43 @@
         return;
       }
 
-      container.innerHTML = `<div class="cmp-empty">Comparing ${modelA} vs ${modelB}…</div>`;
+      container.textContent = `Comparing ${modelA} vs ${modelB}…`;
 
       try {
         const res = await fetch(`/api/v1/compare?model_a=${encodeURIComponent(modelA)}&model_b=${encodeURIComponent(modelB)}`);
         const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
         const models = data.models || [];
 
         if (models.length < 2) {
-          container.innerHTML = `<div class="cmp-error">Could not find both models in Neon DB. Try standard slugs like 'claude-3-7-sonnet', 'gpt-4o', 'deepseek-r1'.</div>`;
+          container.textContent = 'Could not find both exact model IDs in the catalog. Try a model slug or OpenRouter ID.';
           return;
         }
 
         const mA = models[0];
         const mB = models[1];
+        const score = value => value == null ? '—' : Number(value).toFixed(1);
+        const count = value => value == null ? '—' : Number(value).toLocaleString();
+        const price = value => value == null ? '—' : '$' + Number(value).toFixed(2);
+        const advantage = (a, b) => a == null || b == null ? '—' : (a >= b ? window.rankllmsEscapeHtml(mA.name) : window.rankllmsEscapeHtml(mB.name));
 
         container.innerHTML = `
           <div class="cmp-side-cards">
             <div class="cmp-side-card">
               <div class="cmp-side-top">
-                <span class="cmp-provider">${mA.provider}</span>
+                <span class="cmp-provider">${window.rankllmsEscapeHtml(mA.provider)}</span>
                 ${mA.is_open_weight ? '<wa-badge appearance="outlined" pill>Open-Weight</wa-badge>' : ''}
               </div>
-              <h3>${mA.name}</h3>
-              <p>${mA.description || 'Flagship frontier foundation model.'}</p>
+              <h3>${window.rankllmsEscapeHtml(mA.name)}</h3>
+              <p>${window.rankllmsEscapeHtml(mA.description || 'Description not available from sources.')}</p>
             </div>
             <div class="cmp-side-card">
               <div class="cmp-side-top">
-                <span class="cmp-provider provider-b">${mB.provider}</span>
+                <span class="cmp-provider provider-b">${window.rankllmsEscapeHtml(mB.provider)}</span>
                 ${mB.is_open_weight ? '<wa-badge appearance="outlined" pill>Open-Weight</wa-badge>' : ''}
               </div>
-              <h3>${mB.name}</h3>
-              <p>${mB.description || 'Flagship frontier foundation model.'}</p>
+              <h3>${window.rankllmsEscapeHtml(mB.name)}</h3>
+              <p>${window.rankllmsEscapeHtml(mB.description || 'Description not available from sources.')}</p>
             </div>
           </div>
 
@@ -463,48 +469,48 @@
               <thead>
                 <tr>
                   <th scope="col">Evaluation Metric</th>
-                  <th scope="col">${mA.name}</th>
-                  <th scope="col">${mB.name}</th>
+                  <th scope="col">${window.rankllmsEscapeHtml(mA.name)}</th>
+                  <th scope="col">${window.rankllmsEscapeHtml(mB.name)}</th>
                   <th scope="col">Advantage</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td class="metric">Intelligence Index (RankLLMs)</td>
-                  <td class="val val-lead">${mA.benchmarks.intelligence_index.toFixed(1)}</td>
-                  <td class="val val-lead-b">${mB.benchmarks.intelligence_index.toFixed(1)}</td>
-                  <td class="advantage">${mA.benchmarks.intelligence_index >= mB.benchmarks.intelligence_index ? mA.name : mB.name}</td>
+                  <td class="val val-lead">${score(mA.benchmarks.intelligence_index)}</td>
+                  <td class="val val-lead-b">${score(mB.benchmarks.intelligence_index)}</td>
+                  <td class="advantage">${advantage(mA.benchmarks.intelligence_index, mB.benchmarks.intelligence_index)}</td>
                 </tr>
                 <tr>
                   <td class="metric">Coding Index (LiveCodeBench)</td>
-                  <td class="val">${mA.benchmarks.coding_index.toFixed(1)}</td>
-                  <td class="val">${mB.benchmarks.coding_index.toFixed(1)}</td>
-                  <td class="advantage">${mA.benchmarks.coding_index >= mB.benchmarks.coding_index ? mA.name : mB.name}</td>
+                  <td class="val">${score(mA.benchmarks.coding_index)}</td>
+                  <td class="val">${score(mB.benchmarks.coding_index)}</td>
+                  <td class="advantage">${advantage(mA.benchmarks.coding_index, mB.benchmarks.coding_index)}</td>
                 </tr>
                 <tr>
                   <td class="metric">Context Length (Tokens)</td>
-                  <td class="val">${mA.specs.context_length.toLocaleString()}</td>
-                  <td class="val">${mB.specs.context_length.toLocaleString()}</td>
-                  <td class="advantage">${mA.specs.context_length >= mB.specs.context_length ? mA.name : mB.name}</td>
+                  <td class="val">${count(mA.specs.context_length)}</td>
+                  <td class="val">${count(mB.specs.context_length)}</td>
+                  <td class="advantage">${advantage(mA.specs.context_length, mB.specs.context_length)}</td>
                 </tr>
                 <tr>
                   <td class="metric">Prompt Price / 1M Tokens</td>
-                  <td class="val">$${parseFloat(mA.pricing.prompt_price_per_1m).toFixed(2)}</td>
-                  <td class="val">$${parseFloat(mB.pricing.prompt_price_per_1m).toFixed(2)}</td>
-                  <td class="advantage">${parseFloat(mA.pricing.prompt_price_per_1m) <= parseFloat(mB.pricing.prompt_price_per_1m) ? mA.name : mB.name}</td>
+                  <td class="val">${price(mA.pricing.prompt_price_per_1m)}</td>
+                  <td class="val">${price(mB.pricing.prompt_price_per_1m)}</td>
+                  <td class="advantage">${mA.pricing.prompt_price_per_1m == null || mB.pricing.prompt_price_per_1m == null ? '—' : (mA.pricing.prompt_price_per_1m <= mB.pricing.prompt_price_per_1m ? window.rankllmsEscapeHtml(mA.name) : window.rankllmsEscapeHtml(mB.name))}</td>
                 </tr>
                 <tr>
                   <td class="metric">Completion Price / 1M Tokens</td>
-                  <td class="val">$${parseFloat(mA.pricing.completion_price_per_1m).toFixed(2)}</td>
-                  <td class="val">$${parseFloat(mB.pricing.completion_price_per_1m).toFixed(2)}</td>
-                  <td class="advantage">${parseFloat(mA.pricing.completion_price_per_1m) <= parseFloat(mB.pricing.completion_price_per_1m) ? mA.name : mB.name}</td>
+                  <td class="val">${price(mA.pricing.completion_price_per_1m)}</td>
+                  <td class="val">${price(mB.pricing.completion_price_per_1m)}</td>
+                  <td class="advantage">${mA.pricing.completion_price_per_1m == null || mB.pricing.completion_price_per_1m == null ? '—' : (mA.pricing.completion_price_per_1m <= mB.pricing.completion_price_per_1m ? window.rankllmsEscapeHtml(mA.name) : window.rankllmsEscapeHtml(mB.name))}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         `;
       } catch (err) {
-        container.innerHTML = `<div class="cmp-error">Error executing comparison: ${err.message}</div>`;
+        container.textContent = `Error executing comparison: ${err.message}`;
       }
     }
 

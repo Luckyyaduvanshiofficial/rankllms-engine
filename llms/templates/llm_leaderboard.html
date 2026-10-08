@@ -255,11 +255,12 @@
         document.getElementById('lb-count').textContent = (data.total ?? rankings.length).toLocaleString();
         render(rankings);
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="10" class="loading-row is-error">Error: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="loading-row is-error">Error: ${window.rankllmsEscapeHtml(err.message)}</td></tr>`;
       }
     }
 
     function medal(rank) {
+      if (rank == null) return '—';
       if (rank === 1) return '<span class="lb-medal medal-1">#1</span>';
       if (rank === 2) return '<span class="lb-medal medal-2">#2</span>';
       if (rank === 3) return '<span class="lb-medal medal-3">#3</span>';
@@ -272,7 +273,7 @@
     }
 
     function formatPct(v) {
-      if (v === null || v === undefined || isNaN(v) || parseFloat(v) === 0) return '—';
+      if (v === null || v === undefined || isNaN(v)) return '—';
       const num = parseFloat(v);
       return (num <= 1.0 ? (num * 100).toFixed(1) : num.toFixed(1)) + '%';
     }
@@ -291,12 +292,12 @@
         return;
       }
       tbody.innerHTML = items.map(m => {
-        const pIn = m.is_free
+        const pIn = m.is_free === true
           ? '<span class="price-free">Free</span>'
-          : '$' + parseFloat(m.prompt_price_per_1m || 0).toFixed(2);
+          : (m.prompt_price_per_1m == null ? '—' : '$' + parseFloat(m.prompt_price_per_1m).toFixed(2));
         const badges = (m.sources || []).map(sourceBadge).filter(Boolean).join(' ');
 
-        const openBadge = m.is_open_weight
+        const openBadge = m.is_open_weight === true
           ? ' <wa-badge variant="success" appearance="outlined" pill>Open</wa-badge>'
           : '';
 
@@ -304,13 +305,13 @@
           <tr>
             <td class="num">${medal(m.rank)}</td>
             <td class="model-cell">
-              ${m.name || '—'}${openBadge}
-              <span class="slug">${m.canonical_slug || m.openrouter_id || ''}</span>
+              ${window.rankllmsEscapeHtml(m.name || '—')}${openBadge}
+              <span class="slug">${window.rankllmsEscapeHtml(m.canonical_slug || m.openrouter_id || '')}</span>
             </td>
-            <td class="provider">${m.provider || '—'}</td>
-            <td class="score score-index">${m.rankllms_index ? parseFloat(m.rankllms_index).toFixed(1) : '0.0'}</td>
-            <td class="score">${m.intelligence_index ? parseFloat(m.intelligence_index).toFixed(1) : '—'}</td>
-            <td class="score score-code">${m.coding_index ? parseFloat(m.coding_index).toFixed(1) : '—'}</td>
+            <td class="provider">${window.rankllmsEscapeHtml(m.provider || '—')}</td>
+            <td class="score score-index">${m.rankllms_index == null ? '—' : parseFloat(m.rankllms_index).toFixed(1)}</td>
+            <td class="score">${m.intelligence_index == null ? '—' : parseFloat(m.intelligence_index).toFixed(1)}</td>
+            <td class="score score-code">${m.coding_index == null ? '—' : parseFloat(m.coding_index).toFixed(1)}</td>
             <td class="score">${formatPct(m.gpqa_diamond)}</td>
             <td class="num">${formatCtx(m.context_length)}</td>
             <td class="num" style="text-align: right;">${pIn}</td>
