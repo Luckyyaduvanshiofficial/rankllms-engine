@@ -30,7 +30,11 @@ def _in_migrations_or_commands() -> bool:
     migrate` is caught too. Migrations and collectstatic load the app
     registry, which would otherwise start a sync nobody is waiting on.
     """
-    commands = {'migrate', 'makemigrations', 'collectstatic', 'shell', 'dbshell', 'sync_all'}
+    commands = {
+        'migrate', 'makemigrations', 'collectstatic', 'shell', 'dbshell',
+        'sync_all', 'sync_openrouter', 'sync_artificial_analysis',
+        'sync_models_dev', 'fill_nulls',
+    }
     return any(arg in commands for arg in sys.argv[1:])
 
 
@@ -69,22 +73,23 @@ def _database_available() -> bool:
             cursor.fetchone()
         return True
     except Exception as e:
-        logger.warning(f"[APScheduler] Database not reachable, skipping sync: {e}")
+        logger.warning("[APScheduler] Database not reachable, skipping sync (%s).", type(e).__name__)
         return False
 
 
 def run_scheduled_sync():
-    from llms.services.sync_all import run_master_sync
+    from llms.services.admin_sync import SyncAlreadyRunning, enqueue_sync
 
     if not _database_available():
         return
 
     try:
-        logger.info("[APScheduler] Triggering periodic master pipeline sync...")
-        run_master_sync()
-        logger.info("[APScheduler] Periodic master pipeline sync finished.")
+        logger.info("[APScheduler] Queueing scheduled master pipeline sync.")
+        enqueue_sync(source='all')
+    except SyncAlreadyRunning:
+        logger.info("[APScheduler] A sync is already active; scheduled run was skipped.")
     except Exception as e:
-        logger.error(f"[APScheduler] Periodic sync error: {e}")
+        logger.error("[APScheduler] Could not queue scheduled sync (%s).", type(e).__name__)
 
 
 def start_scheduler():
@@ -120,5 +125,7 @@ def start_scheduler():
         replace_existing=True
     )
     _scheduler.start()
-    print(f"[APScheduler] Background scheduler started (pid {os.getpid()}): "
-          f"master model sync every {os.environ.get('SYNC_INTERVAL_HOURS', '6')}h.")
+    logger.info(
+        "Background scheduler started (pid=%s, interval_hours=%s).",
+        os.getpid(), os.environ.get('SYNC_INTERVAL_HOURS', '6'),
+    )

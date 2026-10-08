@@ -26,22 +26,35 @@ read DATABASE_URL
 echo "Enter your SECRET_KEY (run: python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key)'):"
 read SECRET_KEY
 
+echo "Enter the public hostname (for example api.rankllms.com):"
+read PUBLIC_HOST
+
 echo "Enter ARTIFICIAL_ANALYSIS_API_KEY:"
-read ARTIFICIAL_ANALYSIS_API_KEY
+read -r -s ARTIFICIAL_ANALYSIS_API_KEY
+printf '\n'
+
+echo "Enter OPENROUTER_API_KEY (optional; needed for OpenRouter Data API snapshots):"
+read -r -s OPENROUTER_API_KEY
+printf '\n'
 
 cat > .env <<EOF
 DATABASE_URL=${DATABASE_URL}
 SECRET_KEY=${SECRET_KEY}
 DEBUG=False
-ALLOWED_HOSTS=*
+ALLOWED_HOSTS=${PUBLIC_HOST},localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=https://rankllms.com,https://www.rankllms.com,https://api.rankllms.com
+CSRF_TRUSTED_ORIGINS=https://${PUBLIC_HOST}
 ARTIFICIAL_ANALYSIS_API_URL=https://artificialanalysis.ai/api/v2
 ARTIFICIAL_ANALYSIS_API_KEY=${ARTIFICIAL_ANALYSIS_API_KEY}
+ARTIFICIAL_ANALYSIS_MODELS_PATH=language/models/free
+OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 MODELS_DEV_API_URL=https://models.dev/api.json
 
 # The 6-hourly sync runs in-process; with multiple gunicorn workers each would
 # run its own copy, so it stays off and sync_all is invoked on a cron/timer.
 ENABLE_SCHEDULER=false
 RUN_MIGRATIONS=true
+RUN_INITIAL_SYNC=false
 EOF
 
 # 5. Build and run with Neon DB (no local postgres)

@@ -1,17 +1,17 @@
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
-from llms.services.models_dev_sync import sync_models_dev_catalog
+from llms.services.sync_all import run_master_sync
 
 
 class Command(BaseCommand):
     help = 'Sync the free models.dev provider/model catalog into the modelsdev table.'
 
     def handle(self, *args, **options):
-        summary = sync_models_dev_catalog()
-        if summary.get('error'):
-            self.stderr.write(self.style.ERROR(f"models.dev sync failed: {summary['error']}"))
-            return
+        summary = run_master_sync(sources=['models_dev'])
+        if summary['status'] != 'succeeded':
+            raise CommandError('models.dev sync was partial or failed; inspect the source summary.')
+        source = summary['sources'][0].get('summary', {})
         self.stdout.write(self.style.SUCCESS(
-            f"models.dev sync complete: {summary['created']} created, "
-            f"{summary['updated']} updated, {summary['providers']} providers."
+            f"models.dev sync complete: {source.get('created', 0)} created, "
+            f"{source.get('updated', 0)} updated."
         ))

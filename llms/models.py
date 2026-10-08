@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings as django_settings
 from django.utils.text import slugify
 
 
@@ -35,6 +36,7 @@ class LLMModel(models.Model):
         ('llm', 'Language Model'),
         ('image', 'Image Generation'),
         ('video', 'Video Generation'),
+        ('audio', 'Audio Model'),
         ('embedding', 'Embedding Model'),
     ]
 
@@ -46,12 +48,12 @@ class LLMModel(models.Model):
     description = models.TextField(blank=True, default='')
 
     # Open Source & License Classification (For Open-LLM Leaderboard)
-    is_open_weight = models.BooleanField(default=False, db_index=True, help_text="True for open-source/open-weight models (Llama, DeepSeek, Qwen)")
-    license = models.CharField(max_length=100, blank=True, default='Proprietary', help_text="License type (e.g. MIT, Apache 2.0, Llama 3.3, Proprietary)")
+    is_open_weight = models.BooleanField(null=True, blank=True, db_index=True, help_text="Whether a source confirms public model weights")
+    license = models.CharField(max_length=100, blank=True, default='', help_text="License reported by a source, if known")
 
     # Status & Dates
     is_active = models.BooleanField(default=True, db_index=True)
-    is_free = models.BooleanField(default=False, db_index=True)
+    is_free = models.BooleanField(null=True, blank=True, db_index=True)
     created_at_openrouter = models.DateTimeField(null=True, blank=True)
     raw_json = models.JSONField(default=dict, blank=True)
     last_synced_at = models.DateTimeField(auto_now=True)
@@ -70,20 +72,21 @@ class ModelSpecification(models.Model):
     Technical Specifications and Capabilities Matrix for a Model.
     """
     model = models.OneToOneField(LLMModel, on_delete=models.CASCADE, related_name='spec')
-    context_length = models.IntegerField(default=0, db_index=True)
+    context_length = models.IntegerField(null=True, blank=True, db_index=True)
     max_completion_tokens = models.IntegerField(null=True, blank=True)
     modality = models.CharField(max_length=100, blank=True, default='')
     tokenizer = models.CharField(max_length=100, blank=True, default='')
     instruct_type = models.CharField(max_length=100, blank=True, null=True)
 
-    is_multimodal = models.BooleanField(default=False, db_index=True)
-    supports_vision = models.BooleanField(default=False, db_index=True)
-    supports_audio = models.BooleanField(default=False, db_index=True)
-    supports_tools = models.BooleanField(default=False, db_index=True)
-    supports_json_schema = models.BooleanField(default=False)
+    is_multimodal = models.BooleanField(null=True, blank=True, db_index=True)
+    supports_vision = models.BooleanField(null=True, blank=True, db_index=True)
+    supports_audio = models.BooleanField(null=True, blank=True, db_index=True)
+    supports_tools = models.BooleanField(null=True, blank=True, db_index=True)
+    supports_json_schema = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
-        return f"Specs for {self.model.name} ({self.context_length:,} tokens)"
+        context = f'{self.context_length:,} tokens' if self.context_length else 'context unknown'
+        return f"Specs for {self.model.name} ({context})"
 
 
 class ModelPricing(models.Model):
@@ -91,13 +94,13 @@ class ModelPricing(models.Model):
     Normalized Pricing per 1 Million Tokens.
     """
     model = models.OneToOneField(LLMModel, on_delete=models.CASCADE, related_name='pricing')
-    prompt_price_per_token = models.DecimalField(max_digits=20, decimal_places=12, default=0.0)
-    completion_price_per_token = models.DecimalField(max_digits=20, decimal_places=12, default=0.0)
-    image_price = models.DecimalField(max_digits=20, decimal_places=12, default=0.0)
-    request_price = models.DecimalField(max_digits=20, decimal_places=12, default=0.0)
+    prompt_price_per_token = models.DecimalField(max_digits=20, decimal_places=12, null=True, blank=True)
+    completion_price_per_token = models.DecimalField(max_digits=20, decimal_places=12, null=True, blank=True)
+    image_price = models.DecimalField(max_digits=20, decimal_places=12, null=True, blank=True)
+    request_price = models.DecimalField(max_digits=20, decimal_places=12, null=True, blank=True)
 
-    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
-    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
+    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True, db_index=True)
+    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True, db_index=True)
 
     def __str__(self):
         return f"Pricing for {self.model.name}: ${self.prompt_price_per_1m}/1M prompt, ${self.completion_price_per_1m}/1M output"
@@ -110,19 +113,19 @@ class ModelBenchmark(models.Model):
     model = models.OneToOneField(LLMModel, on_delete=models.CASCADE, related_name='benchmark')
 
     # Artificial Analysis Indices
-    intelligence_index = models.FloatField(default=0.0, db_index=True)
-    coding_index = models.FloatField(default=0.0, db_index=True)
-    agentic_index = models.FloatField(default=0.0, db_index=True)
+    intelligence_index = models.FloatField(null=True, blank=True, db_index=True)
+    coding_index = models.FloatField(null=True, blank=True, db_index=True)
+    agentic_index = models.FloatField(null=True, blank=True, db_index=True)
 
     # SWE-Bench & Coding Leaderboard Benchmarks
-    swe_bench_score = models.FloatField(default=0.0, db_index=True, help_text="SWE-bench Resolved % (Software Engineering)")
-    human_eval_score = models.FloatField(default=0.0, help_text="HumanEval %")
-    mmlu_score = models.FloatField(default=0.0, help_text="MMLU %")
-    arena_elo = models.FloatField(default=0.0, db_index=True, help_text="LMSYS Chatbot Arena ELO")
+    swe_bench_score = models.FloatField(null=True, blank=True, db_index=True, help_text="SWE-bench Resolved % (Software Engineering)")
+    human_eval_score = models.FloatField(null=True, blank=True, help_text="HumanEval %")
+    mmlu_score = models.FloatField(null=True, blank=True, help_text="MMLU %")
+    arena_elo = models.FloatField(null=True, blank=True, db_index=True, help_text="LMSYS Chatbot Arena ELO")
 
     # Latency & Throughput Speed
-    tokens_per_second = models.FloatField(default=0.0, help_text="Throughput (TPS)")
-    time_to_first_token = models.FloatField(default=0.0, help_text="TTFT Latency (seconds)")
+    tokens_per_second = models.FloatField(null=True, blank=True, help_text="Throughput (TPS)")
+    time_to_first_token = models.FloatField(null=True, blank=True, help_text="TTFT Latency (seconds)")
 
     class Meta:
         ordering = ['-intelligence_index', '-coding_index', '-swe_bench_score', '-arena_elo']
@@ -290,6 +293,74 @@ class APIKey(models.Model):
         return cls.objects.create(key=raw_key, name=name, tier=tier)
 
 
+class DataSourceConfig(models.Model):
+    """Safe, non-secret operational controls for one upstream data source."""
+
+    SOURCE_CHOICES = [
+        ('openrouter', 'OpenRouter'),
+        ('artificial_analysis', 'Artificial Analysis'),
+        ('models_dev', 'models.dev'),
+    ]
+
+    source = models.CharField(max_length=40, choices=SOURCE_CHOICES, unique=True)
+    enabled = models.BooleanField(default=True)
+    timeout_seconds = models.PositiveSmallIntegerField(default=30)
+    retry_count = models.PositiveSmallIntegerField(default=2)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['source']
+
+    def __str__(self):
+        return f'{self.get_source_display()} ({"enabled" if self.enabled else "disabled"})'
+
+
+class SyncRun(models.Model):
+    """Compact, persistent history for manual and scheduled data sync runs."""
+
+    SOURCE_CHOICES = DataSourceConfig.SOURCE_CHOICES + [('all', 'All sources')]
+    STATUS_CHOICES = [
+        ('queued', 'Queued'),
+        ('running', 'Running'),
+        ('succeeded', 'Succeeded'),
+        ('partial', 'Partial'),
+        ('failed', 'Failed'),
+        ('dry_run', 'Dry run'),
+    ]
+
+    source = models.CharField(max_length=40, choices=SOURCE_CHOICES, db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='queued', db_index=True)
+    dry_run = models.BooleanField(default=False)
+    started_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    duration_seconds = models.FloatField(null=True, blank=True)
+    records_received = models.PositiveIntegerField(default=0)
+    records_added = models.PositiveIntegerField(default=0)
+    records_updated = models.PositiveIntegerField(default=0)
+    records_skipped = models.PositiveIntegerField(default=0)
+    error_count = models.PositiveIntegerField(default=0)
+    error_summary = models.TextField(blank=True, default='')
+    summary = models.JSONField(default=dict, blank=True)
+    triggered_by = models.ForeignKey(
+        django_settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='rankllms_sync_runs',
+    )
+    # Only one queued/running job may hold this unique key. It is cleared when
+    # the worker finishes, including on failure.
+    active_key = models.CharField(max_length=16, unique=True, null=True, blank=True)
+
+    class Meta:
+        ordering = ['-started_at']
+        indexes = [models.Index(fields=['source', '-started_at'])]
+
+    def __str__(self):
+        mode = ' preview' if self.dry_run else ''
+        return f'{self.get_source_display()}{mode}: {self.get_status_display()} ({self.started_at:%Y-%m-%d %H:%M})'
+
+
 # ================= DEDICATED SOURCE TABLES (AS REQUESTED) =================
 
 class ORModel(models.Model):
@@ -301,10 +372,12 @@ class ORModel(models.Model):
     canonical_slug = models.CharField(max_length=250, blank=True, default='')
     author = models.CharField(max_length=150, blank=True, default='')
     description = models.TextField(blank=True, default='')
-    context_length = models.IntegerField(default=0, db_index=True)
-    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
-    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
-    is_free = models.BooleanField(default=False, db_index=True)
+    context_length = models.IntegerField(null=True, blank=True, db_index=True)
+    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True, db_index=True)
+    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True, db_index=True)
+    is_free = models.BooleanField(null=True, blank=True, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
     architecture = models.JSONField(default=dict, blank=True)
     top_provider = models.JSONField(default=dict, blank=True)
     pricing = models.JSONField(default=dict, blank=True)
@@ -330,6 +403,8 @@ class ORBench(models.Model):
     source = models.CharField(max_length=100, db_index=True)  # openrouter, design-arena, artificial-analysis
     benchmark_type = models.CharField(max_length=150, blank=True, default='', db_index=True)
     accuracy = models.FloatField(null=True, blank=True, db_index=True)
+    primary_score = models.FloatField(null=True, blank=True, db_index=True)
+    primary_metric = models.CharField(max_length=80, blank=True, default='')
     elo = models.FloatField(null=True, blank=True, db_index=True)
     win_rate = models.FloatField(null=True, blank=True)
     category = models.CharField(max_length=100, blank=True, default='', db_index=True)
@@ -341,8 +416,12 @@ class ORBench(models.Model):
     total_tasks = models.IntegerField(null=True, blank=True)
     tournament_stats = models.JSONField(default=dict, blank=True)
     pricing = models.JSONField(default=dict, blank=True)
+    source_url = models.URLField(blank=True, default='')
+    last_run_timestamp = models.DateTimeField(null=True, blank=True)
     raw_json = models.JSONField(default=dict, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'orbench'
@@ -357,17 +436,24 @@ class AAModel(models.Model):
     Direct Artificial Analysis Models Catalog (Table: aamodels).
     """
     slug = models.CharField(max_length=250, unique=True, db_index=True)
+    source_id = models.CharField(max_length=100, blank=True, default='', db_index=True)
+    source_slug = models.CharField(max_length=250, blank=True, default='', db_index=True)
+    source_endpoint = models.CharField(max_length=255, blank=True, default='')
     name = models.CharField(max_length=255)
     creator_name = models.CharField(max_length=150, db_index=True)
     creator_slug = models.CharField(max_length=150, blank=True, default='')
+    is_active = models.BooleanField(default=True, db_index=True)
     release_date = models.DateField(null=True, blank=True)
     model_type = models.CharField(max_length=100, blank=True, default='')
-    context_window = models.IntegerField(default=0, db_index=True)
+    context_window = models.IntegerField(null=True, blank=True, db_index=True)
     max_output_tokens = models.IntegerField(null=True, blank=True)
-    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0)
-    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0)
+    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
+    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
+    cache_hit_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
+    cache_write_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
     modalities = models.JSONField(default=list, blank=True)
     raw_json = models.JSONField(default=dict, blank=True)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -381,14 +467,25 @@ class AAModel(models.Model):
 class AABench(models.Model):
     """
     Direct Artificial Analysis Benchmark Evaluations & Telemetry (Table: aabanch).
-    Captures all 17 empirical benchmark evaluation metrics.
+    Captures source-published language indices, task scores, and performance telemetry.
     """
     model_slug = models.CharField(max_length=250, unique=True, db_index=True)
+    source_id = models.CharField(max_length=100, blank=True, default='', db_index=True)
+    source_slug = models.CharField(max_length=250, blank=True, default='', db_index=True)
+    source_endpoint = models.CharField(max_length=255, blank=True, default='')
     model_name = models.CharField(max_length=255)
     creator_name = models.CharField(max_length=150, db_index=True)
-    intelligence_index = models.FloatField(default=0.0, db_index=True)
-    coding_index = models.FloatField(default=0.0, db_index=True)
-    math_index = models.FloatField(default=0.0, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    intelligence_index = models.FloatField(null=True, blank=True, db_index=True)
+    coding_index = models.FloatField(null=True, blank=True, db_index=True)
+    agentic_index = models.FloatField(null=True, blank=True, db_index=True)
+    finance_and_accounting_index = models.FloatField(null=True, blank=True)
+    strategy_and_ops_index = models.FloatField(null=True, blank=True)
+    legal_index = models.FloatField(null=True, blank=True)
+    healthcare_and_medical_index = models.FloatField(null=True, blank=True)
+    engineering_index = models.FloatField(null=True, blank=True)
+    economics_index = models.FloatField(null=True, blank=True)
+    math_index = models.FloatField(null=True, blank=True, db_index=True)
     terminalbench_hard = models.FloatField(null=True, blank=True)
     terminalbench_v2_1 = models.FloatField(null=True, blank=True)
     gpqa = models.FloatField(null=True, blank=True)
@@ -403,9 +500,17 @@ class AABench(models.Model):
     lcr = models.FloatField(null=True, blank=True)  # Long Context Reasoning
     tau2 = models.FloatField(null=True, blank=True)  # Tau-Bench 2
     tau_banking = models.FloatField(null=True, blank=True)
-    tokens_per_second = models.FloatField(default=0.0, db_index=True)
-    time_to_first_token = models.FloatField(default=0.0, db_index=True)
+    tokens_per_second = models.FloatField(null=True, blank=True, db_index=True)
+    time_to_first_token = models.FloatField(null=True, blank=True, db_index=True)
+    time_to_first_answer_token = models.FloatField(null=True, blank=True)
+    end_to_end_response_time = models.FloatField(null=True, blank=True)
+    elo = models.FloatField(null=True, blank=True, db_index=True)
+    confidence_interval = models.FloatField(null=True, blank=True)
+    samples = models.IntegerField(null=True, blank=True)
+    price_per_unit = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
+    price_unit = models.CharField(max_length=60, blank=True, default='')
     raw_json = models.JSONField(default=dict, blank=True)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -422,26 +527,29 @@ class ModelsDevModel(models.Model):
     Source: https://models.dev/api.json — free public provider/model metadata.
     """
     modelsdev_id = models.CharField(max_length=250, unique=True, db_index=True)
+    canonical_model_id = models.CharField(max_length=250, blank=True, default='', db_index=True)
     provider_slug = models.CharField(max_length=150, db_index=True)
     provider_name = models.CharField(max_length=150, blank=True, default='')
     name = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True, db_index=True)
     description = models.TextField(blank=True, default='')
     family = models.CharField(max_length=100, blank=True, default='', db_index=True)
-    reasoning = models.BooleanField(default=False, db_index=True)
-    tool_call = models.BooleanField(default=False, db_index=True)
-    structured_output = models.BooleanField(default=False)
-    temperature = models.BooleanField(default=True)
-    open_weights = models.BooleanField(default=False, db_index=True)
+    reasoning = models.BooleanField(null=True, blank=True, db_index=True)
+    tool_call = models.BooleanField(null=True, blank=True, db_index=True)
+    structured_output = models.BooleanField(null=True, blank=True)
+    temperature = models.BooleanField(null=True, blank=True)
+    open_weights = models.BooleanField(null=True, blank=True, db_index=True)
     release_date = models.DateField(null=True, blank=True, db_index=True)
     last_updated = models.DateField(null=True, blank=True)
     modalities = models.JSONField(default=dict, blank=True)
-    context_length = models.IntegerField(default=0, db_index=True)
+    context_length = models.IntegerField(null=True, blank=True, db_index=True)
     max_output_tokens = models.IntegerField(null=True, blank=True)
-    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
-    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0)
+    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True, db_index=True)
+    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
     cache_read_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
     status = models.CharField(max_length=50, blank=True, default='')
     raw_json = models.JSONField(default=dict, blank=True)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -465,22 +573,43 @@ class RankIndex(models.Model):
     author_slug = models.CharField(max_length=150, blank=True, default='')
     openrouter_id = models.CharField(max_length=250, blank=True, default='', db_index=True)
     aa_slug = models.CharField(max_length=250, blank=True, default='', db_index=True)
+    modelsdev_id = models.CharField(max_length=250, blank=True, default='', db_index=True)
+    family = models.CharField(max_length=150, blank=True, default='', db_index=True)
+    version = models.CharField(max_length=100, blank=True, default='')
+    aliases = models.JSONField(default=list, blank=True)
+    category = models.CharField(max_length=40, blank=True, default='llm', db_index=True)
+    status = models.CharField(max_length=50, blank=True, default='')
+    license = models.CharField(max_length=150, blank=True, default='')
     description = models.TextField(blank=True, default='')
     release_date = models.DateField(null=True, blank=True)
-    is_open_weight = models.BooleanField(default=False, db_index=True)
-    is_free = models.BooleanField(default=False, db_index=True)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
+    input_modalities = models.JSONField(default=list, blank=True)
+    output_modalities = models.JSONField(default=list, blank=True)
+    media_metrics = models.JSONField(default=dict, blank=True)
+    is_open_weight = models.BooleanField(null=True, blank=True, db_index=True)
+    is_free = models.BooleanField(null=True, blank=True, db_index=True)
+    reasoning = models.BooleanField(null=True, blank=True)
+    tool_call = models.BooleanField(null=True, blank=True)
+    structured_output = models.BooleanField(null=True, blank=True)
 
     # Master Composite Rankings
-    rankllms_index = models.FloatField(default=0.0, db_index=True)
-    rank_overall = models.IntegerField(default=0, db_index=True)
-    rank_coding = models.IntegerField(default=0)
-    rank_reasoning = models.IntegerField(default=0)
-    rank_value = models.IntegerField(default=0)
+    rankllms_index = models.FloatField(null=True, blank=True, db_index=True)
+    rank_overall = models.IntegerField(null=True, blank=True, db_index=True)
+    rank_coding = models.IntegerField(null=True, blank=True)
+    rank_reasoning = models.IntegerField(null=True, blank=True)
+    rank_value = models.IntegerField(null=True, blank=True)
 
     # Empirical Benchmarks (Merged from orbench + aabanch)
-    intelligence_index = models.FloatField(default=0.0, db_index=True)
-    coding_index = models.FloatField(default=0.0, db_index=True)
-    math_index = models.FloatField(default=0.0, db_index=True)
+    intelligence_index = models.FloatField(null=True, blank=True, db_index=True)
+    coding_index = models.FloatField(null=True, blank=True, db_index=True)
+    agentic_index = models.FloatField(null=True, blank=True, db_index=True)
+    finance_and_accounting_index = models.FloatField(null=True, blank=True)
+    strategy_and_ops_index = models.FloatField(null=True, blank=True)
+    legal_index = models.FloatField(null=True, blank=True)
+    healthcare_and_medical_index = models.FloatField(null=True, blank=True)
+    engineering_index = models.FloatField(null=True, blank=True)
+    economics_index = models.FloatField(null=True, blank=True)
+    math_index = models.FloatField(null=True, blank=True)
     terminalbench_hard = models.FloatField(null=True, blank=True)
     terminalbench_v2_1 = models.FloatField(null=True, blank=True)
     gpqa_diamond = models.FloatField(null=True, blank=True)
@@ -498,12 +627,16 @@ class RankIndex(models.Model):
     tau_banking = models.FloatField(null=True, blank=True)
 
     # Hardware Telemetry & Economics (Merged from ormodels + aamodels)
-    context_length = models.IntegerField(default=0, db_index=True)
+    context_length = models.IntegerField(null=True, blank=True, db_index=True)
     max_output_tokens = models.IntegerField(null=True, blank=True)
-    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
-    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, default=0.0, db_index=True)
-    tokens_per_second = models.FloatField(default=0.0, db_index=True)
-    time_to_first_token = models.FloatField(default=0.0, db_index=True)
+    prompt_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True, db_index=True)
+    completion_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True, db_index=True)
+    aa_cache_hit_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
+    aa_cache_write_price_per_1m = models.DecimalField(max_digits=14, decimal_places=6, null=True, blank=True)
+    tokens_per_second = models.FloatField(null=True, blank=True, db_index=True)
+    time_to_first_token = models.FloatField(null=True, blank=True, db_index=True)
+    time_to_first_answer_token = models.FloatField(null=True, blank=True)
+    end_to_end_response_time = models.FloatField(null=True, blank=True)
 
     # Sources & Metadata
     has_openrouter = models.BooleanField(default=False)
@@ -519,4 +652,3 @@ class RankIndex(models.Model):
 
     def __str__(self):
         return f"#{self.rank_overall} {self.name} ({self.provider}) - Index: {self.rankllms_index:.1f}"
-

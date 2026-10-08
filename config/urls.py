@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from django.http import JsonResponse, HttpResponse
+from django.db import DatabaseError, connection
 from django.shortcuts import render
 from llms.api import api
 from llms.seo import robots_txt, sitemap_xml
@@ -12,6 +13,7 @@ from llms.seo_context import (
     rankindex_rows,
 )
 from llms.models import RankIndex
+from llms.settings_views import data_sync_action, data_sync_run_status, data_sync_settings
 
 
 def root_home(request):
@@ -91,11 +93,24 @@ def ping_view(request):
 
 
 def health_view(request):
-    return JsonResponse({
-        "status": "healthy",
-        "service": "RankLLMs Engine",
-        "render_keep_alive": True,
-    }, status=200)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+            cursor.fetchone()
+        latest = RankIndex.objects.order_by('-updated_at').values_list('updated_at', flat=True).first()
+        return JsonResponse({
+            'status': 'healthy',
+            'service': 'RankLLMs Engine',
+            'database': 'connected',
+            'canonical_models': RankIndex.objects.count(),
+            'data_snapshot_time': latest.isoformat() if latest else None,
+        }, status=200)
+    except DatabaseError:
+        return JsonResponse({
+            'status': 'unavailable',
+            'service': 'RankLLMs Engine',
+            'database': 'unavailable',
+        }, status=503)
 
 
 urlpatterns = [
@@ -122,6 +137,9 @@ urlpatterns = [
     path('ping', ping_view, name='ping_view'),
     path('health', health_view, name='health_view'),
     path('healthz', health_view, name='healthz_view'),
+    path('settings/data-sync/', data_sync_settings, name='data_sync_settings'),
+    path('settings/data-sync/action/', data_sync_action, name='data_sync_action'),
+    path('settings/data-sync/runs/<int:run_id>/', data_sync_run_status, name='data_sync_run_status'),
     path('admin/', admin.site.urls),
     path('api/v1/', api.urls),
 
@@ -129,6 +147,4 @@ urlpatterns = [
     path('robots.txt', robots_txt, name='robots_txt'),
     path('sitemap.xml', sitemap_xml, name='sitemap_xml'),
 ]
-
-
 

@@ -10,12 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
-from pathlib import Path
-
 import os
 from pathlib import Path
+
 import dj_database_url
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,15 +30,28 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
+DEBUG = os.getenv('DEBUG', 'False').strip().lower() in ('true', '1', 't', 'yes', 'on')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+_default_allowed_hosts = (
+    'localhost,127.0.0.1,::1,api.rankllms.com,'
+    'rankllms-engine-kqso.onrender.com,rankllms-engine.onrender.com'
+)
+ALLOWED_HOSTS = [
+    host.strip().lower()
+    for host in os.getenv('ALLOWED_HOSTS', _default_allowed_hosts).split(',')
+    if host.strip()
+]
+if not ALLOWED_HOSTS or '*' in ALLOWED_HOSTS:
+    raise ImproperlyConfigured(
+        'ALLOWED_HOSTS must contain explicit hostnames; wildcard hosts are not supported.'
+    )
 
 # --- HTTPS / proxy-aware security -----------------------------------------
-# nginx (or Traefik in front of Dokploy) terminates TLS and sets
-# X-Forwarded-Proto. Without SECURE_PROXY_SSL_HEADER, Django treats every
-# request as plain HTTP and secure cookies are never issued.
+# Render/Cloudflare terminate TLS in front of Gunicorn and forward the
+# protocol. Host validation still uses the validated Host header; we do not
+# trust X-Forwarded-Host because the app does not need it.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = False
 
 # A production deploy without a real SECRET_KEY falls back to Django's
 # well-known default, which would let anyone forge sessions. An empty
@@ -186,8 +199,34 @@ STORAGES = {
     },
 }
 
-# CORS Settings
-CORS_ALLOW_ALL_ORIGINS = True  # Allows rankllms.com frontend or any origin to access the API
+# CORS is limited to the product site, the API site, and local development.
+# Operators can add a known frontend origin with CORS_ALLOWED_ORIGINS.
+_default_cors_origins = (
+    'https://rankllms.com,https://www.rankllms.com,https://api.rankllms.com,'
+    'http://localhost:3000,http://127.0.0.1:3000'
+)
+CORS_ALLOWED_ORIGINS = [
+    origin.strip().rstrip('/')
+    for origin in os.getenv('CORS_ALLOWED_ORIGINS', _default_cors_origins).split(',')
+    if origin.strip()
+]
+CORS_URLS_REGEX = r'^/api/.*$'
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip().rstrip('/')
+    for origin in os.getenv(
+        'CSRF_TRUSTED_ORIGINS',
+        'https://api.rankllms.com,https://rankllms-engine-kqso.onrender.com',
+    ).split(',')
+    if origin.strip()
+]
+
+ENABLE_SCHEDULER = os.getenv('ENABLE_SCHEDULER', '').strip().lower() in ('1', 'true', 'yes', 'on')
+try:
+    SYNC_INTERVAL_HOURS = int(os.getenv('SYNC_INTERVAL_HOURS', '6'))
+except ValueError as exc:
+    raise ImproperlyConfigured('SYNC_INTERVAL_HOURS must be a whole number from 1 to 168.') from exc
+if not 1 <= SYNC_INTERVAL_HOURS <= 168:
+    raise ImproperlyConfigured('SYNC_INTERVAL_HOURS must be a whole number from 1 to 168.')
 
 # OpenRouter Settings
 OPENROUTER_API_URL = os.getenv('OPENROUTER_API_URL', 'https://openrouter.ai/api/v1/models')
@@ -196,6 +235,7 @@ OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY', '')
 # Artificial Analysis Settings
 ARTIFICIAL_ANALYSIS_API_URL = os.getenv('ARTIFICIAL_ANALYSIS_API_URL', 'https://artificialanalysis.ai/api/v2')
 ARTIFICIAL_ANALYSIS_API_KEY = os.getenv('ARTIFICIAL_ANALYSIS_API_KEY', '')
+ARTIFICIAL_ANALYSIS_MODELS_PATH = os.getenv('ARTIFICIAL_ANALYSIS_MODELS_PATH', 'language/models/free')
 
 # models.dev Settings (provider + model metadata catalog)
 MODELS_DEV_API_URL = os.getenv('MODELS_DEV_API_URL', 'https://models.dev/api.json')

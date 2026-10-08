@@ -1,335 +1,361 @@
-import requests
-import time
-from decimal import Decimal
-from django.conf import settings
+"""Ingest verified Artificial Analysis model metadata and evaluations."""
+
+from collections import defaultdict
+from decimal import Decimal, InvalidOperation
+
 from django.db import transaction
 from django.utils.text import slugify
-from llms.models import LLMModel, ModelBenchmark, ModelPricing, ModelSpecification, Provider
 
-def sync_artificial_analysis_data():
-    """
-    Ultra-fast Bulk Ingestion Service for Artificial Analysis API v2.
-    Ingests official LLM benchmark evaluations, pricing, throughput, and media ratings.
-    """
-    api_key = getattr(settings, 'ARTIFICIAL_ANALYSIS_API_KEY', '') or ''
-    base_url = getattr(settings, 'ARTIFICIAL_ANALYSIS_API_URL', 'https://artificialanalysis.ai/api/v2')
+from llms.models import (
+    LLMModel,
+    ModelBenchmark,
+    ModelPricing,
+    ModelSpecification,
+    Provider,
+)
+from llms.services.artificial_analysis_client import fetch_language_models
+from llms.services.merge_rankindex import identity_key, normalize_provider
+from llms.services.rankllms_calculator import normalize_percentage
+from llms.services.source_http import UpstreamSourceError
 
-    if not api_key:
-        print('[Artificial Analysis Sync] ARTIFICIAL_ANALYSIS_API_KEY is not set; skipping AA sync.')
-        return False
 
-    headers = {
-        'x-api-key': api_key,
-        'User-Agent': 'RankLLMs-Engine/1.0',
-    }
-
-    t0 = time.time()
-    print("[Artificial Analysis Sync] Fetching catalog from Artificial Analysis API...")
-
-    url = f"{base_url}/data/llms/models"
-    models_list = []
+def _number(value, *, maximum=None):
+    if value is None or isinstance(value, bool):
+        return None
     try:
-        res = requests.get(url, headers=headers, timeout=15)
-        res.raise_for_status()
-        payload = res.json()
-        models_list = payload.get('data', [])
-    except Exception as e:
-        print(f"[Artificial Analysis Sync] Warning fetching LLM models endpoint: {e}")
+        result = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if result < 0 or result == float('inf') or result != result:
+        return None
+    if maximum is not None and result > maximum:
+        return None
+    return result
 
-    print(f"[Artificial Analysis Sync] Received {len(models_list)} LLM models from Artificial Analysis API.")
 
-    provider_cache = {p.slug: p for p in Provider.objects.all()}
-    db_models = list(LLMModel.objects.all())
-    existing_open_ids = {m.openrouter_id for m in db_models}
+def _decimal(value):
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        result = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+    if not result.is_finite() or result < 0:
+        return None
+    return result
 
-    # Smart lookup table
-    lookup = {}
-    for m in db_models:
-        lookup[m.openrouter_id.lower().strip()] = m
-        lookup[m.slug.lower().strip()] = m
-        short_id = m.openrouter_id.split('/')[-1].lower().strip()
-        lookup[short_id] = m
-        clean_s = m.slug.replace('-', '').replace('_', '').lower().strip()
-        lookup[clean_s] = m
 
-    # 1. Pre-create any missing Providers & LLMModels in bulk
-    new_providers = {}
-    new_llms = []
+def _first_value(mapping, *keys):
+    for key in keys:
+        if mapping.get(key) is not None:
+            return mapping[key]
+    return None
 
-    for aa_model in models_list:
-        aa_id = aa_model.get('id', '')
-        aa_name = aa_model.get('name', '')
-        aa_slug = aa_model.get('slug', '') or slugify(aa_name)
-        creator_data = aa_model.get('model_creator', {}) or {}
 
-        creator_name = creator_data.get('name') or 'Other'
-        creator_slug = creator_data.get('slug') or slugify(creator_name)
+def _modalities_for_direction(value):
+    if isinstance(value, dict):
+        return [str(name) for name, enabled in value.items() if enabled is True]
+    if isinstance(value, list):
+        return [str(name) for name in value]
+    return []
 
-        if creator_slug not in provider_cache and creator_slug not in new_providers:
-            new_providers[creator_slug] = Provider(
-                slug=creator_slug,
-                name=creator_name,
-                description=f'{creator_name} AI Models'
-            )
 
-        clean_aa_slug = aa_slug.lower().strip()
-        clean_aa_id = aa_id.lower().strip()
-        clean_aa_name = aa_name.lower().replace('-', '').replace('_', '').replace(' ', '')
+def _creator(model):
+    creator = model.get('model_creator') or model.get('creator') or {}
+    if not isinstance(creator, dict):
+        creator = {}
+    creator_name = creator.get('name') or model.get('creator_name') or 'Independent'
+    creator_slug = creator.get('slug') or model.get('creator_slug') or slugify(creator_name) or 'independent'
+    provider_slug = normalize_provider(creator_slug) or slugify(creator_name) or 'independent'
+    return creator_name, provider_slug
 
-        target_model = (
-            lookup.get(clean_aa_slug) or
-            lookup.get(clean_aa_id) or
-            lookup.get(clean_aa_name)
+
+def _model_identity_index(models):
+    index = defaultdict(list)
+    for model in models:
+        provider = normalize_provider(model.provider.slug)
+        for value in (model.openrouter_id, model.slug):
+            key = identity_key(provider, value)
+            if key and model not in index[key]:
+                index[key].append(model)
+    return index
+
+
+def _slug_for_new_model(provider_slug, model_slug, used_slugs):
+    base = slugify(f'{provider_slug}-{model_slug}') or 'model'
+    slug = base[:250]
+    suffix = 1
+    while slug in used_slugs:
+        ending = f'-{suffix}'
+        slug = f'{base[:250-len(ending)]}{ending}'
+        suffix += 1
+    used_slugs.add(slug)
+    return slug
+
+
+def sync_artificial_analysis_data(models_list=None):
+    """Fetch, validate, and atomically upsert AA language model records.
+
+    The API's measured indices and telemetry are retained as published. No
+    score is inferred from another benchmark, a model name, or a license.
+    """
+    models_list = models_list if models_list is not None else fetch_language_models()
+    prepared = []
+    seen = {}
+    for item in models_list:
+        aa_id = item.get('id') or item.get('slug')
+        if not aa_id:
+            continue
+        aa_slug = item.get('slug') or aa_id
+        normalized = str(aa_slug).strip().casefold()
+        source_id = str(aa_id).strip()
+        if normalized in seen:
+            if seen[normalized] != source_id:
+                raise UpstreamSourceError(
+                    'artificial_analysis',
+                    f'Artificial Analysis returned multiple records for slug {aa_slug}; explicit variant mapping is required. Existing data was kept.',
+                )
+            continue
+        seen[normalized] = source_id
+        creator_name, creator_slug = _creator(item)
+        prepared.append((item, str(aa_id), str(aa_slug), creator_name, creator_slug))
+    if not prepared:
+        raise UpstreamSourceError(
+            'artificial_analysis',
+            'Artificial Analysis returned no valid model records; existing data was kept.',
         )
 
-        if not target_model:
-            open_id = f"aa/{creator_slug}/{aa_slug}"
-            if open_id not in existing_open_ids:
-                existing_open_ids.add(open_id)
-                new_llms.append((open_id, aa_slug, aa_name, creator_slug, aa_model))
-
     with transaction.atomic():
+        provider_cache = {provider.slug: provider for provider in Provider.objects.all()}
+        new_providers = {}
+        for _item, _aa_id, _slug, creator_name, provider_slug in prepared:
+            if provider_slug not in provider_cache and provider_slug not in new_providers:
+                new_providers[provider_slug] = Provider(
+                    slug=provider_slug,
+                    name=creator_name,
+                    description=f'{creator_name} AI Models',
+                )
         if new_providers:
             Provider.objects.bulk_create(list(new_providers.values()), ignore_conflicts=True)
-            provider_cache = {p.slug: p for p in Provider.objects.all()}
+            provider_cache = {provider.slug: provider for provider in Provider.objects.all()}
 
-        if new_llms:
-            llms_to_create = []
-            for open_id, aa_slug, aa_name, creator_slug, aa_model in new_llms:
-                prov = provider_cache.get(creator_slug) or provider_cache.get('other')
-                llms_to_create.append(LLMModel(
-                    openrouter_id=open_id,
-                    slug=aa_slug,
-                    name=aa_name,
-                    provider=prov,
-                    category='llm',
-                    raw_json=aa_model,
-                ))
-            LLMModel.objects.bulk_create(llms_to_create, ignore_conflicts=True)
+        db_models = list(LLMModel.objects.select_related('provider').all())
+        identity_index = _model_identity_index(db_models)
+        used_slugs = set(LLMModel.objects.values_list('slug', flat=True))
+        new_rows = []
+        matched_models = {}
+        ambiguous_matches = 0
 
-    # Refresh DB model cache
-    db_models = list(LLMModel.objects.all())
-    existing_benchmarks = {b.model_id: b for b in ModelBenchmark.objects.all()}
-    existing_pricing = {p.model_id: p for p in ModelPricing.objects.all()}
-    existing_specs = {s.model_id: s for s in ModelSpecification.objects.all()}
+        for item, aa_id, aa_slug, creator_name, provider_slug in prepared:
+            keys = {
+                identity_key(provider_slug, aa_slug),
+                identity_key(provider_slug, aa_id),
+            } - {''}
+            candidates = {candidate for key in keys for candidate in identity_index.get(key, [])}
+            if len(candidates) == 1:
+                target = next(iter(candidates))
+                matched_models[aa_slug] = target
+                continue
+            if len(candidates) > 1:
+                ambiguous_matches += 1
 
-    lookup = {}
-    for m in db_models:
-        lookup[m.openrouter_id.lower().strip()] = m
-        lookup[m.slug.lower().strip()] = m
-        short_id = m.openrouter_id.split('/')[-1].lower().strip()
-        lookup[short_id] = m
-        clean_s = m.slug.replace('-', '').replace('_', '').lower().strip()
-        lookup[clean_s] = m
-
-    specs_to_create = []
-    pricing_to_create = []
-    pricing_to_update = []
-    benchmarks_to_create = []
-    benchmarks_to_update = []
-    updated_count = 0
-
-    for aa_model in models_list:
-        aa_id = aa_model.get('id', '')
-        aa_name = aa_model.get('name', '')
-        aa_slug = aa_model.get('slug', '') or slugify(aa_name)
-        evals = aa_model.get('evaluations', {}) or {}
-        pricing_data = aa_model.get('pricing', {}) or {}
-
-        clean_aa_slug = aa_slug.lower().strip()
-        clean_aa_id = aa_id.lower().strip()
-        clean_aa_name = aa_name.lower().replace('-', '').replace('_', '').replace(' ', '')
-
-        target_model = (
-            lookup.get(clean_aa_slug) or
-            lookup.get(clean_aa_id) or
-            lookup.get(clean_aa_name)
-        )
-
-        if not target_model:
-            continue
-
-        # Specs
-        if target_model.id not in existing_specs:
-            specs_to_create.append(ModelSpecification(
-                model=target_model,
-                context_length=128000,
-                max_completion_tokens=4096,
-                modality='text->text'
+            open_id = f'aa/{provider_slug}/{aa_slug}'
+            if len(open_id) > 200:
+                open_id = f'aa/{provider_slug}/{slugify(aa_slug)[:130]}'
+            new_rows.append(LLMModel(
+                openrouter_id=open_id,
+                slug=_slug_for_new_model(provider_slug, aa_slug, used_slugs),
+                name=item.get('name') or aa_slug,
+                provider=provider_cache[provider_slug],
+                category='llm',
+                description=item.get('description') or '',
+                is_open_weight=(
+                    bool((item.get('licensing') or {}).get('is_open_weights'))
+                    if (item.get('licensing') or {}).get('is_open_weights') is not None
+                    else None
+                ),
+                raw_json=item,
             ))
 
-        # Benchmark
-        bm = existing_benchmarks.get(target_model.id)
-        is_new_bm = False
-        if not bm:
-            bm = ModelBenchmark(model=target_model)
-            existing_benchmarks[target_model.id] = bm
-            is_new_bm = True
+        if new_rows:
+            LLMModel.objects.bulk_create(new_rows, ignore_conflicts=True, batch_size=200)
 
-        intel_raw = evals.get('artificial_analysis_intelligence_index')
-        coding_raw = evals.get('artificial_analysis_coding_index')
-        math_raw = evals.get('artificial_analysis_math_index')
-        mmlu_pro = evals.get('mmlu_pro')
-        gpqa = evals.get('gpqa')
-        livecode = evals.get('livecodebench')
-        math500 = evals.get('math_500')
-        aime = evals.get('aime')
-        terminal = evals.get('terminalbench_hard')
-        tau2 = evals.get('tau2')
-        tps = aa_model.get('median_output_tokens_per_second')
-        ttft = aa_model.get('median_time_to_first_token_seconds')
+        # Resolve newly inserted AA-only rows and refresh map IDs.
+        db_models = list(LLMModel.objects.select_related('provider').all())
+        identity_index = _model_identity_index(db_models)
+        models_by_aa_slug = {}
+        for item, aa_id, aa_slug, _creator_name, provider_slug in prepared:
+            if aa_slug in matched_models:
+                models_by_aa_slug[aa_slug] = matched_models[aa_slug]
+                continue
+            keys = {
+                identity_key(provider_slug, aa_slug),
+                identity_key(provider_slug, aa_id),
+            } - {''}
+            candidates = {candidate for key in keys for candidate in identity_index.get(key, [])}
+            if len(candidates) == 1:
+                models_by_aa_slug[aa_slug] = next(iter(candidates))
 
-        # 1. Normalized Intelligence Index (0-100 Scale)
-        bench_pts = []
-        if gpqa is not None: bench_pts.append(float(gpqa) * 100)
-        if mmlu_pro is not None: bench_pts.append(float(mmlu_pro) * 100)
-        if math500 is not None: bench_pts.append(float(math500) * 100)
-        if aime is not None: bench_pts.append(float(aime) * 100)
-        if livecode is not None: bench_pts.append(float(livecode) * 100)
+        spec_map = {row.model_id: row for row in ModelSpecification.objects.all()}
+        pricing_map = {row.model_id: row for row in ModelPricing.objects.all()}
+        existing_benchmarks = {row.model_id: row for row in ModelBenchmark.objects.all()}
+        benchmark_map = dict(existing_benchmarks)
+        specs_to_create, specs_to_update = [], []
+        prices_to_create, prices_to_update = [], []
+        benchmarks_to_create, benchmarks_to_update = [], []
+        matched_count = 0
+        matched_model_ids = set()
 
-        if bench_pts:
-            avg_bench = sum(bench_pts) / len(bench_pts)
-            if intel_raw is not None:
-                bm.intelligence_index = round((0.35 * min(float(intel_raw) * 1.5, 99.0)) + (0.65 * avg_bench), 1)
+        for item, _aa_id, aa_slug, _creator_name, _provider_slug in prepared:
+            model = models_by_aa_slug.get(aa_slug)
+            if model is None:
+                continue
+            matched_count += 1
+            matched_model_ids.add(model.pk)
+            evaluations = item.get('evaluations') if isinstance(item.get('evaluations'), dict) else {}
+            pricing_data = item.get('pricing') if isinstance(item.get('pricing'), dict) else {}
+            specs_data = item.get('specs') if isinstance(item.get('specs'), dict) else {}
+            limit_data = item.get('limits') if isinstance(item.get('limits'), dict) else {}
+            performance = item.get('performance') if isinstance(item.get('performance'), dict) else {}
+
+            context = item.get('context_window_tokens') or item.get('context_length') or specs_data.get('context_window') or limit_data.get('context')
+            max_output = item.get('max_output_tokens') or specs_data.get('max_output_tokens') or limit_data.get('output')
+            if context is not None or max_output is not None:
+                spec = spec_map.get(model.pk)
+                if spec is None:
+                    spec = ModelSpecification(model=model)
+                    spec_map[model.pk] = spec
+                    specs_to_create.append(spec)
+                else:
+                    specs_to_update.append(spec)
+                if context is not None:
+                    try:
+                        spec.context_length = int(context)
+                    except (TypeError, ValueError):
+                        pass
+                if max_output is not None:
+                    try:
+                        spec.max_completion_tokens = int(max_output)
+                    except (TypeError, ValueError):
+                        pass
+                modalities = item.get('modalities') or specs_data.get('modalities') or {}
+                if isinstance(modalities, dict):
+                    in_modalities = _modalities_for_direction(modalities.get('input'))
+                    out_modalities = _modalities_for_direction(modalities.get('output'))
+                    if in_modalities or out_modalities:
+                        spec.modality = '+'.join(in_modalities) + '->' + '+'.join(out_modalities)
+                        spec.is_multimodal = len(in_modalities) > 1 or any(x in in_modalities for x in ('image', 'audio', 'video'))
+                        spec.supports_vision = 'image' in in_modalities
+                        spec.supports_audio = 'audio' in in_modalities or 'audio' in out_modalities
+
+            prompt = _decimal(_first_value(
+                pricing_data,
+                'price_1m_input_tokens',
+                'prompt_price_per_1m',
+                'prompt_token_cost_per_million',
+            ))
+            completion = _decimal(_first_value(
+                pricing_data,
+                'price_1m_output_tokens',
+                'completion_price_per_1m',
+                'completion_token_cost_per_million',
+            ))
+            if prompt is not None or completion is not None:
+                price = pricing_map.get(model.pk)
+                if price is None:
+                    price = ModelPricing(model=model)
+                    pricing_map[model.pk] = price
+                    prices_to_create.append(price)
+                else:
+                    prices_to_update.append(price)
+                if prompt is not None:
+                    price.prompt_price_per_1m = prompt
+                    price.prompt_price_per_token = prompt / Decimal('1000000')
+                if completion is not None:
+                    price.completion_price_per_1m = completion
+                    price.completion_price_per_token = completion / Decimal('1000000')
+
+            assignments = {
+                'intelligence_index': _number(_first_value(evaluations, 'artificial_analysis_intelligence_index', 'intelligence_index'), maximum=100),
+                'coding_index': _number(_first_value(evaluations, 'artificial_analysis_coding_index', 'coding_index'), maximum=100),
+                'agentic_index': _number(_first_value(evaluations, 'artificial_analysis_agentic_index', 'agentic_index'), maximum=100),
+                'math_index': _number(_first_value(evaluations, 'artificial_analysis_math_index', 'math_index'), maximum=100),
+                'swe_bench_score': normalize_percentage(_first_value(evaluations, 'swe_bench_resolved', 'swe_bench')),
+                'human_eval_score': normalize_percentage(evaluations.get('human_eval')),
+                'mmlu_score': normalize_percentage(_first_value(evaluations, 'mmlu', 'mmlu_pro')),
+                'tokens_per_second': _number(_first_value(item, 'median_output_tokens_per_second') or performance.get('median_output_tokens_per_second')),
+                'time_to_first_token': _number(_first_value(item, 'median_time_to_first_token_seconds') or performance.get('median_time_to_first_token_seconds')),
+                'arena_elo': None,
+            }
+            bm = benchmark_map.get(model.pk)
+            if bm is None:
+                if not any(value is not None for value in assignments.values()):
+                    continue
+                bm = ModelBenchmark(model=model)
+                benchmark_map[model.pk] = bm
+                benchmarks_to_create.append(bm)
             else:
-                bm.intelligence_index = round(avg_bench, 1)
-        elif intel_raw is not None:
-            bm.intelligence_index = round(min(float(intel_raw) * 1.5, 99.0), 1)
+                # Clear legacy inferred values first. The current AA snapshot
+                # below repopulates only fields explicitly measured by AA.
+                for field in (
+                    'intelligence_index', 'coding_index', 'agentic_index', 'math_index',
+                    'swe_bench_score', 'human_eval_score', 'mmlu_score', 'arena_elo',
+                    'tokens_per_second', 'time_to_first_token',
+                ):
+                    setattr(bm, field, None)
+                benchmarks_to_update.append(bm)
+            for field, value in assignments.items():
+                if value is not None:
+                    setattr(bm, field, value)
 
-        # 2. Coding Index
-        if livecode is not None:
-            bm.coding_index = round(float(livecode) * 100, 1)
-        elif coding_raw is not None:
-            bm.coding_index = round(min(float(coding_raw) * 1.3, 99.0), 1)
-        elif bm.intelligence_index > 0:
-            bm.coding_index = round(bm.intelligence_index * 0.94, 1)
-
-        # 3. SWE-Bench Software Engineering
-        if terminal is not None:
-            bm.swe_bench_score = round(float(terminal) * 100, 1)
-        elif livecode is not None:
-            bm.swe_bench_score = round(float(livecode) * 80.0, 1)
-
-        # 4. Agentic & Tool Use Index
-        if tau2 is not None:
-            bm.agentic_index = round(float(tau2) * 100, 1)
-        elif bm.intelligence_index > 0:
-            bm.agentic_index = round(bm.intelligence_index * 0.88, 1)
-
-        # 5. MMLU & LMSYS Chatbot Arena ELO
-        if mmlu_pro is not None:
-            bm.mmlu_score = round(float(mmlu_pro) * 100, 1)
-        if bm.intelligence_index > 0:
-            bm.arena_elo = round(1000.0 + (bm.intelligence_index * 4.2), 1)
-
-        if tps is not None:
-            bm.tokens_per_second = float(tps)
-        if ttft is not None:
-            bm.time_to_first_token = float(ttft)
-
-        if is_new_bm:
-            benchmarks_to_create.append(bm)
-        else:
-            benchmarks_to_update.append(bm)
-
-        # Pricing
-        p_in = pricing_data.get('price_1m_input_tokens')
-        p_out = pricing_data.get('price_1m_output_tokens')
-        if p_in is not None or p_out is not None:
-            pr = existing_pricing.get(target_model.id)
-            is_new_pr = False
-            if not pr:
-                pr = ModelPricing(model=target_model)
-                existing_pricing[target_model.id] = pr
-                is_new_pr = True
-
-            if p_in is not None:
-                pr.prompt_price_per_1m = Decimal(str(p_in))
-                pr.prompt_price_per_token = Decimal(str(p_in)) / Decimal('1000000')
-            if p_out is not None:
-                pr.completion_price_per_1m = Decimal(str(p_out))
-                pr.completion_price_per_token = Decimal(str(p_out)) / Decimal('1000000')
-
-            if is_new_pr:
-                pricing_to_create.append(pr)
-            else:
-                pricing_to_update.append(pr)
-
-        updated_count += 1
-
-    # 2. Media Endpoints Ingestion
-    media_endpoints = [
-        ('/data/media/text-to-image', 'image'),
-        ('/data/media/image-editing', 'image'),
-        ('/data/media/text-to-video', 'video'),
-        ('/data/media/image-to-video', 'video'),
-        ('/data/media/text-to-speech', 'audio'),
-    ]
-
-    media_synced = 0
-    existing_openrouter_ids = set(LLMModel.objects.values_list('openrouter_id', flat=True))
-    media_models_to_create = []
-
-    for endpoint_path, category_name in media_endpoints:
-        try:
-            m_res = requests.get(f"{base_url}{endpoint_path}", headers=headers, timeout=10)
-            if m_res.status_code == 200:
-                media_items = m_res.json().get('data', [])
-                for m_item in media_items:
-                    m_slug = m_item.get('slug') or slugify(m_item.get('name', 'media-model'))
-                    m_name = m_item.get('name') or m_slug
-                    creator_data = m_item.get('model_creator') or {}
-                    creator_name = creator_data.get('name') or 'Unknown'
-                    creator_slug = slugify(creator_name)
-
-                    if creator_slug not in provider_cache:
-                        provider_obj, _ = Provider.objects.get_or_create(
-                            slug=creator_slug,
-                            defaults={'name': creator_name, 'description': f'{creator_name} AI Models'}
-                        )
-                        provider_cache[creator_slug] = provider_obj
-                    else:
-                        provider_obj = provider_cache[creator_slug]
-
-                    open_id = f"aa/{category_name}/{m_slug}"
-                    if open_id not in existing_openrouter_ids:
-                        existing_openrouter_ids.add(open_id)
-                        media_models_to_create.append(LLMModel(
-                            openrouter_id=open_id,
-                            slug=f"{category_name}-{m_slug}",
-                            name=m_name,
-                            provider=provider_obj,
-                            category=category_name,
-                            raw_json=m_item,
-                        ))
-                        media_synced += 1
-        except Exception as e:
-            print(f"[Artificial Analysis Sync] Warning fetching media endpoint {endpoint_path}: {e}")
-
-    with transaction.atomic():
-        if media_models_to_create:
-            LLMModel.objects.bulk_create(media_models_to_create, ignore_conflicts=True)
+        # Older releases filled every missing model with name-based estimates
+        # and fabricated ELO/SWE values. A successful complete AA catalog
+        # refresh invalidates those unsupported leftovers for non-AA models.
+        llm_model_ids = set(LLMModel.objects.filter(category='llm').values_list('pk', flat=True))
+        for model_id, bm in existing_benchmarks.items():
+            if model_id not in llm_model_ids or model_id in matched_model_ids:
+                continue
+            changed = False
+            for field in (
+                'intelligence_index', 'coding_index', 'agentic_index', 'math_index',
+                'swe_bench_score', 'human_eval_score', 'mmlu_score', 'arena_elo',
+                'tokens_per_second', 'time_to_first_token',
+            ):
+                if getattr(bm, field) is not None:
+                    setattr(bm, field, None)
+                    changed = True
+            if changed:
+                benchmarks_to_update.append(bm)
 
         if specs_to_create:
-            ModelSpecification.objects.bulk_create(specs_to_create, ignore_conflicts=True, batch_size=100)
-
+            ModelSpecification.objects.bulk_create(specs_to_create, ignore_conflicts=True, batch_size=200)
+        if specs_to_update:
+            ModelSpecification.objects.bulk_update(
+                specs_to_update,
+                fields=['context_length', 'max_completion_tokens', 'modality', 'is_multimodal', 'supports_vision', 'supports_audio'],
+                batch_size=200,
+            )
+        if prices_to_create:
+            ModelPricing.objects.bulk_create(prices_to_create, ignore_conflicts=True, batch_size=200)
+        if prices_to_update:
+            ModelPricing.objects.bulk_update(
+                prices_to_update,
+                fields=['prompt_price_per_token', 'completion_price_per_token', 'prompt_price_per_1m', 'completion_price_per_1m'],
+                batch_size=200,
+            )
         if benchmarks_to_create:
-            ModelBenchmark.objects.bulk_create(benchmarks_to_create, ignore_conflicts=True, batch_size=100)
+            ModelBenchmark.objects.bulk_create(benchmarks_to_create, ignore_conflicts=True, batch_size=200)
         if benchmarks_to_update:
             ModelBenchmark.objects.bulk_update(
                 benchmarks_to_update,
-                fields=['intelligence_index', 'coding_index', 'tokens_per_second', 'time_to_first_token'],
-                batch_size=100
+                fields=['intelligence_index', 'coding_index', 'agentic_index', 'math_index', 'swe_bench_score', 'human_eval_score', 'mmlu_score', 'arena_elo', 'tokens_per_second', 'time_to_first_token'],
+                batch_size=200,
             )
 
-        if pricing_to_create:
-            ModelPricing.objects.bulk_create(pricing_to_create, ignore_conflicts=True, batch_size=100)
-        if pricing_to_update:
-            ModelPricing.objects.bulk_update(
-                pricing_to_update,
-                fields=['prompt_price_per_token', 'completion_price_per_token', 'prompt_price_per_1m', 'completion_price_per_1m'],
-                batch_size=100
-            )
-
-    print(f"[Artificial Analysis Sync] Completed sync in {time.time()-t0:.2f}s. LLM Synced: {updated_count} (New LLMs: {len(new_llms)}), Media Created: {media_synced}.")
-    return True
+    return {
+        'models_fetched': len(prepared),
+        'models_matched_or_added': matched_count,
+        'models_added': len(new_rows),
+        'ambiguous_matches': ambiguous_matches,
+        'records_updated': matched_count,
+    }

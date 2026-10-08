@@ -1,6 +1,8 @@
-import os
+import logging
 
 from django.apps import AppConfig
+
+logger = logging.getLogger(__name__)
 
 
 class LlmsConfig(AppConfig):
@@ -16,5 +18,5 @@ class LlmsConfig(AppConfig):
         try:
             from .scheduler import start_scheduler
             start_scheduler()
-        except Exception as e:  # never let a scheduler failure block startup
-            print(f"[Scheduler] Failed to start background scheduler: {e}")
+        except Exception as exc:  # scheduler startup must not block web startup
+            logger.error('Scheduler startup failed (%s).', type(exc).__name__)

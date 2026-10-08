@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" class="wa-theme-default wa-palette-default wa-light">
+<head>
+  <meta charset="UTF-8">
+  {% include "_wa_head.html" %}
+  <title>Data Sync Settings | RankLLMs Engine</title>
+  <meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+  <wa-page>
+    <header slot="header" class="site-header section">
+      <a class="brand-wordmark" href="/">RankLLMs</a>
+      {% include "_wa_nav.html" with nav_class="header-nav" active_path=request.path %}
+      <div class="header-actions">
+        <wa-button href="/admin/logout/" appearance="outlined" size="s">Sign out</wa-button>
+        <wa-button data-toggle-nav appearance="plain" class="toggle-nav" aria-label="Open menu">
+          <wa-icon name="bars"></wa-icon>
+        </wa-button>
+      </div>
+    </header>
+    {% include "_wa_nav.html" with nav_class="" active_path=request.path %}
+
+    <main class="section content-wrap settings-page">
+      <section class="page-header" aria-labelledby="settings-title">
+        <div>
+          <div class="page-meta"><wa-badge variant="brand" appearance="outlined" pill>Staff control</wa-badge><span>Source snapshots · manual sync · integrity</span></div>
+          <h1 id="settings-title">Data sync settings</h1>
+          <p class="page-lede">Check the last saved source snapshots, preview changes without committing, or run one provider at a time. A preview still calls upstream APIs and uses their request quota; credentials stay on the server.</p>
+        </div>
+        <div class="page-actions">
+          <form method="post" action="{% url 'data_sync_action' %}">
+            {% csrf_token %}<input type="hidden" name="action" value="sync"><input type="hidden" name="source" value="all">
+            <wa-button type="submit" variant="brand"{% if active_run %} disabled{% endif %}>Sync all sources</wa-button>
+          </form>
+          <form method="post" action="{% url 'data_sync_action' %}">
+            {% csrf_token %}<input type="hidden" name="action" value="dry_run"><input type="hidden" name="source" value="all">
+            <wa-button type="submit" appearance="outlined"{% if active_run %} disabled{% endif %}>Dry run · all</wa-button>
+          </form>
+        </div>
+      </section>
+
+      <p class="schedule-note"><strong>Automatic schedule:</strong> {% if scheduler_enabled %}enabled · every {{ sync_interval_hours }} hours while the Render instance is awake{% else %}disabled · use a Render Cron Job or enable <code>ENABLE_SCHEDULER</code> on one web instance{% endif %}. Interval is controlled by the server environment, not a browser field.</p>
+
+      {% for message in messages %}
+        <p class="notice notice-{{ message.tags }}" role="status">{{ message }}</p>
+      {% endfor %}
+
+      {% if selected_run %}
+      <section class="run-result" data-run-id="{{ selected_run.pk }}" data-status-url="{% url 'data_sync_run_status' selected_run.pk %}" aria-labelledby="run-result-title" aria-live="polite">
+        <div class="run-result-head">
+          <div>
+            <p class="section-kicker">Latest operation</p>
+            <h2 id="run-result-title">{% if selected_run.dry_run %}Dry run{% else %}Sync run{% endif %} #{{ selected_run.pk }}</h2>
+          </div>
+          <span class="status-pill status-{{ selected_run.status }}" data-run-status>{{ selected_run.get_status_display }}</span>
+        </div>
+        <p class="run-wait" data-run-message>{% if selected_run.status == 'queued' or selected_run.status == 'running' %}Waiting for the worker to finish. No estimated progress is shown.{% else %}Run finished. Counts below come from the saved run report.{% endif %}</p>
+        <div class="run-summary" data-run-summary>
+          {% if selected_run.finished_at %}
+          <span><strong>{{ selected_run.records_received }}</strong> received</span>
+          <span><strong>{{ selected_run.records_added }}</strong> added</span>
+          <span><strong>{{ selected_run.records_updated }}</strong> updated</span>
+          <span><strong>{{ selected_run.records_skipped }}</strong> skipped</span>
+          <span><strong>{{ selected_run.summary.merge_summary.conflicts|default:0 }}</strong> conflicts</span>
+          <span><strong>{{ selected_run.summary.total_rankindex|default:"—" }}</strong> canonical models</span>
+          <span><strong>{{ selected_run.error_count }}</strong> failed sources</span>
+          <span><strong>{{ selected_run.duration_seconds|default:"—" }}s</strong> duration</span>
+          {% endif %}
+        </div>
+        {% if selected_run.error_summary %}<p class="run-error">{{ selected_run.error_summary }}</p>{% endif %}
+        <details class="run-details"{% if selected_run.finished_at %}{% endif %}>
+          <summary>View source results and conflicts</summary>
+          <pre data-run-json>{{ selected_run.summary|default:"{}"|pprint }}</pre>
+        </details>
+        <a class="quiet-link" href="{% url 'data_sync_settings' %}">Refresh this page</a>
+      </section>
+      {% endif %}
+
+      <section class="settings-section" aria-labelledby="sources-title">
+        <div class="section-heading">
+          <div><p class="section-kicker">Source snapshots</p><h2 id="sources-title">Data sources</h2></div>
+          <span class="section-note">Connection status is based on server configuration and recorded runs.</span>
+        </div>
+        <div class="source-list">
+          {% for source in sources %}
+          <article class="source-row">
+            <div class="source-main">
+              <div class="source-title-line">
+                <h3>{{ source.name }}</h3>
+                <span class="status-pill status-{{ source.status }}">{{ source.status|title }}</span>
+              </div>
+              <p class="source-connection">{{ source.connection }}{% if source.latest_error %}<span class="source-error"> · {{ source.latest_error }}</span>{% endif %}</p>
+              <dl class="source-facts">
+                <div><dt>Last successful sync</dt><dd>{% if source.last_success %}<time datetime="{{ source.last_success.finished_at|date:'c' }}">{{ source.last_success.finished_at|date:'Y-m-d H:i:s' }} UTC</time>{% else %}Never{% endif %}</dd></div>
+                <div><dt>Last failed sync</dt><dd>{% if source.last_failure %}{{ source.last_failure.finished_at|date:'Y-m-d H:i:s' }} UTC{% else %}None recorded{% endif %}</dd></div>
+                <div><dt>Records received</dt><dd>{{ source.records_received|default:0 }}</dd></div>
+                <div><dt>Added / updated</dt><dd>{{ source.records_added|default:0 }} / {{ source.records_updated|default:0 }}</dd></div>
+                <div><dt>Skipped / unchanged</dt><dd>{{ source.records_skipped|default:0 }} / {{ source.records_unchanged|default:0 }}</dd></div>
+                <div><dt>Last duration</dt><dd>{% if source.duration_seconds != None %}{{ source.duration_seconds }}s{% else %}—{% endif %}</dd></div>
+                <div><dt>Request limits</dt><dd>{{ source.rate_limit }}</dd></div>
+              </dl>
+            </div>
+            <div class="source-operations">
+              <form method="post" action="{% url 'data_sync_action' %}" class="source-sync-actions">
+                {% csrf_token %}<input type="hidden" name="source" value="{{ source.key }}">
+                <button class="action-button" type="submit" name="action" value="sync"{% if active_run or not source.enabled %} disabled{% endif %}>Sync source</button>
+                <button class="action-button action-secondary" type="submit" name="action" value="dry_run"{% if active_run or not source.enabled %} disabled{% endif %}>Preview</button>
+              </form>
+              <form method="post" action="{% url 'data_sync_action' %}" class="source-config">
+                {% csrf_token %}<input type="hidden" name="action" value="save_source"><input type="hidden" name="source" value="{{ source.key }}">
+                <label class="enabled-toggle"><input type="checkbox" name="enabled"{% if source.enabled %} checked{% endif %}> Source enabled</label>
+                <label>Timeout <span class="field-unit">seconds</span><input type="number" name="timeout_seconds" min="5" max="120" value="{{ source.timeout_seconds }}"></label>
+                <label>Retries <input type="number" name="retry_count" min="0" max="5" value="{{ source.retry_count }}"></label>
+                <button class="save-button" type="submit">Save source settings</button>
+              </form>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="settings-section" aria-labelledby="integrity-title">
+        <div class="section-heading">
+          <div><p class="section-kicker">Current database snapshot</p><h2 id="integrity-title">Data integrity</h2></div>
+          {% if integrity.stale %}<span class="status-pill status-warning">Last successful sync is over 24 hours old</span>{% elif integrity.last_success %}<span class="section-note">Latest successful run: {{ integrity.last_success.finished_at|date:'Y-m-d H:i:s' }} UTC</span>{% else %}<span class="section-note">No successful sync is recorded yet.</span>{% endif %}
+        </div>
+        <div class="integrity-layout">
+          <div class="integrity-summary">
+            <p><strong>{{ integrity.total_source_records }}</strong><span>source records</span></p>
+            <p><strong>{{ integrity.canonical_models }}</strong><span>canonical models</span></p>
+            <p><strong>{{ integrity.duplicate_canonical_aliases }}</strong><span>duplicate aliases</span></p>
+          </div>
+          <dl class="integrity-grid">
+            <div><dt>Unmatched OpenRouter records</dt><dd>{{ integrity.unmatched_openrouter_records|default:"—" }}</dd></div>
+            <div><dt>Unmatched Artificial Analysis records</dt><dd>{{ integrity.unmatched_aamodel_records|default:"—" }}</dd></div>
+            <div><dt>Unmatched models.dev records</dt><dd>{{ integrity.unmatched_modelsdev_records|default:"—" }}</dd></div>
+            <div><dt>Ambiguous model matches</dt><dd>{{ integrity.ambiguous_matches|default:"—" }}</dd></div>
+            <div><dt>Source conflicts</dt><dd>{{ integrity.source_conflicts|default:"—" }}</dd></div>
+            <div><dt>Models missing provider / name</dt><dd>{{ integrity.missing_provider }} / {{ integrity.missing_name }}</dd></div>
+            <div><dt>Models missing pricing</dt><dd>{{ integrity.missing_pricing }}</dd></div>
+            <div><dt>Models missing context</dt><dd>{{ integrity.missing_context }}</dd></div>
+            <div><dt>Preserved stale source records</dt><dd>{{ integrity.stale_source_records }}</dd></div>
+            <div><dt>Impossible negative prices</dt><dd>{{ integrity.impossible_prices }}</dd></div>
+            <div><dt>Benchmark values outside 0–100</dt><dd>{{ integrity.invalid_benchmarks }}</dd></div>
+            <div><dt>Unmatched / orphan source records</dt><dd>{{ integrity.orphan_records|default:"—" }}</dd></div>
+          </dl>
+        </div>
+        <details class="integrity-sources">
+          <summary>Source table record counts</summary>
+          <ul>{% for label, count in integrity.source_records.items %}<li><span>{{ label }}</span><strong>{{ count }}</strong></li>{% endfor %}</ul>
+        </details>
+        {% if integrity.latest_conflict_details %}
+        <details class="integrity-sources"><summary>Recent field conflicts</summary><pre>{{ integrity.latest_conflict_details|pprint }}</pre></details>
+        {% endif %}
+      </section>
+
+      <section class="settings-section" aria-labelledby="history-title">
+        <div class="section-heading"><div><p class="section-kicker">Recent activity</p><h2 id="history-title">Sync history</h2></div><span class="section-note">The 20 most recent runs are retained here.</span></div>
+        <div class="history-wrap">
+          <table class="history-table">
+            <thead><tr><th scope="col">Started</th><th scope="col">Source</th><th scope="col">Mode</th><th scope="col">Status</th><th scope="col">Duration</th><th scope="col">Fetched</th><th scope="col">Added</th><th scope="col">Updated</th><th scope="col">Skipped</th><th scope="col">Conflicts</th><th scope="col">Errors</th></tr></thead>
+            <tbody>
+              {% for run in history %}
+              <tr>
+                <td><a href="{% url 'data_sync_settings' %}?run={{ run.pk }}">{{ run.started_at|date:'Y-m-d H:i:s' }} UTC</a></td>
+                <td>{{ run.get_source_display }}</td><td>{% if run.dry_run %}Preview{% else %}Normal{% endif %}</td>
+                <td><span class="status-pill status-{{ run.status }}">{{ run.get_status_display }}</span></td>
+                <td>{% if run.duration_seconds != None %}{{ run.duration_seconds }}s{% else %}—{% endif %}</td>
+                <td>{{ run.records_received }}</td><td>{{ run.records_added }}</td><td>{{ run.records_updated }}</td><td>{{ run.records_skipped }}</td><td>{{ run.summary.merge_summary.conflicts|default:"—" }}</td><td>{{ run.error_count }}</td>
+              </tr>
+              {% empty %}<tr><td colspan="11" class="empty-history">No sync runs are recorded. Start with “Sync all sources.”</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </wa-page>
+
+  <style>
+    .settings-page { display: grid; gap: var(--wa-space-xl); padding-block: var(--wa-space-xl) var(--wa-space-3xl); }
+    .schedule-note { margin: calc(-1 * var(--wa-space-m)) 0 0; color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-2xs); }
+    .schedule-note strong { color: var(--wa-color-text-normal); }
+    .schedule-note code { font-family: var(--wa-font-family-mono); font-size: var(--wa-font-size-3xs); }
+    .page-header .page-actions { display: flex; flex-wrap: wrap; gap: var(--wa-space-s); }
+    .page-actions form { margin: 0; }
+    .settings-section { display: grid; gap: var(--wa-space-m); }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: var(--wa-space-m); }
+    .section-heading h2, .run-result h2 { margin: 0; font-family: var(--wa-font-family-display); font-size: var(--wa-font-size-xl); font-weight: 500; }
+    .section-kicker { margin: 0 0 var(--wa-space-3xs); font-family: var(--wa-font-family-mono); font-size: var(--wa-font-size-3xs); letter-spacing: .1em; text-transform: uppercase; color: var(--wa-color-text-quiet); }
+    .section-note { color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-2xs); }
+    .source-list { border-top: 1px solid var(--wa-color-surface-border); }
+    .source-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 25rem); gap: var(--wa-space-xl); padding: var(--wa-space-l) 0; border-bottom: 1px solid var(--wa-color-surface-border); }
+    .source-title-line, .run-result-head { display: flex; align-items: center; gap: var(--wa-space-s); }
+    .source-title-line h3 { margin: 0; font-size: var(--wa-font-size-m); font-weight: 600; }
+    .source-connection { margin: var(--wa-space-2xs) 0 var(--wa-space-m); color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-2xs); }
+    .source-error, .run-error { color: var(--wa-color-danger-fill-normal, #b42318); }
+    .source-facts, .integrity-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--wa-space-s) var(--wa-space-l); margin: 0; }
+    .source-facts dt, .integrity-grid dt { margin: 0 0 .15rem; color: var(--wa-color-text-quiet); font-family: var(--wa-font-family-mono); font-size: var(--wa-font-size-3xs); }
+    .source-facts dd, .integrity-grid dd { margin: 0; font-size: var(--wa-font-size-2xs); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .source-operations { display: grid; align-content: start; gap: var(--wa-space-m); }
+    .source-sync-actions { display: flex; flex-wrap: wrap; gap: var(--wa-space-xs); }
+    .action-button, .save-button { min-height: 2.25rem; border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-s); padding: .35rem .7rem; color: var(--wa-color-text-normal); background: var(--wa-color-surface-raised); font: 600 var(--wa-font-size-2xs) var(--wa-font-family-body); cursor: pointer; }
+    .action-button:hover, .save-button:hover { border-color: var(--wa-color-brand-border-normal); background: var(--wa-color-mix-hover); }
+    .action-secondary { color: var(--wa-color-text-quiet); }
+    .source-config { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--wa-space-xs) var(--wa-space-s); padding-top: var(--wa-space-s); border-top: 1px dashed var(--wa-color-surface-border); }
+    .source-config label { display: grid; gap: .25rem; color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-3xs); }
+    .source-config input[type="number"] { width: 100%; min-height: 2rem; border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-s); padding: .25rem .45rem; background: var(--wa-color-surface-raised); color: var(--wa-color-text-normal); font: 500 var(--wa-font-size-2xs) var(--wa-font-family-mono); }
+    .source-config .enabled-toggle { display: flex; align-items: center; grid-column: 1 / -1; gap: var(--wa-space-xs); color: var(--wa-color-text-normal); font-size: var(--wa-font-size-2xs); }
+    .source-config .enabled-toggle input { accent-color: var(--wa-color-brand-fill-normal); }
+    .field-unit { color: var(--wa-color-text-quiet); }
+    .source-config .save-button { grid-column: 1 / -1; justify-self: start; }
+    .status-pill { display: inline-flex; align-items: center; white-space: nowrap; border: 1px solid var(--wa-color-surface-border); border-radius: 999px; padding: .15rem .5rem; font: 600 var(--wa-font-size-3xs) var(--wa-font-family-mono); color: var(--wa-color-text-quiet); background: var(--wa-color-surface-lowered); }
+    .status-healthy, .status-succeeded, .status-dry_run { color: #276749; border-color: #a7d7b5; background: #edf8f0; }
+    .status-warning, .status-partial, .status-queued { color: #8a5b00; border-color: #e7cf8a; background: #fff8df; }
+    .status-failed { color: #a12b24; border-color: #e7aaa5; background: #fff0ee; }
+    .status-running { color: #17617c; border-color: #9acddd; background: #eaf8fc; }
+    .status-disabled { color: var(--wa-color-text-quiet); }
+    .wa-dark .status-healthy, .wa-dark .status-succeeded, .wa-dark .status-dry_run { color: #9be0af; background: #18291d; border-color: #35563e; }
+    .wa-dark .status-warning, .wa-dark .status-partial, .wa-dark .status-queued { color: #efd27f; background: #302812; border-color: #625222; }
+    .wa-dark .status-failed { color: #ffaaa3; background: #321c1a; border-color: #69302a; }
+    .wa-dark .status-running { color: #91d8ef; background: #132b34; border-color: #285465; }
+    .integrity-layout { display: grid; grid-template-columns: minmax(11rem, .7fr) minmax(0, 2fr); gap: var(--wa-space-xl); padding: var(--wa-space-l); border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-m); background: var(--wa-color-surface-raised); }
+    .integrity-summary { display: grid; gap: var(--wa-space-s); align-content: start; }
+    .integrity-summary p { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: var(--wa-space-s); margin: 0; }
+    .integrity-summary strong { font: 600 var(--wa-font-size-l) var(--wa-font-family-mono); font-variant-numeric: tabular-nums; }
+    .integrity-summary span { color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-2xs); }
+    .integrity-sources { padding: var(--wa-space-s) var(--wa-space-m); border-top: 1px solid var(--wa-color-surface-border); color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-2xs); }
+    .integrity-sources summary, .run-details summary { cursor: pointer; color: var(--wa-color-text-link); font-weight: 600; }
+    .integrity-sources ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--wa-space-xs) var(--wa-space-xl); padding: 0; list-style: none; }
+    .integrity-sources li { display: flex; justify-content: space-between; gap: var(--wa-space-m); }
+    .integrity-sources strong { color: var(--wa-color-text-normal); font-family: var(--wa-font-family-mono); }
+    .history-wrap { overflow-x: auto; border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-m); background: var(--wa-color-surface-raised); }
+    .history-table { width: 100%; border-collapse: collapse; font-size: var(--wa-font-size-2xs); white-space: nowrap; }
+    .history-table th { padding: var(--wa-space-s); text-align: left; color: var(--wa-color-text-quiet); background: var(--wa-color-surface-lowered); font: 600 var(--wa-font-size-3xs) var(--wa-font-family-mono); }
+    .history-table td { padding: var(--wa-space-s); border-top: 1px solid var(--wa-color-surface-border); font-variant-numeric: tabular-nums; }
+    .history-table td:first-child a, .quiet-link { color: var(--wa-color-text-link); text-decoration: none; }
+    .history-table td:first-child a:hover, .quiet-link:hover { text-decoration: underline; }
+    .empty-history { color: var(--wa-color-text-quiet); text-align: center !important; padding: var(--wa-space-xl) !important; }
+    .run-result { display: grid; gap: var(--wa-space-s); padding: var(--wa-space-l); border: 1px solid var(--wa-color-surface-border); border-inline-start: 3px solid var(--wa-color-brand-fill-normal); border-radius: var(--wa-border-radius-m); background: var(--wa-color-surface-raised); }
+    .run-result-head { justify-content: space-between; }
+    .run-wait { margin: 0; color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-2xs); }
+    .run-summary { display: flex; flex-wrap: wrap; gap: var(--wa-space-m); font-size: var(--wa-font-size-2xs); color: var(--wa-color-text-quiet); }
+    .run-summary strong { color: var(--wa-color-text-normal); font-family: var(--wa-font-family-mono); }
+    .run-error { margin: 0; font-size: var(--wa-font-size-2xs); }
+    .run-details pre, .integrity-sources pre { max-height: 22rem; overflow: auto; margin: var(--wa-space-s) 0 0; padding: var(--wa-space-s); border-radius: var(--wa-border-radius-s); background: var(--wa-color-surface-lowered); color: var(--wa-color-text-normal); font: var(--wa-font-size-3xs)/1.55 var(--wa-font-family-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .quiet-link { justify-self: start; font-size: var(--wa-font-size-2xs); }
+    .notice { margin: 0; padding: var(--wa-space-s) var(--wa-space-m); border-inline-start: 3px solid var(--wa-color-brand-fill-normal); background: var(--wa-color-surface-raised); font-size: var(--wa-font-size-2xs); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    @media (max-width: 850px) { .source-row { grid-template-columns: 1fr; } .integrity-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 620px) { .settings-page { padding-inline: var(--wa-space-m); } .section-heading { align-items: start; flex-direction: column; } .source-facts, .integrity-grid, .integrity-sources ul { grid-template-columns: 1fr; } .page-header .page-actions { width: 100%; } .page-header .page-actions form { flex: 1; } }
+  </style>
+  <script>
+    (() => {
+      const panel = document.querySelector('[data-run-status-url]');
+      if (!panel) return;
+      const statusNode = panel.querySelector('[data-run-status]');
+      const messageNode = panel.querySelector('[data-run-message]');
+      const summaryNode = panel.querySelector('[data-run-summary]');
+      const errorNode = panel.querySelector('[data-run-error]');
+      let attempts = 0;
+      const poll = async () => {
+        if (attempts++ > 300) return;
+        try {
+          const response = await fetch(panel.dataset.statusUrl, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+          if (!response.ok) throw new Error(`Status request failed (${response.status})`);
+          const run = await response.json();
+          statusNode.textContent = run.status.replaceAll('_', ' ');
+          statusNode.className = `status-pill status-${run.status}`;
+          if (run.status === 'queued' || run.status === 'running') {
+            messageNode.textContent = run.status === 'queued' ? 'Queued. Waiting for a worker.' : 'Sync is running. No estimated progress is shown.';
+            window.setTimeout(poll, 2000);
+            return;
+          }
+          messageNode.textContent = run.dry_run ? 'Preview completed. Database changes were rolled back.' : 'Run finished. These are the values reported by the sync worker.';
+          summaryNode.replaceChildren();
+          [['received', run.records_received], ['added', run.records_added], ['updated', run.records_updated], ['skipped', run.records_skipped], ['conflicts', run.summary?.merge_summary?.conflicts ?? 0], ['canonical models', run.summary?.total_rankindex ?? '—'], ['failed sources', run.error_count], ['duration', run.duration_seconds == null ? '—' : `${run.duration_seconds}s`]].forEach(([label, value]) => {
+            const item = document.createElement('span');
+            const strong = document.createElement('strong');
+            strong.textContent = value;
+            item.append(strong, document.createTextNode(` ${label}`));
+            summaryNode.append(item);
+          });
+          if (run.error_summary) {
+            let error = panel.querySelector('[data-run-error]');
+            if (!error) { error = document.createElement('p'); error.className = 'run-error'; error.dataset.runError = ''; panel.insertBefore(error, panel.querySelector('.run-details')); }
+            error.textContent = run.error_summary;
+          }
+          const jsonNode = panel.querySelector('[data-run-json]');
+          if (jsonNode) jsonNode.textContent = JSON.stringify(run.summary, null, 2);
+        } catch (error) {
+          messageNode.textContent = `${error.message}. Refresh to check the persisted run record.`;
+        }
+      };
+      if (statusNode.textContent.trim().toLowerCase() === 'queued' || statusNode.textContent.trim().toLowerCase() === 'running') poll();
+    })();
+  </script>
+</body>
+</html>
